@@ -1,0 +1,18 @@
+import { designOptions } from "@/lib/design-options";
+import { availableOptions } from "@/lib/server/options";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
+import { createHash } from "node:crypto";
+import { editorialContent } from "@/lib/server/content";
+import { homepagePair } from "@/lib/server/showcase";
+import { NextRequest,NextResponse } from "next/server";
+import { rows,row,put,remove } from "@/lib/server/db";
+import { catalogue,validateFabric } from "@/lib/server/catalogue";
+import { failure,HttpError,jsonInput,requireAdmin,privateHeaders } from "@/lib/server/security";
+export async function GET(){try{await requireAdmin();return NextResponse.json({enquiries:rows("enquiry").map(r=>({id:r.id,created:r.created,...JSON.parse(r.data)})),designs:rows("design").map(r=>({id:r.id,created:r.created,...JSON.parse(r.data)})),fabrics:catalogue(),content:[...editorialContent().faqs.map(q=>({...q,type:"faq"})),...editorialContent().articles.map(a=>({id:a.slug,title:a.title,body:a.body.join("\n\n"),type:"article"}))],showcase:homepagePair(),options:availableOptions()},{headers:privateHeaders});}catch(e){return failure(e);}}
+export async function PATCH(request:NextRequest){try{await requireAdmin();const data=await jsonInput(request);if(data.kind==="options"){const options=data.options as Record<string,unknown>;if(!options||Object.entries(designOptions).some(([key,values])=>!Array.isArray(options[key])||!(options[key] as unknown[]).length||!(options[key] as unknown[]).every(v=>typeof v==='string'&&values.includes(v))))throw new HttpError(400,'Options must be nonempty subsets of supported design choices.');put('settings','design-options','admin',Object.fromEntries(Object.keys(designOptions).map(key=>[key,options[key]])));}else if(data.kind==="showcase"){
+const before=String(data.before),after=String(data.after);if(before===after||![before,after].every(p=>/^\/images\/[a-z0-9-]+\.(webp|avif|jpg)$/.test(p)))throw new HttpError(400,"Choose distinct local image paths.");
+const bytes=await Promise.all([before,after].map(p=>readFile(path.join(process.cwd(),'public',p))));const meta=await Promise.all(bytes.map(b=>sharp(b).metadata()));if(meta[0].width!==meta[1].width||meta[0].height!==meta[1].height||createHash('sha256').update(bytes[0]).digest('hex')===createHash('sha256').update(bytes[1]).digest('hex'))throw new HttpError(400,"Comparison images must have equal dimensions and different content.");
+if(typeof data.provenance!=="string"||!data.provenance.trim())throw new HttpError(400,"Provide honest provenance and an illustration label where appropriate.");put('settings','hero','admin',{before,after,provenance:data.provenance.slice(0,300)});
+}else if(data.kind==="fabric"){const fabric=validateFabric(data);put("fabric",fabric.id,"admin",fabric);}else if(data.kind==="enquiry"){const item=row("enquiry",String(data.id));if(!item||!["new","contacted","closed"].includes(String(data.status)))throw new HttpError(400,"Invalid enquiry status.");put("enquiry",item.id,item.owner,{...JSON.parse(item.data),status:data.status});}else if(data.kind==="content"){if(!/^[a-z0-9-]{2,80}$/.test(String(data.id))||typeof data.title!=="string"||typeof data.body!=="string"||data.title.length>150||data.body.length>12000||!["faq","article"].includes(String(data.type)))throw new HttpError(400,"Invalid editorial content.");put("content",String(data.id),"admin",{title:data.title,body:data.body,type:data.type,archived:data.archived===true});}else if(data.kind==="delete-enquiry"){remove("enquiry",String(data.id));}else throw new HttpError(400,"Unsupported operation.");return NextResponse.json({ok:true},{headers:privateHeaders});}catch(e){return failure(e);}}

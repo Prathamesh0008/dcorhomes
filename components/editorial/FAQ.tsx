@@ -1,0 +1,2 @@
+import { editorialContent } from "@/lib/server/content";
+export default function FAQ(){return <div className="divide-y divide-[#dedbd2] border-y border-solid border-[#dedbd2]">{editorialContent().faqs.map(item=><details key={item.id} className="group py-5"><summary className="cursor-pointer text-[15px] font-medium leading-relaxed marker:text-bronze">{item.title}</summary><p className="mb-0 mt-4 max-w-3xl text-[15px] leading-[1.8] text-muted">{item.body}</p></details>)}</div>;}

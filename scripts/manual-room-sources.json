@@ -1,0 +1,27 @@
+[
+  {
+    "id": "bedroom",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-a4e34a30-534e-46be-a794-1ca3fc0a0d46.png",
+    "prompt": "Edit this architectural room photograph into a Bedroom with a low bed partially visible at the far left edge, bedside lamp at the far right edge. CRITICAL keep the central garden window opening and oak flooring EXACTLY in the same position, same size, same straight-on camera, same warm ivory architecture. Window glass and central floor remain totally unobstructed. No curtains, no sheers, no blinds, no textiles covering window. Retain landscape 4:3 framing. Ultra realistic luxury interior photograph. This is a base room for aligned curtain overlay rendering. No people or text."
+  },
+  {
+    "id": "dining",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-49ff118a-6e2b-492e-8d7d-eac9d856a163.png",
+    "prompt": "Edit this architectural room photograph into a Dining room with an oak dining table and chairs only at extreme side edges. CRITICAL keep the central garden window opening and oak flooring EXACTLY in the same position, same size, same straight-on camera, same warm ivory architecture. Window glass and central floor remain totally unobstructed. No curtains, no sheers, no blinds, no textiles covering window. Retain landscape 4:3 framing. Ultra realistic luxury interior photograph. This is a base room for aligned curtain overlay rendering. No people or text."
+  },
+  {
+    "id": "office",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-47312b96-cb80-4319-814c-960c67f02cf5.png",
+    "prompt": "Edit this architectural room photograph into a Home office with a slim walnut desk at the far left wall and bookshelves at the far right edge. CRITICAL keep the central garden window opening and oak flooring EXACTLY in the same position, same size, same straight-on camera, same warm ivory architecture. Window glass and central floor remain totally unobstructed. No curtains, no sheers, no blinds, no textiles covering window. Retain landscape 4:3 framing. Ultra realistic luxury interior photograph. This is a base room for aligned curtain overlay rendering. No people or text."
+  },
+  {
+    "id": "guest",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-0a4bd3d5-0731-4031-b08b-9dea0ac75e07.png",
+    "prompt": "Edit this architectural room photograph into a Guest room with a compact daybed and folded throw at the extreme left edge and luggage bench at far right. CRITICAL keep the central garden window opening and oak flooring EXACTLY in the same position, same size, same straight-on camera, same warm ivory architecture. Window glass and central floor remain totally unobstructed. No curtains, no sheers, no blinds, no textiles covering window. Retain landscape 4:3 framing. Ultra realistic luxury interior photograph. This is a base room for aligned curtain overlay rendering. No people or text."
+  },
+  {
+    "id": "nursery",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-d97814e8-3094-4e2d-bd46-c4b047e8314f.png",
+    "prompt": "Edit this architectural room photograph into a Calm nursery with wooden crib at extreme left edge and a rocking chair at extreme right edge. CRITICAL keep the central garden window opening and oak flooring EXACTLY in the same position, same size, same straight-on camera, same warm ivory architecture. Window glass and central floor remain totally unobstructed. No curtains, no sheers, no blinds, no textiles covering window. Retain landscape 4:3 framing. Ultra realistic luxury interior photograph. This is a base room for aligned curtain overlay rendering. No people or text."
+  }
+]

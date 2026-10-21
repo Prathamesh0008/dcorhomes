@@ -1,0 +1,10 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import Container from "@/components/ui/Container";
+import Image from "@/components/ui/Photograph";
+import { typography } from "@/lib/typography";
+import { editorialContent } from "@/lib/server/content";
+export const dynamic="force-dynamic";
+type Context={params:Promise<{slug:string}>};
+export async function generateMetadata({params}:Context){const {slug}=await params;const article=editorialContent().articles.find(p=>p.slug===slug);return {title:article?.title||"Guide not found",description:article?.description,alternates:{canonical:`/inspiration/${slug}`}};}
+export default async function Article({params}:Context){const {slug}=await params;const article=editorialContent().articles.find(p=>p.slug===slug);if(!article)notFound();return <Container as="section" className="py-12 md:py-20"><nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap gap-3 text-[12px] text-muted"><Link href="/">Home</Link><span>/</span><Link href="/inspiration">Inspiration</Link></nav><article className="max-w-4xl"><h1 className={typography.page}>{article.title}</h1><p className={`text-muted ${typography.body}`}>{article.description}</p><div className="relative my-8 aspect-[16/9] overflow-hidden bg-sand"><Image src={article.image} alt="Curtain reference illustrating this guide" fill sizes="90vw" className="object-cover" priority/></div>{article.body.map((paragraph,i)=><p key={i} className={`text-muted ${typography.body}`}>{paragraph}</p>)}</article><div className="mt-10 flex flex-wrap gap-6 text-[13px]"><Link href="/studio" className="underline">Explore this in the studio</Link><Link href="/measure" className="underline">Plan your measurements</Link><Link href="/contact" className="underline">Discuss your room</Link></div><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'Article',headline:article.title,description:article.description,author:{'@type':'Organization',name:'Dcorhome'}}).replace(/</g,'\\u003c')}}/></Container>;}

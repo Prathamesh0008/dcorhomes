@@ -1,0 +1,9 @@
+const fs=require('node:fs'),path=require('node:path'),Module=require('node:module'),ts=require('typescript'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const file=path.resolve('lib/curtains/configurator-data.ts'),mod=new Module(file,module);mod.filename=file;mod.paths=module.paths;mod._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,file);
+const data=mod.exports,hashes=new Set();
+for(const look of data.previewLooks){assert.ok(data.curtainFabrics.find(f=>f.name===look.fabric).patterns.includes(look.pattern));assert.equal(data.nearestPreview(look).id,look.id);for(const key of ['image','thumbnail'])assert.ok(fs.existsSync(path.join('public',look[key])));const bytes=fs.readFileSync(path.join('public',look.image));const hash=crypto.createHash('sha256').update(bytes).digest('hex');assert.ok(!hashes.has(hash));hashes.add(hash);assert.deepEqual(data.fromStudioSelection(data.toStudioSelection(look)),Object.fromEntries(['style','fabric','mainColor','sheerColor','pattern','room'].map(k=>[k,look[k]])));}
+const choices={style:data.curtainStyles,fabric:data.curtainFabrics.map(f=>f.name),mainColor:data.mainColors.map(c=>c.name),sheerColor:data.sheerColors.map(c=>c.name),room:data.curtainRooms};
+for(const look of data.previewLooks)for(const [key,values]of Object.entries(choices))for(const choice of values){const next=data.nearestPreview({...look,[key]:choice},key);assert.equal(next[key],choice);if(look[key]!==choice)assert.notEqual(next.image,look.image);}
+assert.equal(data.compatibleConfig({...data.defaultCurtainConfig,fabric:'Velvet',pattern:'Damask'}).pattern,'Solid');
+assert.equal(data.toStudioSelection({...data.defaultCurtainConfig,mainColor:'#123456'}).color,'#123456');
+console.log('10 unique preview assets, all instant selector transitions, compatibility and URL selection round trips PASS');

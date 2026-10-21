@@ -1,0 +1,17 @@
+[
+  {
+    "id": "room",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-6231a8f1-b2a4-4e7c-8092-606e41072c35.png",
+    "prompt": "Photorealistic premium interior architecture photograph. Front on perfectly centered square-on view, landscape 4:3. Warm ivory living room, large wide rectangular floor-to-ceiling window centered, window opening occupies exactly x=22% to78% image width and y=12% to88% image height. View of a leafy garden. Bare window, absolutely no curtains, no sheers, no blinds. Window front plane unobstructed, no furniture in front. Low cream sofa on extreme left and small armchair extreme right edges only, oak floor, warm neutral walls, luxury editorial photography, no text."
+  },
+  {
+    "id": "main",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-33e962d4-2938-4526-81a9-640c6532e4c2.png",
+    "prompt": "Create a photorealistic isolated product asset on TRANSPARENT BACKGROUND, landscape 4:3 canvas. Exactly two floor-length ivory neutral curtains hanging vertically, one near left third and one near right third, symmetrical. Left curtain occupies x=18% to34% of total canvas width and y=10% to90% height. Right curtain x=66% to82%, same height. Both curtains drawn open, central gap completely transparent, outside transparent. Rich detailed photographic vertical fabric folds, neutral grayscale white cloth, soft directional lighting shadows in folds, fine textile weave. Straight frontal orthographic view. Wave pleat header at top, natural gently undulating edges and hem. No window, no wall, no rod, no floor, no objects, no text. This is an alpha cutout asset for recoloring and compositing."
+  },
+  {
+    "id": "sheer",
+    "path": "C:\\Users\\AMD\\.codex\\generated_images\\01a15d9c-2307-7460-ac6a-12fb29c95cd8\\exec-e792962f-5183-4b3e-a0c9-f3d1fcb403eb.png",
+    "prompt": "Photorealistic isolated white sheer curtain asset on TRANSPARENT BACKGROUND landscape 4:3 canvas. Single wide finely pleated translucent white voile hanging from y=10% to90%, spanning x=22% to78% of canvas width. Neutral white grayscale material, delicate realistic folds and fine weave, straight frontal orthographic view, straight header and gently wavy hem. No window, no wall, no floor, no background, no text. Semitransparent cloth alpha with visible folds. This is a sheer alpha cutout for browser compositing."
+  }
+]

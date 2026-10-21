@@ -1,0 +1,3 @@
+import { articles,faqs } from "@/lib/editorial";
+import { databaseReady,rows } from "./db";
+export function editorialContent(){const additions=databaseReady()?rows("content"):[];const questions=new Map(faqs.map(q=>[q.id,q]));const posts=new Map(articles.map(a=>[a.slug,a]));for(const item of additions){const data=JSON.parse(item.data);if(data.type==='faq'){if(data.archived)questions.delete(item.id);else questions.set(item.id,{id:item.id,title:data.title,body:data.body});}if(data.type==='article'){if(data.archived)posts.delete(item.id);else posts.set(item.id,{slug:item.id,title:data.title,description:data.body.slice(0,150),image:'/images/curtain-room.jpg',body:data.body.split(/\n\s*\n/)});}}return{faqs:[...questions.values()],articles:[...posts.values()]};}

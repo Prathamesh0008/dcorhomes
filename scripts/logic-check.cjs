@@ -1,0 +1,12 @@
+const fs=require('node:fs'),path=require('node:path'),Module=require('node:module'),ts=require('typescript'),assert=require('node:assert/strict');
+const file=path.resolve('lib/measurements.ts'),mod=new Module(file,module);mod.filename=file;mod.paths=module.paths;mod._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,file);
+const calculate=mod.exports.calculateMeasurements;
+const input={width:280,drop:240,windows:1,fullness:2,rollWidth:140,panels:2,allowance:30,repeat:0,unit:'cm'};
+assert.equal(calculate(input).meters,10.8);
+assert.equal(calculate({...input,windows:2}).meters,21.6);
+assert.equal(calculate({...input,repeat:50}).meters,12);
+const inches={...input,unit:'in'};for(const key of ['width','drop','rollWidth','allowance','repeat'])inches[key]/=2.54;
+assert.ok(Math.abs(calculate(inches).meters-calculate(input).meters)<.01);
+for(const change of [{width:-1},{drop:0},{windows:1.2},{fullness:0},{rollWidth:NaN},{panels:0},{repeat:-1},{allowance:Infinity}])assert.equal(calculate({...input,...change}),null);
+assert.equal(calculate({...input,width:150,fullness:2,panels:2}).drops,4);
+console.log('Measurement unit conversion, repeats, panels, windows, allowances and invalid-input tests PASS');

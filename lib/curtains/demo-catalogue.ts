@@ -1,0 +1,12 @@
+import { mainColors, sheerColors } from './configurator-data';
+import { manualHeadings, type FabricRecord, type FabricVariant } from './catalogue';
+const variants=(palette: typeof mainColors, prefix: string): FabricVariant[]=>palette.map((c,i)=>({id:c.name,name:c.name,colorCode:`DEMO-${prefix}-${i+1}`,hexPreview:c.hex,family:['Warm Ivory','Soft Beige','Taupe','Sand','Mocha','Off White','Pure White','Soft Ivory','Cream','Warm Beige'].includes(c.name)?'Neutral':c.name.includes('Grey')||c.name==='Charcoal'?'Grey':c.name.includes('Rose')||c.name.includes('Blush')?'Rose':'Green',available:null}));
+// Demonstration palettes, not manufacturer colors, SKUs, inventory or prices.
+export const demoFabrics: FabricRecord[] = [
+  {id:'sienna',slug:'sienna',name:'Linen',category:'Linen',usage:['main'],images:['/images/linen-detail.jpg'],colors:variants(mainColors.filter(c=>['Warm Ivory','Soft Beige','Taupe','Sand','Off White'].includes(c.name)),'LIN')},
+  {id:'clay',slug:'clay',name:'Velvet',category:'Velvet',usage:['main'],images:['/images/velvet-detail.jpg'],colors:variants(mainColors.filter(c=>['Olive','Soft Beige','Dusty Rose','Charcoal','Mocha'].includes(c.name)),'VEL')},
+  {id:'noir',slug:'noir',name:'Blackout',category:'Blackout',usage:['main'],images:['/images/dark-textile.jpg'],colors:variants(mainColors.filter(c=>['Slate Grey','Charcoal','Warm Ivory','Soft Beige'].includes(c.name)),'BLK')},
+  {id:'olive',slug:'olive',name:'Textured Weave',category:'Textured',usage:['main'],images:['/images/sheer-detail.jpg'],colors:variants(mainColors.filter(c=>['Mocha','Olive','Taupe','Sand'].includes(c.name)),'TEX')},
+  {id:'solstice',slug:'solstice',name:'Sheer Weave',category:'Sheer',usage:['sheer'],images:['/images/curtain-room.jpg'],colors:variants(sheerColors.filter(c=>['Pure White','Soft Ivory','Cream','Pale Grey'].includes(c.name)),'VOI')},
+  {id:'pearl',slug:'pearl',name:'Fine Voile',category:'Sheer',usage:['sheer'],images:['/images/sheer-detail.jpg'],colors:variants(sheerColors.filter(c=>['Soft Ivory','Warm Beige','Blush White'].includes(c.name)),'FVO')},
+].map(f=>({...f,usage:f.usage as ('main'|'sheer')[],source:'demo' as const,description:'Demonstration material and palette. Supplier specifications and actual color availability are not yet verified.',compatibleHeadingStyles:f.category==='Blackout'?manualHeadings.filter(h=>h!=='Goblet Pleat'):f.category==='Sheer'?['Wave Pleat','Pencil Pleat','Rod Pocket']:manualHeadings}));

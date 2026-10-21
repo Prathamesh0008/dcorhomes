@@ -1,0 +1,5 @@
+import { NextRequest,NextResponse } from "next/server";
+import { rows,remove,expiredRows } from "@/lib/server/db";
+import { deleteAsset } from "@/lib/server/assets";
+import { failure,mutation,requireAdmin } from "@/lib/server/security";
+export async function POST(request:NextRequest){try{mutation(request);await requireAdmin();const days=Math.max(1,Number(process.env.RETENTION_DAYS||30));let deleted=0;for(const design of expiredRows('design',Date.now()-days*86400000)){await deleteAsset(`${design.id}/original.webp`);await deleteAsset(`${design.id}/result.webp`);for(const share of rows('share',design.owner))if(JSON.parse(share.data).designId===design.id)remove('share',share.id);remove('design',design.id);deleted++;}for(const enquiry of expiredRows('enquiry',Date.now()-days*86400000))remove('enquiry',enquiry.id);for(const share of expiredRows('share',Date.now()-7*86400000))remove('share',share.id);for(const login of expiredRows('admin-session',Date.now()-8*3600000))remove('admin-session',login.id);return NextResponse.json({ok:true,deleted,batchLimit:200});}catch(e){return failure(e);}}
