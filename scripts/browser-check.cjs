@@ -14,7 +14,7 @@ const chrome = spawn(
     `--user-data-dir=${profile}`,
     "about:blank",
   ],
-  { stdio: "ignore" },
+  { stdio: "ignore", windowsHide: true },
 );
 const keepAlive = setInterval(() => {}, 1000);
 const deadline = setTimeout(() => {
@@ -50,6 +50,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
       if (m.id) {
         const p = pending.get(m.id);
         pending.delete(m.id);
+        if(!p)return;
         m.error ? p.reject(Error(m.error.message)) : p.resolve(m.result);
       } else if (m.method === "Runtime.exceptionThrown")
         errors.push(m.params.exceptionDetails.text);
@@ -57,7 +58,9 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     let sessionId, activeTarget;
     const call = (method, params = {}) =>
       new Promise((resolve, reject) => {
-        pending.set(++id, { resolve, reject });
+        const requestId=++id;
+        const timer=setTimeout(()=>{pending.delete(requestId);reject(Error('Browser command timed out: '+method));},20000);
+        pending.set(requestId, { resolve:value=>{clearTimeout(timer);resolve(value);}, reject:error=>{clearTimeout(timer);reject(error);} });
         ws.send(
           JSON.stringify({
             id,
@@ -110,8 +113,14 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
         `(()=>{for(const i of document.images)i.loading='eager';return true})()`,
       );
       await delay(500);
+      // Restored client selections can replace SSR images after hydration.
+      // Require the image set and its load state to settle before inspecting it.
+      let previousImages='',stableImages=0;
       for (let i = 0; i < 40; i++) {
-        if (await evaluate(`![...document.images].some(i=>!i.complete)`)) break;
+        const state=await evaluate(`({sources:[...document.images].map(i=>i.currentSrc||i.src).join('|'),complete:[...document.images].every(i=>i.complete)})`);
+        stableImages=state.complete&&state.sources===previousImages?stableImages+1:0;
+        previousImages=state.sources;
+        if(stableImages>=2)break;
         await delay(100);
       }
       const layout = await evaluate(
@@ -120,6 +129,9 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
       if (layout.overflow || layout.broken.length || layout.vectors)
         throw Error(JSON.stringify({ route, width, ...layout }));
     }
+    if(process.env.DCORHOME_HOME_REDESIGN){await require('./homepage-redesign-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_FABRIC_IMAGES_ONLY){await require('./fabric-image-browser-scenarios.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_CATALOGUE_ONLY==='true'){await require('./catalogue-browser-scenarios.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
     if(process.env.DCORHOME_MANUAL_ONLY==='true'){await require('./manual-browser-scenarios.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
     if(process.env.DCORHOME_HOME_ONLY==='true'){
       for(const width of [390,1440]){await go('/',width);const shot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(os.tmpdir(),`dcorhome-review-home-${width}.png`),Buffer.from(shot.data,'base64'));console.log('Final homepage',width,'layout/assets PASS');}

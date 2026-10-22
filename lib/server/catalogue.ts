@@ -1,12 +1,12 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { row } from "./db";
-import { products, categoryNames, type CurtainProduct } from "@/lib/catalog";
-import { databaseReady, rows } from "./db";
+import { categoryNames, type CurtainProduct } from "@/lib/catalog";
 import { HttpError } from "./security";
-import supplierData from '@/lib/curtains/supplier-catalogue.json';
-import type { FabricRecord } from '@/lib/curtains/catalogue';
-export function catalogue() { const overrides = databaseReady() ? rows("fabric") : []; const entries = new Map(products.map(p => [p.id, p])); for(const f of supplierData as FabricRecord[])entries.set(f.id,{id:f.id,name:f.name,subtitle:f.brand||f.category,category:f.category as CurtainProduct['category'],description:f.description,image:f.images[0],imageAlt:f.name,imageNote:'Supplier catalogue photograph',color:f.colors.find(c=>c.available!==false)!.hexPreview,accent:f.colors[0].family,pricePerMeter:f.pricePerMetre??null}); for (const item of overrides) entries.set(item.id, JSON.parse(item.data)); return [...entries.values()].filter(p => !(p as CurtainProduct & { archived?: boolean }).archived); }
+import { fabricRecords } from './fabric-records';
+export function catalogue(): CurtainProduct[] {
+ return fabricRecords().map(f=>({id:f.id,name:f.name,subtitle:f.collection||f.brand||f.category,category:f.category as CurtainProduct['category'],description:f.description,image:f.images[0]||'',imageAlt:f.name,imageNote:f.source==='supplier'?'Supplier catalogue photograph':'Demo fabric reference; not a verified supplier photograph',color:f.colors.find(c=>c.active!==false&&c.available!==false)?.hexPreview||'#baa48e',accent:f.colors[0]?.family||'Unverified',pricePerMeter:f.pricePerMetre??null}));
+}
 export function validateFabric(input: Record<string, unknown>) {
   const text = (key: string, max: number) => typeof input[key] === "string" ? String(input[key]).trim().slice(0, max) : "";
   const id = text("id", 60), name = text("name", 100), category = text("category", 40), image = text("image", 200);

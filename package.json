@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "predev": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs",
-    "prebuild": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs"
+    "prebuild": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs",
+    "check:catalogue": "node scripts/catalogue-logic-check.cjs",
+    "test:catalogue": "node scripts/catalogue-integration-check.cjs",
+    "import:supplier-csv": "node scripts/import-supplier-csv.cjs",
+    "prepare:fabric-previews": "node scripts/prepare-fabric-previews.cjs",
+    "check:fabric-images": "node scripts/fabric-image-check.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

@@ -1,6 +1,7 @@
 "use client";
+import { useFabricRecords } from '@/components/curtains/FabricCatalogueProvider';
 import CurtainConfigurator from "@/components/curtains/CurtainConfigurator";
-import { manualSelection, readManual, storageKey, type ManualConfig } from '@/lib/curtains/manual-config';
+import { manualSelection, manualSummary, readManual, storageKey, type ManualConfig } from '@/lib/curtains/manual-config';
 import { curtainFabrics, curtainStyles } from "@/lib/curtains/configurator-data";
 import type { DesignSelection } from "@/lib/design-options";
 import { useDesignOptions } from "@/lib/useDesignOptions";
@@ -32,6 +33,7 @@ import CurtainComparison from "@/components/interactive/CurtainComparison";
 
 
 function StudioContent() {
+  const records=useFabricRecords();
   const products=useCatalogue();
   const designOptions=useDesignOptions();
 
@@ -64,8 +66,9 @@ function StudioContent() {
   const selection={...preferences,fabric:fabricId,heading,pattern,color:actualColor,sheerColor:preferences.sheerColor || '#f3efdf'};
   const patterns=(curtainFabrics.find(f=>f.name===preferences.configuratorFabric) || curtainFabrics.find(f=>f.catalogueId===fabric.id) || curtainFabrics.find(f=>f.name===fabric.category))?.patterns || designOptions.patterns;
   const [studioMode,setStudioMode]=useState<'sample'|'upload'>(query.get('mode')==='upload'||query.get('design')||query.get('local')?'upload':'sample');
-  function configure(next:ManualConfig){const transferred=manualSelection(next);setPreferences(p=>({...p,...transferred}));setFabricId(transferred.fabric!);setHeading(transferred.heading!);setPattern(transferred.pattern!);setColor(transferred.color!);clearResult();try{localStorage.setItem(storageKey,JSON.stringify(next));const params=new URLSearchParams(window.location.search);for(const [key,value]of Object.entries(transferred))params.set(key,value);if(params.toString()!==window.location.search.slice(1))window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params.toString());}catch{}}
-  useEffect(()=>{if(!query.get('design')&&!query.get('local'))configure(readManual(Object.fromEntries(query.entries())));},[query]);
+  function changeMode(mode:'sample'|'upload'){setStudioMode(mode);const params=new URLSearchParams(window.location.search);params.set('mode',mode);window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params);window.scrollTo({top:0,behavior:'instant'});}
+  function configure(next:ManualConfig){const transferred=manualSelection(next,records);setPreferences(p=>({...p,...transferred}));setFabricId(transferred.fabric!);setHeading(transferred.heading!);setPattern(transferred.pattern!);setColor(transferred.color!);clearResult();try{localStorage.setItem(storageKey,JSON.stringify(next));const params=new URLSearchParams(window.location.search);for(const [key,value]of Object.entries(transferred))params.set(key,value);if(params.toString()!==window.location.search.slice(1))window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params.toString());}catch{}}
+  useEffect(()=>{if(!query.get('design')&&!query.get('local'))configure(readManual(Object.fromEntries(query.entries()),records));},[query]);
 
   const [x, setX] = useState(50),
     [width, setWidth] = useState(64),
@@ -228,31 +231,11 @@ function StudioContent() {
   }
   return (
     <>
-      <section className="border-b border-solid border-[#dedbd2] bg-cream py-10 md:py-14">
-        <Container>
-          <Eyebrow>THE DCORHOME DESIGN STUDIO</Eyebrow>
-          <h1 className={`mb-4 mt-5 ${typography.page}`}>
-            Your room.{" "}
-            <em className="font-serif font-normal text-[#97836b]">Considered anew.</em>
-          </h1>
-          <p className={`mb-0 max-w-[580px] text-muted ${typography.body}`}>
-            A photograph, a material, a new perspective. Explore your choices at
-            your own pace, then let us help with the details.
-          </p>
-        </Container>
+      <section className="border-b border-solid border-[#dedbd2] bg-cream py-6 md:py-11">
+        <Container><Eyebrow>THE DCORHOME DESIGN STUDIO</Eyebrow><h1 className="mb-4 mt-4 text-[30px] font-medium leading-[1.1] tracking-[-1px] md:text-[52px]">{studioMode==='sample'?<><span className="md:hidden">Your curtain design.</span><span className="hidden md:inline">Beautiful curtains.</span></>:'Try them in'} <em className={`font-serif font-normal text-[#97836b] ${studioMode==='sample'?'hidden md:inline':''}`}>{studioMode==='sample'?'Made simple.':'your room.'}</em></h1><p className="mb-0 max-w-[600px] text-[16px] leading-7 text-muted">{studioMode==='sample'?'Choose your main curtains, add a soft sheer, and bring your favourite combination to life.':'Bring your curtain choices into your own space. Upload a photograph when you are ready.'}</p>{studioMode==='upload'&&<button type="button" onClick={()=>changeMode('sample')} className="mt-4 min-h-11 bg-transparent px-0 text-[15px] underline underline-offset-4">Back to your curtain design</button>}</Container>
       </section>
-      <Container
-        className="flex flex-wrap gap-x-7 gap-y-3 border-b border-solid border-[#dedbd2] py-6 text-[10px] text-muted"
-        aria-label="Design steps"
-      >
-        <span>01 / Choose a room</span>
-        <span>02 / Fabric & color</span>
-        <span>03 / Heading & placement</span>
-        <span>04 / Render, compare & save</span>
-      </Container>
-      <Container className="flex flex-wrap gap-4 py-5" ><button type="button" aria-pressed={studioMode==='sample'} onClick={()=>setStudioMode('sample')} className="min-h-11 rounded-full border border-solid border-[#b3b7a8] bg-transparent px-5 text-[13px] aria-pressed:bg-ink aria-pressed:text-paper">Sample preview</button><button type="button" aria-pressed={studioMode==='upload'} onClick={()=>setStudioMode('upload')} className="min-h-11 rounded-full border border-solid border-[#b3b7a8] bg-transparent px-5 text-[13px] aria-pressed:bg-ink aria-pressed:text-paper">My room AI preview</button></Container>
-      {studioMode==='sample' ? <section className="bg-ink py-10"><Container><CurtainConfigurator studio selection={selection} onManualChange={configure}/><button type="button" onClick={()=>setStudioMode('upload')} className="mt-8 min-h-12 rounded-full bg-paper px-6 text-[13px] text-ink">Upload my room with these choices</button></Container></section> : <>
-      <section className="bg-ink py-6 text-paper"><Container><details><summary className="min-h-11 cursor-pointer py-3 text-[14px]">Edit main and sheer configuration</summary><CurtainConfigurator studio selection={selection} onManualChange={configure}/></details></Container></section>
+      {studioMode==='sample' ? <section className="bg-paper py-7 md:py-10"><Container><CurtainConfigurator studio selection={selection} onManualChange={configure} onTryRoom={()=>changeMode('upload')}/></Container></section> : <>
+      <section className="bg-paper py-5"><Container><details><summary className="min-h-11 cursor-pointer py-3 text-[16px]">Edit your curtain choices</summary><CurtainConfigurator studio selection={selection} onManualChange={configure} onTryRoom={()=>changeMode('upload')}/></details></Container></section>
       <Container
         as="section"
         className="grid items-start gap-10 py-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,.85fr)] lg:gap-12 lg:py-14"
@@ -260,7 +243,7 @@ function StudioContent() {
         <div className="min-w-0 lg:sticky lg:top-[110px]" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();const incoming=event.dataTransfer.files[0];if(incoming)void acceptFile(incoming);}}>
           <p className="text-[12px] leading-relaxed text-muted">Drop your photograph here or choose a file. JPG, PNG or WebP, up to 10 MB. Nothing is uploaded until you press Generate.</p>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <span className="text-[9px] uppercase tracking-[1.5px] text-muted">
+            <span className="text-[13px] uppercase tracking-[1.5px] text-muted">
               {result && view === "render"
                 ? "AI-edited photograph"
                 : view === "concept"
@@ -271,7 +254,7 @@ function StudioContent() {
               disabled={busy}
               type="button"
               onClick={() => uploader.current?.click()}
-              className="flex min-h-11 items-center gap-2 border-0 bg-transparent p-0 text-[11px] text-ink disabled:opacity-50"
+              className="flex min-h-11 items-center gap-2 border-0 bg-transparent p-0 text-[15px] text-ink disabled:opacity-50"
             >
               <ImagePlus size={15} />{" "}
               {file ? "Change photograph" : "Upload your room"}
@@ -327,19 +310,19 @@ function StudioContent() {
                 disabled={mode.id === "render" && !result}
                 aria-pressed={view === mode.id}
                 onClick={() => setView(mode.id as typeof view)}
-                className="min-h-11 border-b border-solid border-transparent bg-transparent p-0 text-[11px] text-muted aria-pressed:border-ink aria-pressed:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-11 border-b border-solid border-transparent bg-transparent p-0 text-[15px] text-muted aria-pressed:border-ink aria-pressed:text-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {mode.label}
               </button>
             ))}
           </div>
-          <p className="mt-4 text-[10px] leading-[1.8] text-muted">
+          <p className="mt-4 text-[14px] leading-[1.8] text-muted">
             {file
               ? file.name
               : "Reference room, already dressed with curtains. Upload your own room for an AI edit."}
           </p>
           <div className="my-5 flex items-center gap-4">
-            <span className="text-[9px] uppercase tracking-[1px] text-muted">
+            <span className="text-[13px] uppercase tracking-[1px] text-muted">
               Or use a reference
             </span>
             {[images.living, images.studio].map((source, i) => (
@@ -381,7 +364,7 @@ function StudioContent() {
               onClick={drawToCanvas}
               disabled={busy}
               type="button"
-              className="flex min-h-11 items-center gap-2 border-0 bg-transparent px-0 text-[11px] text-ink disabled:opacity-50"
+              className="flex min-h-11 items-center gap-2 border-0 bg-transparent px-0 text-[15px] text-ink disabled:opacity-50"
             >
               <ArrowDownToLine size={15} /> Download placement sketch
             </button>
@@ -389,7 +372,7 @@ function StudioContent() {
               <a
                 href={result}
                 download="dcorhome-ai-design.webp"
-                className="flex min-h-11 items-center gap-2 text-[11px]"
+                className="flex min-h-11 items-center gap-2 text-[15px]"
               >
                 <ArrowDownToLine size={15} />
                 Download AI edit
@@ -400,7 +383,7 @@ function StudioContent() {
           {result && (
             <p
               role="status"
-              className="border-l border-solid border-[#b2a18a] pl-3 text-[11px] leading-[1.8] text-muted"
+              className="border-l border-solid border-[#b2a18a] pl-3 text-[15px] leading-[1.8] text-muted"
             >
               Your design is ready. Compare with your original and save the
               edited image. AI results are illustrative and may alter room
@@ -413,14 +396,13 @@ function StudioContent() {
             disabled={busy}
             className="m-0 min-w-0 border-0 p-0 disabled:opacity-60"
           >
-            <Eyebrow>YOUR DESIGN DIRECTION</Eyebrow>
-            <div className="my-5 grid grid-cols-2 gap-3">{([['style','Overall direction',designOptions.styles],['curtainLength','Curtain length',designOptions.lengths],['fullness','Fullness',['1.5','2','2.5']]] as const).map(([key,label,options])=><label key={key} className="text-[12px] text-muted">{label}<select className="mt-2 h-11 w-full border border-solid border-[#d2d1c5] bg-paper px-2 text-[13px] text-ink" value={preferences[key]} onChange={e=>{setPreferences(p=>({...p,[key]:e.target.value}));clearResult();}}>{options.map(option=><option key={option}>{option}</option>)}</select></label>)}</div>
-            <div className="my-6 border-y border-solid border-[#dedbd2] py-5 text-[12px] leading-relaxed text-muted"><p>{preferences.configuratorFabric || fabric.name} ? {heading} ? {pattern}</p><p>Main: {actualColor} ? Sheer: {selection.sheerColor}</p><p>Use ?Edit main and sheer configuration? above to adjust independent layers, materials, palettes and headings.</p></div>
+            <details><summary className="min-h-11 cursor-pointer py-3 text-[16px]">Advanced Customization</summary>
+            <div className="my-5 grid grid-cols-2 gap-3">{([['style','Overall direction',designOptions.styles],['curtainLength','Curtain length',designOptions.lengths],['fullness','Fullness',['1.5','2','2.5']]] as const).map(([key,label,options])=><label key={key} className="text-[12px] text-muted">{label}<select className="mt-2 h-11 w-full border border-solid border-[#d2d1c5] bg-paper px-2 text-[13px] text-ink" value={preferences[key]} onChange={e=>{if(key==='curtainLength'||key==='fullness')configure({...readManual(selection,records),[key]:e.target.value});else{setPreferences(p=>({...p,[key]:e.target.value}));clearResult();}}}>{options.map(option=><option key={option}>{option}</option>)}</select></label>)}</div>
             <details className="border-b border-solid border-[#dedbd2] py-6">
               <summary className="cursor-pointer py-2 text-[12px]">
-                03 / Placement sketch controls
+                Optional placement sketch
               </summary>
-              <p className="text-[10px] leading-[1.8] text-muted">
+              <p className="text-[14px] leading-[1.8] text-muted">
                 These controls adjust the optional schematic only. AI rendering
                 uses your fabric, color, pattern and heading; exact sizing is
                 agreed separately.
@@ -465,7 +447,7 @@ function StudioContent() {
                 ].map((s) => (
                   <label
                     key={s.name}
-                    className="mb-4 block text-[10px] text-muted"
+                    className="mb-4 block text-[14px] text-muted"
                   >
                     <span className="flex justify-between gap-3">
                       {s.name}
@@ -487,12 +469,13 @@ function StudioContent() {
                 ))}
               </div>
             </details>
+            </details>
             <div className="pt-6">
               <h3 className="mb-4 text-[12px] font-medium">
-                04 / Create your edited photograph
+                See your curtains in your room
               </h3>
               <p
-                className="mb-4 text-[11px] leading-[1.85] text-muted"
+                className="mb-4 text-[15px] leading-[1.85] text-muted"
                 role="status"
               >
                 {configured
@@ -505,7 +488,7 @@ function StudioContent() {
                 onClick={generate}
                 disabled={!file || !configured || busy}
                 type="button"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-3 bg-ink px-4 text-[11px] text-paper transition-colors hover:bg-[#40564a] disabled:cursor-not-allowed disabled:bg-[#d5d7cc] disabled:text-[#68715e]"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-3 bg-ink px-4 text-[15px] text-paper transition-colors hover:bg-[#40564a] disabled:cursor-not-allowed disabled:bg-[#d5d7cc] disabled:text-[#68715e]"
               >
                 {busy ? (
                   <>
@@ -519,7 +502,7 @@ function StudioContent() {
                   </>
                 )}
               </button>
-              <p className="mb-0 mt-3 text-[9px] leading-[1.8] text-muted">
+              <p className="mb-0 mt-3 text-[13px] leading-[1.8] text-muted">
                 Generation processes your uploaded image with the configured
                 provider and may incur usage costs. Confirm final fabric,
                 dimensions and installation with us.
@@ -529,7 +512,7 @@ function StudioContent() {
           {error && (
             <p
               role="alert"
-              className="mt-5 border-l-2 border-solid border-[#9b6a52] bg-[#f6eee5] p-4 text-[11px] leading-[1.8] text-[#835342]"
+              className="mt-5 border-l-2 border-solid border-[#9b6a52] bg-[#f6eee5] p-4 text-[15px] leading-[1.8] text-[#835342]"
             >
               {error}
             </p>
@@ -537,7 +520,7 @@ function StudioContent() {
         </aside>
       </Container>
       </>}
-      <section className="border-t border-solid border-[#dedbd2] bg-cream py-16">
+      {studioMode==='upload'&&<section className="border-t border-solid border-[#dedbd2] bg-cream py-16">
         <Container className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div>
             <h2 className={`mb-3 ${typography.section}`}>
@@ -548,9 +531,9 @@ function StudioContent() {
               fit.
             </p>
           </div>
-          <ActionLink href="/contact">Discuss your design</ActionLink>
+          <ActionLink href={`/contact?${new URLSearchParams({interest:'Curtain quotation',message:manualSummary(readManual(selection,records),records)}).toString()}`}>Discuss your design</ActionLink>
         </Container>
-      </section>
+      </section>}
     </>
   );
 }

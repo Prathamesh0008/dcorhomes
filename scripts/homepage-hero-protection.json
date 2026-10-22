@@ -1,0 +1,21 @@
+{
+  "hero": "      <section className=\"bg-[#f3efe6]\">\r\n        <Container className=\"grid items-center gap-8 py-8 md:gap-10 md:py-12 lg:grid-cols-[.94fr_1.06fr] lg:gap-12 lg:py-14\">\r\n          <div className={`min-w-0 ${heroStyles.entrance}`}>\r\n            <Eyebrow>DESIGN YOUR SPACE WITH DCORHOME</Eyebrow>\r\n            <h1 className={`mb-5 mt-5 ${typography.hero}`}>\r\n              Your room.<br />Your curtains.<br />\r\n              <em className=\"font-serif text-[1.09em] font-normal text-[#907356]\">Beautifully<br className=\"hidden xl:block\" /> reimagined.</em>\r\n            </h1>\r\n            <p className={`mb-6 max-w-[440px] text-[#666e61] ${typography.body}`}>\r\n              See how beautiful curtains transform your own space. Upload a photo,\r\n              explore stunning fabrics, and find a look you’ll love.\r\n            </p>\r\n            <div className=\"flex flex-wrap items-center gap-4\">\r\n              <ActionLink href=\"/studio\" className=\"rounded-full \">Try the curtain visualizer</ActionLink>\r\n              <ActionLink href=\"/collections\" variant=\"text\" className=\"\">Explore fabrics</ActionLink>\r\n            </div>\r\n            <p className=\"mb-0 mt-5 text-[11px] leading-relaxed text-[#777c6e]\">Your photograph. Your fabric choices. A new view of home.</p>\r\n          </div>\r\n          <div className={`min-w-0 ${heroStyles.entrance}`}>\r\n            <CurtainComparison\r\n              before={pair.before}\r\n              after={pair.after}\r\n              variant=\"hero\"\r\n              autoPlay\r\n              priority\r\n              // beforeLabel=\"BEFORE\"\r\n              // afterLabel=\"AFTER\"\r\n              caption=\"Linen · warm ivory — AI-created room illustration, not a product photograph.\"\r\n            />\r\n          </div>\r\n        </Container>\r\n      </section>",
+  "heroHash": "9c96c54b84bd39bd3fd948072f75b0b1cbef1e6d234d7752e8a22ec1b10b216b",
+  "files": {
+    "components/interactive/CurtainComparison.tsx": "d14cfa4e89f2ca417ff1a8b19a806f888455e01fdfe94f95edb6e567ad25b482",
+    "components/interactive/useComparisonAutoplay.ts": "3a39590cfd2a33e51436404eaec0daa892775db1091cc411754a763e02a50b14",
+    "components/interactive/HeroEntrance.module.css": "902fa94933f220e03d808e7cda78e6ddb56966efe0c538663e4ea5fb92cb0a4a",
+    "components/ui/Container.tsx": "fca1e13f782fb677298413d106531cd6a935f09f79ff05daa2069989ed7ecf0b",
+    "components/ui/Photograph.tsx": "72cec94e8f3f1457e0baa4306e8ade3c808623a12fe640a2e775f4dbde141b41",
+    "components/ui/ActionLink.tsx": "f1fb30dd2cc68e4b0cda4038584a0012f871259df59f394834fe09801fff582b",
+    "components/ui/Eyebrow.tsx": "3bc95d6b62816852c453fb13ffc600cc7a692d0ac06627ed28398458c18d2187",
+    "lib/typography.ts": "d8b080e4403920667abb1661174fbd7b16c9e11658d38d0047adba37b0232172",
+    "app/globals.css": "0f0c118e424fdcf8db74c8797664ab0a8b1c8f4ae520d29dfcfd78b7e74f2fb1",
+    "components/SiteHeader.tsx": "8d84daf0902eaf03b916536d027a2c120fd30c9990beab198e3894dbfe8e344e",
+    "app/layout.tsx": "0f1332b23dcb1b07d42f937460e4af166a1ca1b6b7dbc4bfd360914dc79b3bba",
+    "lib/server/showcase.ts": "af14a2a728fddc8090b1b5c95bb095d5087b93d22b91731c4b886be6f72572bb",
+    "lib/assets.ts": "81b8aa57f2e81bf947aa4e5d5195cd1012ace5ed1c74a635bc81ca7a5d76c569",
+    "public/images/hero-room-before.webp": "e615d7e9dd24f2e3de734c2107c031e8d4637931d39b83e5c61c06850f875375",
+    "public/images/hero-room-after.webp": "cfe83e3d8292345eae5dcc792ae02201fccc2b2d0dc92e0b953c93767c6c8faa"
+  }
+}

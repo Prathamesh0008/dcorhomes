@@ -1,5 +1,5 @@
 "use client";
-import { CSSProperties, ReactNode, useRef, useState, useEffect } from "react";
+import { CSSProperties, ReactNode, useId, useRef, useState, useEffect } from "react";
 import Image from "@/components/ui/Photograph";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useComparisonAutoplay } from "./useComparisonAutoplay";
@@ -36,6 +36,7 @@ export default function CurtainComparison({
     value = useRef(50),
     active = useRef<number | null>(null),
     bounds = useRef<DOMRect | null>(null);
+  const instructionsId = useId();
   const [failed, setFailed] = useState(false);
   const [paused, setPaused] = useState(false);
   const placeholder = before === after;
@@ -146,17 +147,20 @@ export default function CurtainComparison({
             Room imagery is unavailable. Explore curtain options in the studio.
           </p>
         )}
+        {variant !== "hero" && <>
         <span className="absolute bottom-[22px] text-[9px] text-ink tracking-[1.5px] bg-[#fffdf0df] pointer-events-none left-[18px] py-[9px] px-3">
           {placeholder ? "REFERENCE" : afterLabel}
         </span>
         <span className="absolute bottom-[22px] text-[9px] text-ink tracking-[1.5px] bg-[#fffdf0df] pointer-events-none right-[18px] py-[9px] px-3">
           {placeholder ? "REFERENCE" : beforeLabel}
         </span>
+        </>}
         <div className="absolute left-[var(--reveal)] w-px bg-white pointer-events-none inset-y-0" />
           <div
             role="slider"
             tabIndex={0}
             aria-label={label}
+            aria-describedby={instructionsId}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={50}
@@ -192,7 +196,7 @@ export default function CurtainComparison({
             <ChevronLeft size={14} strokeWidth={1.4} />
             <ChevronRight size={14} strokeWidth={1.4} />
           </div>
-        {autoPlay && !placeholder && beforeImage !== afterImage && (
+        {variant !== "hero" && autoPlay && !placeholder && beforeImage !== afterImage && (
           <button
             type="button"
             aria-label={paused || playback.reduced ? "Play automatic comparison" : "Pause automatic comparison"}
@@ -213,8 +217,12 @@ export default function CurtainComparison({
           </span>
         </noscript>
       </div>
+      <p id={instructionsId} className="sr-only">
+        Use the arrow keys to adjust the comparison, or hold Shift for larger steps.
+        Home shows the original image; End shows the curtain view.
+      </p>
       {caption && (
-        <figcaption className="flex justify-between text-[9px] text-inherit leading-[1.6] mt-[13px] gap-[15px] max-[761px]:text-[8px] max-[761px]:flex-wrap max-[761px]:gap-[5px]">
+        <figcaption aria-hidden={variant === "hero" ? true : undefined} className={`flex justify-between text-[9px] text-inherit leading-[1.6] mt-[13px] gap-[15px] max-[761px]:text-[8px] max-[761px]:flex-wrap max-[761px]:gap-[5px] ${variant === "hero" ? "invisible select-none" : ""}`}>
           {caption}
           <span className="whitespace-nowrap tracking-[1px]">
             DRAG TO COMPARE

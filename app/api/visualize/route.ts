@@ -1,5 +1,6 @@
+import { fabricRecords } from '@/lib/server/fabric-records';
 import { curtainFabrics, curtainStyles } from "@/lib/curtains/configurator-data";
-import { fabricFor, fabrics as manualFabrics, normalizeManual } from '@/lib/curtains/manual-config';
+import { fabricFor, normalizeManual } from '@/lib/curtains/manual-config';
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { NextRequest, NextResponse } from "next/server";
@@ -29,18 +30,19 @@ export async function POST(request: NextRequest) {
   const requestedStyle=String(input.get('configuratorStyle')||'');
   const requestedFabric=String(input.get('configuratorFabric')||'');
   if(requestedStyle&&!curtainStyles.includes(requestedStyle))throw new HttpError(400,'Invalid curtain style.');
+  const manualFabrics=fabricRecords();
   const supplierMaterial=manualFabrics.find(f=>f.id===fabric.id&&f.name===requestedFabric&&f.usage.includes('main'));
   const material=requestedFabric?(curtainFabrics.find(f=>f.name===requestedFabric)||(supplierMaterial?{name:supplierMaterial.name,patterns:['Solid','Textured','Striped']}:undefined)):(curtainFabrics.find(f=>f.catalogueId===fabric.id)||curtainFabrics.find(f=>f.name===fabric.category));
   if(requestedFabric&&!material)throw new HttpError(400,'Invalid main curtain material.');
   const sheerColor=String(input.get('sheerColor')||'#f3efdf');
   if(!/^#[0-9a-f]{6}$/i.test(sheerColor))throw new HttpError(400,'Invalid sheer curtain color.');
-  const sheerFabric=String(input.get('sheerFabric')||'solstice'),sheerMaterial=fabricFor(sheerFabric,'sheer');
+  const sheerFabric=String(input.get('sheerFabric')||'solstice'),sheerMaterial=fabricFor(sheerFabric,'sheer',manualFabrics);
   if(sheerMaterial.id!==sheerFabric)throw new HttpError(400,'Invalid sheer material.');
   const sheerHeading=pick('sheerHeading',sheerMaterial.compatibleHeadingStyles,sheerMaterial.compatibleHeadingStyles[0]);
   const mainEnabled=pick('mainEnabled',['true','false'],'true'),sheerEnabled=pick('sheerEnabled',['true','false'],String(input.get('layers')==='Layered sheer and drape'));
   if(mainEnabled==='false'&&sheerEnabled==='false')throw new HttpError(400,'Enable a curtain layer before generating.');
   let manual:string|undefined;
-  if(input.get('manual')){try{const raw=String(input.get('manual'));if(raw.length>4000)throw Error();manual=JSON.stringify(normalizeManual(JSON.parse(raw)));}catch{throw new HttpError(400,'Invalid manual configuration.');}}
+  if(input.get('manual')){try{const raw=String(input.get('manual'));if(raw.length>4000)throw Error();const normalized=normalizeManual(JSON.parse(raw),manualFabrics);for(const [layer,id,color,enabled] of [['main',normalized.mainFabric,normalized.mainColor,normalized.mainEnabled],['sheer',normalized.sheerFabric,normalized.sheerColor,normalized.sheerEnabled]] as const){if(enabled&&!fabricFor(id,layer,manualFabrics).colors.find(c=>c.id===color)?.hexPreview)throw Error();}manual=JSON.stringify(normalized);}catch{throw new HttpError(400,'This configuration has an invalid selection or a shade without a digital color reference. Contact us for a sample before requesting an AI preview.');}}
   const options={sheerColor,sheerFabric,sheerHeading,mainEnabled,sheerEnabled,manual,configuratorStyle:requestedStyle,configuratorFabric:requestedFabric,fabric:fabric.id,style:pick("style",designOptions.styles,"Modern"),roomType:pick("roomType",designOptions.rooms,"Living room"),heading:requestedStyle || pick("heading",[...designOptions.headings,...curtainStyles],"Wave fold"),pattern:pick("pattern",designOptions.patterns,"Solid"),curtainLength:pick("curtainLength",designOptions.lengths,"Floor length"),layers:pick("layers",designOptions.layers,"Single curtain"),fullness:pick("fullness",["1.5","2","2.5"],"2"),color:String(input.get("color")||fabric.color)};
   if(material&&!material.patterns.includes(options.pattern))throw new HttpError(400,"This pattern is not supported by the selected material.");
   if(!/^#[0-9a-f]{6}$/i.test(options.color)) throw new HttpError(400,"Invalid curtain color.");

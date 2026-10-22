@@ -1,4 +1,4 @@
-import CurtainConfigurator from "@/components/curtains/CurtainConfigurator";
-import Container from "@/components/ui/Container";
-import { typography } from "@/lib/typography";
-export default function DesignComposer(){return <section className="bg-ink py-14 text-paper md:py-20"><Container><p className="text-[10px] uppercase tracking-[2px] text-[#c8b99d]">Your curtain configurator</p><h2 className={`mb-5 ${typography.section}`}>Choose the details.<br/><em className="font-serif font-normal text-[#c8b99d]">See the whole look.</em></h2><p className="mb-8 max-w-2xl text-[15px] leading-[1.8] text-[#c6cdbf]">Explore independent sheer and main curtain layers, then bring your choices into your own room.</p><CurtainConfigurator/></Container></section>;}
+﻿import CurtainConfigurator from '@/components/curtains/CurtainConfigurator';
+import Container from '@/components/ui/Container';
+import {HomeHeading,homeEyebrow} from '@/components/home/HomeHeading';
+export default function DesignComposer(){return <section id="curtain-customizer" data-home-section="customizer" aria-labelledby="home-customizer-title" className="scroll-mt-28 bg-[#2b4035] py-14 text-paper md:py-20"><Container><div className="mb-8 flex flex-wrap items-end justify-between gap-6 md:mb-10"><div><p className={`${homeEyebrow} text-[#c5b18e]`}>THE SIGNATURE DCORHOME CUSTOMIZER</p><HomeHeading id="home-customizer-title" className="mb-0">Your curtains.<br/><em className="font-serif font-normal text-[#d4c2a3]">Your combination.</em></HomeHeading></div><p className="mb-0 max-w-[350px] text-[16px] leading-7 text-[#d4dccf]">Choose your colors, layer your fabrics, and explore the look.</p></div><div className="bg-paper p-4 text-ink sm:p-7 lg:p-10"><CurtainConfigurator homepage/></div></Container></section>;}

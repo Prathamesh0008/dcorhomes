@@ -1,0 +1,33 @@
+const {spawn}=require('node:child_process'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const root=path.resolve('.test-data'),directory=path.join(root,'catalogue-'+crypto.randomUUID()),port=3210,base='http://localhost:'+port,password=crypto.randomBytes(24).toString('hex');
+const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p',String(port)],{windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,SITE_URL:base,DCORHOME_DATA_DIR:directory,SESSION_SECRET:crypto.randomBytes(32).toString('hex'),ADMIN_PASSWORD:password,ALLOW_LOCAL_HTTP:'true',AI_ENABLED:'false',RESEND_API_KEY:'',ENQUIRY_FROM_EMAIL:'',ENQUIRY_TO_EMAIL:'',DCORHOME_WHATSAPP_NUMBER:'15555550123'}});
+let logs='';server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const delay=ms=>new Promise(r=>setTimeout(r,ms));
+const req=(route,options={})=>fetch(base+route,{...options,headers:{Origin:base,...options.headers}});
+const send=(route,method,body,cookie='')=>req(route,{method,headers:{'Content-Type':'application/json',Cookie:cookie},body:JSON.stringify(body)});
+(async()=>{try{
+ for(let i=0;i<120;i++){try{if((await req('/api/catalogue')).ok)break;}catch{}await delay(250);}
+ assert.equal((await req('/api/admin')).status,401);
+ const empty=await (await req('/collections?category=silk')).text();assert.ok(empty.includes('Silk Satin Study'));
+ const login=await send('/api/admin/session','POST',{password});assert.equal(login.status,200);const adminCookie=login.headers.get('set-cookie').split(';')[0];const patch=body=>send('/api/admin','PATCH',body,adminCookie);
+ const fixture={id:'verification-silk',slug:'verification-silk',name:'Synthetic verification silk',category:'Silk',categoryId:'silk',collection:'Synthetic test fixture',description:'Automated test data only; not real supplier inventory.',source:'supplier',usage:['main'],sku:'TEST-FABRIC',fabricWidthCm:280,weightGsm:180,composition:'Synthetic integration test only',weave:'Test weave',pattern:'Solid',compatibleHeadingStyles:['Wave Pleat'],images:['/images/linen-detail.jpg'],colors:[{id:'test-ivory',name:'Test Ivory',colorCode:'TEST-IVORY',variantSku:'TEST-SHADE-IVORY',family:'Neutral',hexPreview:'#eee5d5',mainImage:'/images/linen-detail.jpg',swatchImage:'/images/linen-detail.jpg',available:true},{id:'test-navy',name:'Test Navy',colorCode:'TEST-NAVY',variantSku:'TEST-SHADE-NAVY',family:'Blue',hexPreview:'#203044',mainImage:'/images/dark-textile.jpg',images:['/images/velvet-detail.jpg'],swatchImage:'/images/dark-textile.jpg',available:true}]};
+ assert.equal((await send('/api/admin','PATCH',{kind:'fabric-record',operation:'create',record:fixture})).status,401);
+ assert.equal((await patch({kind:'fabric-record',operation:'create',record:fixture})).status,200);
+ assert.equal((await patch({kind:'fabric-record',operation:'create',record:fixture})).status,409);
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,colors:[fixture.colors[0],fixture.colors[0]]}})).status,400);
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,images:['/images/../secret.jpg']}})).status,400);
+ const filtered=await (await req('/api/catalogue?category=silk&color=Blue&widthMin=270&gsmMax=200&composition='+encodeURIComponent(fixture.composition))).json();assert.equal(filtered.records.total,1);assert.equal(filtered.records.items[0].id,fixture.id);
+ assert.equal((await req('/collections/verification-silk?shade=test-navy')).status,200);
+ assert.ok((await (await req('/sitemap.xml')).text()).includes('/collections/verification-silk'));
+ const browser=spawn(process.execPath,['scripts/browser-check.cjs'],{windowsHide:true,stdio:'inherit',env:{...process.env,DCORHOME_CATALOGUE_ONLY:'true',DCORHOME_TEST_BASE_URL:base}});assert.equal(await new Promise(resolve=>browser.on('exit',resolve)),0,'Browser journey failed');
+ const images=spawn(process.execPath,['scripts/browser-check.cjs'],{windowsHide:true,stdio:'inherit',env:{...process.env,DCORHOME_CATALOGUE_ONLY:'',DCORHOME_FABRIC_IMAGES_ONLY:'true',DCORHOME_TEST_BASE_URL:base}});assert.equal(await new Promise(resolve=>images.on('exit',resolve)),0,'Photographic shade journey failed');
+ const session=await req('/api/session'),guestCookie=session.headers.get('set-cookie').split(';')[0];const requestId=crypto.randomUUID(),body={name:'Synthetic API verification',email:'test@example.com',consent:true,catalogueFabricId:fixture.id,variantId:'test-navy',quantityMetres:'10',message:'Isolated test only'};
+ const quote=()=>req('/api/enquiries',{method:'POST',headers:{'Content-Type':'application/json',Cookie:guestCookie,'Idempotency-Key':requestId},body:JSON.stringify(body)});
+ assert.equal((await quote()).status,200);assert.equal((await (await quote()).json()).id,requestId);
+ const admin=await (await req('/api/admin',{headers:{Cookie:adminCookie}})).json(),saved=admin.enquiries.find(e=>e.id===requestId);assert.equal(saved.selectedFabric.variantSku,'TEST-SHADE-NAVY');assert.equal(saved.selectedFabric.quantityMetres,10);assert.equal(saved.notification,'not-configured');assert.equal(admin.enquiries.filter(e=>e.id===requestId).length,1);
+ const imported={...fixture,id:'verification-import',slug:'verification-import'};assert.equal((await patch({kind:'fabric-import',records:[imported,fixture]})).status,409);assert.ok(!(await (await req('/api/catalogue')).json()).fabrics.some(f=>f.id===imported.id));
+ assert.equal((await patch({kind:'fabric-import',records:[imported]})).status,200);
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,active:false}})).status,200);assert.equal((await req('/collections/verification-silk')).status,404);
+ assert.equal((await req('/api/admin',{headers:{Cookie:guestCookie}})).status,401);
+ const manual=spawn(process.execPath,['scripts/browser-check.cjs'],{windowsHide:true,stdio:'inherit',env:{...process.env,DCORHOME_CATALOGUE_ONLY:'',DCORHOME_MANUAL_ONLY:'true',DCORHOME_TEST_BASE_URL:base}});assert.equal(await new Promise(resolve=>manual.on('exit',resolve)),0,'Manual configurator regression failed');
+ console.log('Authenticated full-record CRUD, validation, supplier filters, metadata/sitemap, isolated quote persistence/idempotency, atomic create-only imports and inactive records PASS');
+ }catch(error){console.error(error);console.error(logs.slice(-2500));process.exitCode=1;}finally{server.kill();console.log('Synthetic test data only: '+directory);}})();

@@ -23,13 +23,13 @@ export default function ProductCard({
           className="block h-full"
           aria-label={`View ${product.name} details`}
         >
-          <Image
+          {product.image?<Image
             src={product.image}
             alt={product.imageAlt}
             fill
             sizes="(max-width: 680px) 85vw, (max-width: 1024px) 45vw, 30vw"
             className="object-cover transition-opacity duration-300 group-hover/product:opacity-90"
-          />
+          />:<span className="flex h-full items-center justify-center p-5 text-[12px] text-muted">Photograph unavailable</span>}
         </Link>
         <button
           className="absolute right-3 top-3 grid h-11 w-11 place-items-center border border-solid border-[#e5e0d5] bg-paper text-ink transition-colors hover:bg-cream aria-pressed:text-[#986c55]"

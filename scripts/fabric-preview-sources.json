@@ -1,0 +1,55 @@
+{
+  "sienna": {
+    "source": "/images/linen-detail.jpg",
+    "sourceUrl": "https://www.pexels.com/photo/beige-wrinkled-fabric-15679399/",
+    "photographer": "Lisett Kruusimae"
+  },
+  "clay": {
+    "source": "/images/velvet-detail.jpg",
+    "crop": {
+      "left": 650,
+      "top": 650,
+      "width": 1000,
+      "height": 1450
+    },
+    "sourceUrl": "https://www.pexels.com/photo/brown-velvet-fabric-16975989/",
+    "photographer": "Eugenia Remark"
+  },
+  "noir": {
+    "source": "/images/dark-textile.jpg",
+    "sourceUrl": "https://www.pexels.com/photo/close-up-photo-of-black-textile-1487821/",
+    "photographer": "Engin Akyurt"
+  },
+  "olive": {
+    "source": "/images/fabrics/textured/pexels-7598534-source.jpg",
+    "sourceUrl": "https://www.pexels.com/photo/a-texture-of-a-fabric-7598534/",
+    "photographer": "Eva Bronzini"
+  },
+  "solstice": {
+    "source": "/images/sheer-detail.jpg",
+    "crop": {
+      "left": 30,
+      "top": 800,
+      "width": 650,
+      "height": 1800
+    },
+    "sourceUrl": "https://www.pexels.com/photo/checkered-curtain-near-glass-window-10624309/",
+    "photographer": "Alexey Demidov"
+  },
+  "pearl": {
+    "source": "/images/sheer-detail.jpg",
+    "crop": {
+      "left": 20,
+      "top": 50,
+      "width": 750,
+      "height": 2100
+    },
+    "sourceUrl": "https://www.pexels.com/photo/checkered-curtain-near-glass-window-10624309/",
+    "photographer": "Alexey Demidov"
+  },
+  "silk-satin-study": {
+    "source": "/images/fabrics/silk/satin-study/pexels-14380623-source.jpg",
+    "sourceUrl": "https://www.pexels.com/photo/rippled-white-silk-fabric-in-close-up-photography-14380623/",
+    "photographer": "Qwirki & Co."
+  }
+}

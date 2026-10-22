@@ -1,8 +1,12 @@
+import { fabricRecords } from '@/lib/server/fabric-records';
+import FabricCatalogueProvider from '@/components/curtains/FabricCatalogueProvider';
 import { siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
+// Admin catalogue changes must reach direct Studio visits as well as collection navigation.
+export const dynamic='force-dynamic';
 export const metadata: Metadata = {
   title: {
     default: "Dcorhome | Curtains, beautifully considered",
@@ -21,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SiteHeader />
+        <FabricCatalogueProvider records={fabricRecords()} whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader />
         <main>{children}</main>
-        <SiteFooter />
+        <SiteFooter /></FabricCatalogueProvider>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 "use client";
-﻿import Link from "next/link";
+import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
@@ -18,18 +19,21 @@ export function Brand({ light = false }: { light?: boolean }) {
       aria-label="Dcorhome home"
       className={`inline-flex flex-col gap-2 ${light ? "text-paper" : "text-ink"}`}
     >
-      <span className="flex items-center gap-3 text-[26px] font-semibold leading-none tracking-[-1px] sm:text-[28px]">
-        <span aria-hidden="true" className="flex h-7 items-center gap-[3px] text-bronze">
-          <span className="h-5 w-px bg-current" />
-          <span className="h-7 w-px bg-current" />
-          <span className="h-5 w-px bg-current" />
-        </span>
-        <span>
-        DCOR<span className="font-normal">HOME</span>
+      <span className="flex items-center gap-3 text-[30px] font-semibold leading-none tracking-[-1px] sm:text-[34px]">
+        <Image
+          src={light ? "/branding/cream.png" : "/branding/green.png"}
+          alt=""
+          aria-hidden="true"
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0 object-contain"
+        />
+        <span className="whitespace-nowrap">
+          <span className="text-[1.13em] leading-[0]">D</span>COR{" "}<span className="font-normal">HOME</span>
         </span>
       </span>
       <span
-        className={`text-[8px] font-medium uppercase tracking-[2.7px] ${light ? "text-[#aeb8a9]" : "text-[#8a8e7f]"}`}
+        className={`text-[10px] font-medium uppercase tracking-[2.7px] ${light ? "text-[#aeb8a9]" : "text-[#8a8e7f]"}`}
       >
         Curtain atelier
       </span>
@@ -74,18 +78,18 @@ export default function SiteHeader() {
   }, [open]);
   return (
     <header className="sticky top-0 z-50 border-b border-solid border-[#e2dfd5] bg-paper/90 backdrop-blur-xl">
-      <Container className="flex h-[78px] items-center justify-between gap-4 xl:grid xl:h-[88px] xl:grid-cols-[1fr_auto_1fr]">
+      <Container className="flex h-[86px] items-center justify-between gap-4 xl:grid xl:h-[100px] xl:grid-cols-[1fr_auto_1fr]">
         <Brand />
         <nav
           aria-label="Primary navigation"
-          className="hidden items-center gap-1 rounded-full border border-solid border-[#e6e1d6] bg-cream/70 p-1 xl:flex"
+          className="hidden items-center gap-5 lg:gap-7 xl:flex"
         >
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               aria-current={pathname === item.href ? "page" : undefined}
-              className="flex min-h-11 items-center rounded-full px-4 text-[13px] font-medium text-muted transition-colors hover:bg-sand/60 hover:text-ink aria-[current=page]:bg-ink aria-[current=page]:text-paper"
+              className="flex min-h-12 items-center border-b border-solid border-transparent px-0.5 text-[15px] font-medium text-[#667064] transition-colors hover:border-[#ac987e] hover:text-ink aria-[current=page]:border-ink aria-[current=page]:text-ink"
             >
               {item.label}
             </Link>
@@ -93,7 +97,7 @@ export default function SiteHeader() {
         </nav>
         <Link
           href="/studio"
-          className="group hidden min-h-12 justify-self-end items-center gap-4 rounded-full border border-solid border-[#ffffff20] bg-ink px-5 text-[13px] font-medium text-paper transition-colors hover:bg-[#40564a] xl:flex"
+          className="group hidden min-h-12 justify-self-end items-center gap-4 rounded-full border border-solid border-[#ffffff20] bg-ink px-6 text-[14px] font-medium text-paper transition-colors hover:bg-[#40564a] xl:flex"
         >
           Design Your Space <ArrowUpRight size={16} strokeWidth={1.5} className="transition-transform motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5" />
         </Link>
@@ -119,7 +123,7 @@ export default function SiteHeader() {
           aria-hidden={!open}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className={`absolute inset-x-0 top-full max-h-[calc(100dvh_-_78px)] overflow-y-auto border-b border-solid border-[#d8d5cb] bg-paper px-6 pb-7 pt-3 shadow-lg transition-[opacity,transform,visibility] duration-200 xl:hidden ${open ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0"}`}
+          className={`absolute inset-x-0 top-full max-h-[calc(100dvh_-_86px)] overflow-y-auto border-b border-solid border-[#d8d5cb] bg-paper px-6 pb-7 pt-3 shadow-lg transition-[opacity,transform,visibility] duration-200 xl:hidden ${open ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0"}`}
         >
           {[...navigation, { href: "/contact", label: "Consultation" }].map(
             (item) => (
@@ -128,7 +132,7 @@ export default function SiteHeader() {
                 href={item.href}
                 onClick={() => { setOpen(false); toggle.current?.focus(); }}
                 aria-current={pathname === item.href ? "page" : undefined}
-                className="flex min-h-14 items-center justify-between border-b border-solid border-[#e5e2d9] text-[13px] text-muted aria-[current=page]:text-ink"
+                className="flex min-h-14 items-center justify-between border-b border-solid border-[#e5e2d9] text-[17px] text-muted aria-[current=page]:text-ink"
               >
                 {item.label}
                 <ArrowUpRight size={15} strokeWidth={1.3} />

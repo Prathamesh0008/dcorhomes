@@ -1,8 +1,9 @@
 // Supplier records belong in supplier-catalogue.json. Demo records are intentionally
 // separate: none of their palettes or compatibility rules assert real availability.
-export type FabricVariant = { id: string; name: string; colorCode: string; hexPreview: string; family: string; swatchImage?: string; variantSku?: string; available: boolean | null };
+export type FabricVariant = { id: string; name: string; colorCode: string; hexPreview?: string; family: string; swatchImage?: string; variantSku?: string; available: boolean | null; mainImage?: string; textureImage?: string; drapedImage?: string; digitalPreviewImage?: string; digitalPreviewImages?: string[]; digitalSwatchImage?: string; images?: string[]; availability?: string; active?: boolean };
 export type FabricRecord = {
   id: string; slug: string; name: string; category: string; description: string;
+  categoryId?: string; variety?: string; active?: boolean; collection?: string; texture?: string; construction?: string; linearWeightGm?: number; rollLengthM?: number; lightFiltering?: string; liningCompatibility?: string; applications?: string[]; washing?: string; dryCleaning?: string; ironing?: string;
   source: 'demo' | 'supplier'; usage: ('main' | 'sheer')[]; sku?: string;
   brand?: string; supplierReference?: string; composition?: string;
   fabricWidthCm?: number; weightGsm?: number; weave?: string; thicknessMm?: number;
@@ -15,15 +16,15 @@ export type FabricRecord = {
 export const manualHeadings = ['Wave Pleat','Pinch Pleat','Eyelet','Pencil Pleat','Goblet Pleat','Rod Pocket'];
 export function specificationRows(f: FabricRecord): [string,string][] {
   const pending='Specification pending';
-  return [ ['Brand / collection',f.brand || pending],['Fabric SKU',f.sku || pending],
+  return [ ['Fabric ID',f.id],['Fabric name',f.name],['Brand / collection',f.collection || f.brand || pending],['Fabric SKU',f.sku || pending],
     ['Fabric width (cm)',f.fabricWidthCm == null ? pending : String(f.fabricWidthCm)],
     ['Fabric weight (GSM)',f.weightGsm == null ? pending : String(f.weightGsm)],
     ['Composition',f.composition || pending],['Weave / texture',f.weave || pending],
-    ['Thickness (mm)',f.thicknessMm == null ? pending : String(f.thicknessMm)],
+    ['Texture',f.texture || pending],['Construction',f.construction || pending],['Linear weight (g/m)',f.linearWeightGm == null?pending:String(f.linearWeightGm)],['Roll length (m)',f.rollLengthM == null?pending:String(f.rollLengthM)],['Light filtering',f.lightFiltering || pending],['Lining compatibility',f.liningCompatibility || pending],['Washing',f.washing || pending],['Dry cleaning',f.dryCleaning || pending],['Ironing',f.ironing || pending],['Thickness (mm)',f.thicknessMm == null ? pending : String(f.thicknessMm)],
     ['Transparency / light filtering',f.opacity || pending],
     ['Tested blackout (%)',f.blackoutPercentage == null ? pending : String(f.blackoutPercentage)],
     ['Pattern',f.pattern || pending],['Pattern repeat H × V (cm)',f.patternRepeatCm ? `${f.patternRepeatCm.horizontal} × ${f.patternRepeatCm.vertical}` : pending],
-    ['Recommended usage',f.source==='demo' ? 'Illustrative direction only' : f.usage.join(' / ')+' curtains'],
+    ['Recommended usage',f.source==='demo' ? 'Illustrative direction only' : f.applications?.join(', ') || f.usage.join(' / ')+' curtains'],
     ['Care instructions',f.careInstructions || pending],['Shrinkage',f.shrinkage || pending],
     ['Verified certifications',f.certifications?.join(', ') || pending],
     ['Price per metre',f.pricePerMetre == null ? pending : `${f.currency || ''} ${f.pricePerMetre}`],

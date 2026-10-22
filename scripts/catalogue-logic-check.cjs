@@ -1,0 +1,17 @@
+const fs=require('node:fs'),ts=require('typescript'),assert=require('node:assert/strict');
+const old=require.extensions['.ts'];require.extensions['.ts']=(module,file)=>module._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText,file);
+const {demoFabrics}=require('../lib/curtains/demo-catalogue.ts'),{queryFabrics}=require('../lib/curtains/catalogue-query.ts'),{variantPhotos,categoryId}=require('../lib/curtains/categories.ts'),{fabricEnquiry,whatsappHref}=require('../lib/curtains/enquiry.ts'),{csv,convert}=require('./import-supplier-csv.cjs');
+assert.equal(queryFabrics(demoFabrics,{category:'silk'}).total,1);
+assert.equal(queryFabrics(demoFabrics,{usage:'sheer'}).total,2);
+assert.equal(categoryId(demoFabrics.find(f=>f.category==='Blackout')),'unclassified');
+const f={...demoFabrics[0],id:'test-only',slug:'test-only',source:'supplier',sku:'TEST-ONLY',category:'Silk',categoryId:'silk',fabricWidthCm:280,weightGsm:180,composition:'Synthetic test only',colors:Array.from({length:30},(_,i)=>({id:'test-'+i,name:'Test shade '+i,colorCode:'TEST-'+i,variantSku:'TEST-SKU-'+i,family:'Test',available:true,mainImage:i%2?'/images/dark-textile.jpg':'/images/linen-detail.jpg'}))};
+assert.equal(queryFabrics([f],{category:'silk',widthMin:'250',gsmMax:'200',q:'TEST-SKU-29'}).total,1);
+assert.equal(queryFabrics([f],{widthMin:'300'}).total,0);
+assert.equal(variantPhotos(f,'test-29')[0].src,'/images/dark-textile.jpg');assert.ok(variantPhotos(demoFabrics[0],demoFabrics[0].colors[0].id)[0].mode==='digital');
+const many=Array.from({length:25},(_,i)=>({...f,id:'test-'+i,name:String(i).padStart(2,'0')}));assert.equal(queryFabrics(many,{page:'3'}).items.length,1);assert.equal(queryFabrics(many,{sort:'name-desc'}).items[0].name,'24');
+const message=fabricEnquiry(f,f.colors[29],'https://example.invalid/collections/test-only?shade=test-29');assert.ok(message.includes('TEST-SKU-29'));assert.equal(new URL(whatsappHref('15555550123',message)).searchParams.get('text'),message);assert.equal(whatsappHref('',message),null);assert.equal(whatsappHref('bad',message),null);
+assert.deepEqual(csv('id,name\r\n"test","two, words"\r\n'),[{id:'test',name:'two, words'}]);
+const fabricRows=[{id:'test-only',slug:'test-only',name:'Test only',category:'Silk',categoryId:'silk',description:'Synthetic test only',source:'supplier',sku:'TEST',usage:'main',compatibleHeadingStyles:'Wave Pleat',images:'/images/linen-detail.jpg'}],shades=[{fabricId:'test-only',id:'test-shade',name:'Test only',colorCode:'TEST',variantSku:'TEST-SKU',family:'Test',available:'true'}];
+assert.equal(convert(fabricRows,shades)[0].colors.length,1);assert.throws(()=>convert(fabricRows,[...shades,...shades]));assert.throws(()=>convert(fabricRows,[{...shades[0],variantSku:''}]));
+if(old)require.extensions['.ts']=old;else delete require.extensions['.ts'];
+console.log('Hierarchy, 30-shade galleries, real-data filters, sorting/pagination, missing-photo disclosure, WhatsApp encoding and CSV parent-child validation PASS');
