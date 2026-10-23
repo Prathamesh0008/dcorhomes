@@ -1,7 +1,12 @@
 "use client";
-import { useFabricRecords } from '@/components/curtains/FabricCatalogueProvider';
-import CurtainConfigurator from "@/components/curtains/CurtainConfigurator";
-import { manualSelection, manualSummary, readManual, storageKey, type ManualConfig } from '@/lib/curtains/manual-config';
+import { useFabricRecords, useShowroomWhatsApp } from '@/components/curtains/FabricCatalogueProvider';
+import { composerTransfer, validateComposer } from "@/lib/curtains/composer";
+import { whatsappHref } from "@/lib/curtains/enquiry";
+import Link from "next/link";
+import WindowAreaSelector from "@/components/curtains/WindowAreaSelector";
+import { validWindowArea, type WindowArea } from "@/lib/visualizer-area";
+import StudioVisualizer from "@/components/curtains/StudioVisualizer";
+import { fabricFor, manualSelection, manualSummary, readManual, storageKey, type ManualConfig } from '@/lib/curtains/manual-config';
 import { curtainFabrics, curtainStyles } from "@/lib/curtains/configurator-data";
 import type { DesignSelection } from "@/lib/design-options";
 import { useDesignOptions } from "@/lib/useDesignOptions";
@@ -33,7 +38,10 @@ import CurtainComparison from "@/components/interactive/CurtainComparison";
 
 
 function StudioContent() {
-  const records=useFabricRecords();
+  const [windowArea,setWindowArea]=useState<WindowArea|null>(null),[validating,setValidating]=useState(false);
+  const generateLock=useRef(false),uploadVersion=useRef(0);
+  const [photoRatio,setPhotoRatio]=useState(4/3);
+  const records=useFabricRecords(),whatsappNumber=useShowroomWhatsApp();
   const products=useCatalogue();
   const designOptions=useDesignOptions();
 
@@ -51,7 +59,7 @@ function StudioContent() {
   const [pattern, setPattern] = useState(query.get("pattern") || "Solid");
   const [color, setColor] = useState<string | null>(query.get("color"));
   const actualColor = color || fabric.color;
-  const [preferences,setPreferences]=useState<DesignSelection>({...defaultSelection,...Object.fromEntries([...query.entries()].filter(([k])=>['style','roomType','curtainLength','fullness','layers','sheerColor','configuratorFabric','configuratorStyle','manual','sheerFabric','sheerHeading','mainEnabled','sheerEnabled'].includes(k)))});
+  const [preferences,setPreferences]=useState<DesignSelection>({...defaultSelection,...Object.fromEntries([...query.entries()].filter(([k])=>['style','roomType','curtainLength','fullness','layers','sheerColor','configuratorFabric','configuratorStyle','manual','sheerFabric','sheerHeading','mainEnabled','sheerEnabled','inspirationPattern'].includes(k)))});
   const [designId,setDesignId]=useState('');
   const [originalResult,setOriginalResult]=useState('');
   const generation=useRef<AbortController | null>(null);
@@ -60,15 +68,40 @@ function StudioContent() {
     async function restore(){try{let saved;
       if(query.get('local')){const record=(await localDesigns()).find(r=>r.id===query.get('local'));if(!record)return;const original=URL.createObjectURL(record.original);urls.push(original);const edited=record.result?URL.createObjectURL(record.result):'';if(edited)urls.push(edited);saved={selection:record.selection,original,result:edited,id:''};}
       else if(query.get('design')){const r=await fetch('/api/designs/'+encodeURIComponent(query.get('design')!));if(!r.ok)throw Error('This private design is unavailable in your current session.');const data=await r.json();saved={selection:data.selection,original:`/api/designs/${data.id}/image?type=original`,result:`/api/designs/${data.id}/image`,id:data.id};}
-      if(saved&&!cancelled){const restoredPhoto=await fetch(saved.original).then(r=>{if(!r.ok)throw Error("Original image unavailable.");return r.blob();});if(cancelled)return;setFile(new File([restoredPhoto],"saved-room.webp",{type:restoredPhoto.type}));setPreferences(saved.selection);setFabricId(saved.selection.fabric);setHeading(saved.selection.heading);setPattern(saved.selection.pattern);setColor(saved.selection.color);setRoom(saved.original);setOriginalResult(saved.original);setResult(saved.result);setDesignId(saved.id);setView(saved.result?'render':'original');}
+      if(saved&&!cancelled){const restoredPhoto=await fetch(saved.original).then(r=>{if(!r.ok)throw Error("Original image unavailable.");return r.blob();});if(cancelled)return;const bitmap=await createImageBitmap(restoredPhoto);setPhotoRatio(bitmap.width/bitmap.height);bitmap.close();setFile(new File([restoredPhoto],"saved-room.webp",{type:restoredPhoto.type}));setPreferences(saved.selection);if(saved.selection.windowArea){try{const a=JSON.parse(saved.selection.windowArea);if(validWindowArea(a))setWindowArea(a);}catch{}}setFabricId(saved.selection.fabric);setHeading(saved.selection.heading);setPattern(saved.selection.pattern);setColor(saved.selection.color);setRoom(saved.original);setOriginalResult(saved.original);setResult(saved.result);setDesignId(saved.id);setView(saved.result?'render':'original');}
     }catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Could not reopen design.');}}restore();return()=>{cancelled=true;urls.forEach(u=>URL.revokeObjectURL(u));};
   },[query]);
-  const selection={...preferences,fabric:fabricId,heading,pattern,color:actualColor,sheerColor:preferences.sheerColor || '#f3efdf'};
+  const selection={...preferences,windowArea:windowArea?JSON.stringify(windowArea):undefined,fabric:fabricId,heading,pattern,color:actualColor,sheerColor:preferences.sheerColor || '#f3efdf'};
+  const previewConfig=readManual(selection,records),previewMain=fabricFor(previewConfig.mainFabric,'main',records),previewSheer=fabricFor(previewConfig.sheerFabric,'sheer',records);
+  const enquirySummary=`Style: ${selection.style} / Pattern: ${selection.pattern} / Room: ${selection.roomType}\n${manualSummary(readManual(selection,records),records)}`;
+  const whatsapp=whatsappHref(whatsappNumber,enquirySummary);
   const patterns=(curtainFabrics.find(f=>f.name===preferences.configuratorFabric) || curtainFabrics.find(f=>f.catalogueId===fabric.id) || curtainFabrics.find(f=>f.name===fabric.category))?.patterns || designOptions.patterns;
   const [studioMode,setStudioMode]=useState<'sample'|'upload'>(query.get('mode')==='upload'||query.get('design')||query.get('local')?'upload':'sample');
   function changeMode(mode:'sample'|'upload'){setStudioMode(mode);const params=new URLSearchParams(window.location.search);params.set('mode',mode);window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params);window.scrollTo({top:0,behavior:'instant'});}
+  function chooseStyle(style:string){
+    setPreferences(current=>({...current,style}));
+    clearResult();
+    const params=new URLSearchParams(window.location.search);
+    params.set('style',style);
+    window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params);
+  }
   function configure(next:ManualConfig){const transferred=manualSelection(next,records);setPreferences(p=>({...p,...transferred}));setFabricId(transferred.fabric!);setHeading(transferred.heading!);setPattern(transferred.pattern!);setColor(transferred.color!);clearResult();try{localStorage.setItem(storageKey,JSON.stringify(next));const params=new URLSearchParams(window.location.search);for(const [key,value]of Object.entries(transferred))params.set(key,value);if(params.toString()!==window.location.search.slice(1))window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params.toString());}catch{}}
-  useEffect(()=>{if(!query.get('design')&&!query.get('local'))configure(readManual(Object.fromEntries(query.entries()),records));},[query]);
+  useEffect(()=>{
+    if(query.get('design')||query.get('local'))return;
+    const current=readManual(Object.fromEntries(query.entries()),records);
+    if(query.get('composer')==='1'){
+      const intent=validateComposer({style:query.get('style')||undefined,pattern:query.get('inspirationPattern')||undefined,room:current.room});
+      configure(composerTransfer(intent,current,records).manual);
+      setPreferences(p=>({...p,style:intent.style,inspirationPattern:intent.pattern}));
+    }else configure(current);
+  },[query]);
+  function useAvailablePattern(){
+    setPreferences(p=>({...p,inspirationPattern:undefined}));
+    const params=new URLSearchParams(window.location.search);
+    params.delete('inspirationPattern');params.delete('composer');
+    window.history.replaceState(window.history.state,'',window.location.pathname+'?'+params);
+  }
+
 
   const [x, setX] = useState(50),
     [width, setWidth] = useState(64),
@@ -81,10 +114,15 @@ function StudioContent() {
   const [room, setRoom] = useState(images.living);
   const [file, setFile] = useState<File | null>(null);
   const [configured, setConfigured] = useState(false);
+  const [availability,setAvailability]=useState('Checking preview availability.');
+  const [retentionDays,setRetentionDays]=useState(30);
+  const privateUpload=useRef<{file:File;id:string}|null>(null);
+  const attempt=useRef<{signature:string;id:string}|null>(null);
+  async function discardUpload(){const old=privateUpload.current;privateUpload.current=null;attempt.current=null;if(old)await fetch('/api/visualizer/uploads/'+old.id,{method:'DELETE'}).catch(()=>{});}
   useEffect(() => {
-    fetch("/api/visualize")
+    fetch("/api/visualizer/generate")
       .then((r) => r.json())
-      .then((data) => setConfigured(data.configured === true))
+      .then((data) => {setConfigured(data.configured === true);setAvailability(data.reason||'');setRetentionDays(data.retentionDays||30);})
       .catch(() => setConfigured(false));
   }, []);
   const [busy, setBusy] = useState(false),
@@ -103,59 +141,67 @@ function StudioContent() {
     setView((current) => (current === "render" ? "original" : current));
   }
   async function acceptFile(incoming:File){
-    if(busy)return;
-    if(!['image/png','image/jpeg','image/webp'].includes(incoming.type)||incoming.size===0||incoming.size>10*1024*1024){setError('Choose a JPG, PNG or WebP photograph smaller than 10 MB.');return;}
-    try{const bitmap=await createImageBitmap(incoming);const valid=bitmap.width>=256&&bitmap.height>=256&&bitmap.width*bitmap.height<=24000000;bitmap.close();if(!valid)throw Error('Use an image at least 256px per side and at most 24 megapixels.');
-      setView('original');setRoom(URL.createObjectURL(incoming));setFile(incoming);clearResult();setError('');
-    }catch(e){setError(e instanceof Error?e.message:'This image is corrupted or unsupported.');}
+    if(busy||validating)return;
+    const version=++uploadVersion.current;
+    if(!['image/png','image/jpeg','image/webp'].includes(incoming.type)||incoming.size===0||incoming.size>3*1024*1024){setError('Choose a JPG, PNG or WebP photograph smaller than 3 MB.');return;}
+    setValidating(true);
+    try{const bitmap=await createImageBitmap(incoming);const ratio=bitmap.width/bitmap.height;const valid=bitmap.width>=256&&bitmap.height>=256&&bitmap.width*bitmap.height<=24000000;bitmap.close();if(!valid)throw Error('Use an image at least 256px per side and at most 24 megapixels.');
+      if(version!==uploadVersion.current)return;void discardUpload();setPhotoRatio(ratio);setView('original');setRoom(URL.createObjectURL(incoming));setFile(incoming);setWindowArea(null);clearResult();setError('');
+    }catch(e){setError(e instanceof Error?e.message:'This image is corrupted or unsupported.');}finally{if(version===uploadVersion.current)setValidating(false);}
   }
   function upload(e:ChangeEvent<HTMLInputElement>){const incoming=e.target.files?.[0];if(incoming)void acceptFile(incoming);e.target.value='';}
   function useSample() {
+    uploadVersion.current++;setValidating(false);void discardUpload();
     setView("original");
     setRoom(images.living);
     setFile(null);
+    setWindowArea(null);
     clearResult();
     setError("");
     if (uploader.current) uploader.current.value = "";
   }
   async function generate() {
-    if (!file || !configured || busy) return;
+    if (!file || !configured || busy || validating || !validWindowArea(windowArea) || generateLock.current) return;
+    generateLock.current=true;
     generation.current=new AbortController();
     setBusy(true);
     setError("");
     clearResult();
     try {
-      const data = new FormData();
-      data.append("image", file);
-      data.append("fabricId", fabricId);
-      data.append("heading", heading);
-      data.append("pattern", pattern);
-      data.append("color", actualColor);
-      data.append("sheerColor",selection.sheerColor);
-      for(const key of ['manual','sheerFabric','sheerHeading','mainEnabled','sheerEnabled'] as const)if(selection[key])data.append(key,selection[key]!);
-      if(selection.configuratorFabric)data.append("configuratorFabric",selection.configuratorFabric);
-      if(curtainStyles.includes(heading))data.append("configuratorStyle",heading);
-      for(const key of ["style","roomType","curtainLength","fullness","layers"] as const)data.append(key,selection[key]);
-      const response = await fetch("/api/visualize", {
-        method: "POST",
-        body: data,
-        signal:generation.current.signal,
-      });
-      const payload = await response.json();
-      if (!response.ok)
-        throw new Error(
-          payload.error || "Unable to generate your design right now.",
-        );
-      if(typeof payload.image!=="string"||!payload.id)throw Error("The service returned no valid design.");
-      setResult(`data:${payload.mime||"image/webp"};base64,${payload.image}`);
-      setDesignId(payload.id);
-      setOriginalResult(payload.original);
+      if(privateUpload.current?.file!==file){
+        const data=new FormData();data.append('image',file);
+        const uploaded=await fetch('/api/visualizer/upload',{method:'POST',body:data,signal:generation.current.signal});
+        const photo=await uploaded.json();if(!uploaded.ok)throw Error(photo.error||'Your room photo could not be uploaded.');
+        privateUpload.current={file,id:photo.id};
+      }
+      const body={uploadId:privateUpload.current.id,windowArea,manual:previewConfig,style:selection.style};
+      const signature=JSON.stringify(body);
+      if(attempt.current?.signature!==signature)attempt.current={signature,id:crypto.randomUUID()};
+      const requestId=attempt.current.id;
+      const response=await fetch('/api/visualizer/generate',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':requestId},body:signature,signal:generation.current.signal});
+      let payload=await response.json();
+      // Polling reads status only; it never starts another provider request.
+      if(response.status===202){
+        for(let tries=0;tries<60&&payload.status==='processing';tries++){
+          await new Promise(resolve=>setTimeout(resolve,2000));
+          if(generation.current.signal.aborted)throw Error('Preview check stopped.');
+          const status=await fetch('/api/visualizer/generations/'+requestId,{signal:generation.current.signal});payload=await status.json();
+        }
+      }
+      if(payload.status!=='completed'){
+        if(payload.status==='failed')attempt.current=null;
+        throw Error(payload.error||(payload.status==='processing'?'Your preview is still being prepared. Press Generate to check the same request.':'Unable to generate your design right now.'));
+      }
+      if(typeof payload.result!=='string'||!payload.id)throw Error('The service returned no valid design.');
+      setResult(payload.result);setDesignId(payload.id);setOriginalResult(payload.original);
+      attempt.current=null;
       setView("render");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to complete the preview.",
       );
     } finally {
+      generateLock.current=false;
       setBusy(false);
     }
   }
@@ -231,17 +277,18 @@ function StudioContent() {
   }
   return (
     <>
-      <section className="border-b border-solid border-[#dedbd2] bg-cream py-6 md:py-11">
-        <Container><Eyebrow>THE DCORHOME DESIGN STUDIO</Eyebrow><h1 className="mb-4 mt-4 text-[30px] font-medium leading-[1.1] tracking-[-1px] md:text-[52px]">{studioMode==='sample'?<><span className="md:hidden">Your curtain design.</span><span className="hidden md:inline">Beautiful curtains.</span></>:'Try them in'} <em className={`font-serif font-normal text-[#97836b] ${studioMode==='sample'?'hidden md:inline':''}`}>{studioMode==='sample'?'Made simple.':'your room.'}</em></h1><p className="mb-0 max-w-[600px] text-[16px] leading-7 text-muted">{studioMode==='sample'?'Choose your main curtains, add a soft sheer, and bring your favourite combination to life.':'Bring your curtain choices into your own space. Upload a photograph when you are ready.'}</p>{studioMode==='upload'&&<button type="button" onClick={()=>changeMode('sample')} className="mt-4 min-h-11 bg-transparent px-0 text-[15px] underline underline-offset-4">Back to your curtain design</button>}</Container>
+      <section className="border-b border-solid border-[#dedbd2] bg-cream py-10 md:py-14">
+        <Container><Eyebrow>THE DCORHOME DESIGN STUDIO</Eyebrow><h1 className={`mb-4 mt-5 ${typography.page}`}>Your room. <em className="font-serif font-normal text-[#97836b]">Considered anew.</em></h1><p className={`mb-0 max-w-[580px] text-muted ${typography.body}`}>A photograph, a material, a new perspective. Explore your choices at your own pace, then let us help with the details.</p></Container>
       </section>
-      {studioMode==='sample' ? <section className="bg-paper py-7 md:py-10"><Container><CurtainConfigurator studio selection={selection} onManualChange={configure} onTryRoom={()=>changeMode('upload')}/></Container></section> : <>
-      <section className="bg-paper py-5"><Container><details><summary className="min-h-11 cursor-pointer py-3 text-[16px]">Edit your curtain choices</summary><CurtainConfigurator studio selection={selection} onManualChange={configure} onTryRoom={()=>changeMode('upload')}/></details></Container></section>
+      <Container className="flex flex-wrap gap-3 py-5" aria-label="Visualizer modes"><button type="button" aria-pressed={studioMode==='sample'} disabled={busy} onClick={()=>changeMode('sample')} className="min-h-12 rounded-full border border-solid border-[#b3b7a8] bg-transparent px-5 text-[15px] aria-pressed:bg-ink aria-pressed:text-paper">Sample preview</button><button type="button" aria-pressed={studioMode==='upload'} disabled={busy} onClick={()=>changeMode('upload')} className="min-h-12 rounded-full border border-solid border-[#b3b7a8] bg-transparent px-5 text-[15px] aria-pressed:bg-ink aria-pressed:text-paper">Room photo ? AI on hold</button></Container>
+      {studioMode==='sample' ? <section className="bg-ink py-8 md:py-12"><Container><StudioVisualizer selection={selection} onManualChange={configure} onStyleChange={chooseStyle} onUseAvailablePattern={useAvailablePattern} onTryRoom={()=>changeMode('upload')}/></Container></section> : <>
+      <section className="bg-ink py-5 text-paper"><Container><details><summary className="min-h-11 cursor-pointer py-3 text-[16px]">01 / Review your curtain choices</summary><fieldset disabled={busy} className="m-0 min-w-0 border-0 p-0"><StudioVisualizer selection={selection} onManualChange={configure} onStyleChange={chooseStyle} onUseAvailablePattern={useAvailablePattern} onTryRoom={()=>changeMode('upload')}/></fieldset></details></Container></section>
       <Container
         as="section"
         className="grid items-start gap-10 py-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,.85fr)] lg:gap-12 lg:py-14"
       >
         <div className="min-w-0 lg:sticky lg:top-[110px]" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();const incoming=event.dataTransfer.files[0];if(incoming)void acceptFile(incoming);}}>
-          <p className="text-[12px] leading-relaxed text-muted">Drop your photograph here or choose a file. JPG, PNG or WebP, up to 10 MB. Nothing is uploaded until you press Generate.</p>
+          <p className="text-[12px] leading-relaxed text-muted">AI room generation is on hold. You can explore fabrics and combinations in the working sample preview. Room photos can be selected locally (JPG, PNG or WebP, up to 3 MB); no AI generation is available.</p>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <span className="text-[13px] uppercase tracking-[1.5px] text-muted">
               {result && view === "render"
@@ -251,15 +298,16 @@ function StudioContent() {
                   : "Original photograph"}
             </span>
             <button
-              disabled={busy}
+              disabled={busy||validating}
               type="button"
               onClick={() => uploader.current?.click()}
               className="flex min-h-11 items-center gap-2 border-0 bg-transparent p-0 text-[15px] text-ink disabled:opacity-50"
             >
               <ImagePlus size={15} />{" "}
-              {file ? "Change photograph" : "Upload your room"}
+              {validating ? "Checking photograph..." : file ? "Replace photograph" : "Upload your room"}
             </button>
           </div>
+          {file&&<button type="button" disabled={busy} onClick={useSample} className="mb-4 min-h-11 bg-transparent px-0 text-[14px] underline">Remove photograph</button>}
           <input
             ref={uploader}
             className="sr-only"
@@ -268,13 +316,17 @@ function StudioContent() {
             aria-label="Upload your room photograph"
             onChange={upload}
           />
+          {validating&&<p role="status" className="bg-cream p-4 text-[15px]">Checking your photograph...</p>}
           {result && view === "render" ? (
             <CurtainComparison
+              aspectRatio={photoRatio}
               before={originalResult || room}
               after={result}
               caption="AI-edited image compared with your original. Review architectural details before deciding."
               afterLabel="AI edit"
             />
+          ) : file && view === "original" ? (
+            <WindowAreaSelector key={room} src={room} value={windowArea} disabled={busy} onChange={area=>{setWindowArea(area);clearResult();}}/>
           ) : view === "concept" ? (
             <div className="relative aspect-[4/3] overflow-hidden bg-sand"><NextImage src={room} alt="Your room with an illustrative placement diagram" fill sizes="(max-width:1023px) 100vw,60vw" className="object-cover" unoptimized={room.startsWith('blob:')}/><CurtainPlacementSketch x={x} width={width} top={top} length={length} opening={open} color={actualColor} heading={heading} pattern={pattern}/></div>
           ) : (
@@ -332,8 +384,10 @@ function StudioContent() {
                 key={source}
                 aria-label={`Select sample room ${i + 1}`}
                 onClick={() => {
+                  void discardUpload();
                   setRoom(source);
                   setFile(null);
+                  setWindowArea(null);
                   clearResult();
                   setView("original");
                   if (uploader.current) uploader.current.value = "";
@@ -379,7 +433,10 @@ function StudioContent() {
               </a>
             )}
           </div>
+          <p className="mt-5 text-[14px] leading-7 text-muted">AI-generated preview for design inspiration. Actual fabric color, folds and fit may vary. Preview is illustrative and intended to help visualize curtain direction, layering, and color mood. Final physical appearance may vary.</p>
+          <div className="my-5 border-y border-solid border-[#dedbd2] py-5"><p className="mb-2 text-[12px] uppercase tracking-[2px] text-bronze">YOUR CURTAIN DESIGN</p><p className="m-0 text-[15px] leading-7">{selection.style} / {selection.pattern} / {selection.roomType}<br/>Main curtain: {previewConfig.mainEnabled?`${previewMain.name} / ${previewMain.colors.find(c=>c.id===previewConfig.mainColor)?.name}`:'Not included'}<br/>Sheer curtain: {previewConfig.sheerEnabled?`${previewSheer.name} / ${previewSheer.colors.find(c=>c.id===previewConfig.sheerColor)?.name}`:'Not included'}</p></div>
           <DesignActions original={originalResult || room} result={result} selection={selection} designId={designId}/>
+          {result&&<div className="mt-5 flex flex-wrap gap-3"><Link href={`/contact?${new URLSearchParams({designId,interest:'AI curtain preview quotation',room:selection.roomType,message:enquirySummary})}`} className="inline-flex min-h-12 items-center justify-center bg-ink px-6 text-[15px] text-paper">Request a Quote</Link>{whatsapp&&<a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center border-b border-solid border-ink px-3 text-[15px]">Enquire on WhatsApp</a>}</div>}
           {result && (
             <p
               role="status"
@@ -472,7 +529,7 @@ function StudioContent() {
             </details>
             <div className="pt-6">
               <h3 className="mb-4 text-[12px] font-medium">
-                See your curtains in your room
+                03 / Preview your curtains
               </h3>
               <p
                 className="mb-4 text-[15px] leading-[1.85] text-muted"
@@ -480,13 +537,13 @@ function StudioContent() {
               >
                 {configured
                   ? file
-                    ? "Ready to create an AI edit from your uploaded photograph."
+                    ? validWindowArea(windowArea) ? "Your photograph and window area are ready. Generate when you are happy with your curtain choices." : "Mark your window area on the photograph before generating."
                     : "AI rendering is connected. Upload your own photograph to begin."
-                  : "AI visualization is currently unavailable. You can explore materials and save your design direction on this device."}
+                  : `${availability} You can still explore and save your design direction on this device.`}
               </p>
               <button
                 onClick={generate}
-                disabled={!file || !configured || busy}
+                disabled={!file || !configured || busy || validating || !validWindowArea(windowArea)}
                 type="button"
                 className="inline-flex min-h-12 w-full items-center justify-center gap-3 bg-ink px-4 text-[15px] text-paper transition-colors hover:bg-[#40564a] disabled:cursor-not-allowed disabled:bg-[#d5d7cc] disabled:text-[#68715e]"
               >
@@ -498,14 +555,12 @@ function StudioContent() {
                 ) : (
                   <>
                     <WandSparkles size={15} />
-                    Generate AI design
+                    {result ? "Regenerate My Room Preview" : "Generate My Room Preview"}
                   </>
                 )}
               </button>
               <p className="mb-0 mt-3 text-[13px] leading-[1.8] text-muted">
-                Generation processes your uploaded image with the configured
-                provider and may incur usage costs. Confirm final fabric,
-                dimensions and installation with us.
+                Generate sends your photo to our image provider. Unused uploads expire after 24 hours; previews expire after {retentionDays} days. Delete saved previews in My designs. <Link href="/privacy" className="underline">Photo privacy</Link>. Confirm final fabric, dimensions and installation with us.
               </p>
             </div>
           </fieldset>
@@ -531,7 +586,7 @@ function StudioContent() {
               fit.
             </p>
           </div>
-          <ActionLink href={`/contact?${new URLSearchParams({interest:'Curtain quotation',message:manualSummary(readManual(selection,records),records)}).toString()}`}>Discuss your design</ActionLink>
+          <ActionLink href={`/contact?${new URLSearchParams({interest:'Curtain quotation',message:`Style: ${selection.style}\n${manualSummary(readManual(selection,records),records)}`}).toString()}`}>Discuss your design</ActionLink>
         </Container>
       </section>}
     </>

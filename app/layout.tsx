@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
+import { customerSession } from "@/lib/server/customer-auth";
 // Admin catalogue changes must reach direct Studio visits as well as collection navigation.
 export const dynamic='force-dynamic';
 export const metadata: Metadata = {
@@ -19,15 +20,16 @@ export const metadata: Metadata = {
   openGraph:{siteName:"Dcorhome",type:"website",title:"Dcorhome curtain design studio",description:"Explore fabrics and visualize a curtain direction in your own room."},
   icons: { icon: "/dcorhome-mark.svg" },
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const customer = await customerSession();
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-pt-[100px]">
       <body>
-        <FabricCatalogueProvider records={fabricRecords()} whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader />
+        <FabricCatalogueProvider records={(await fabricRecords())} whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader signedIn={Boolean(customer)} />
         <main>{children}</main>
-        <SiteFooter /></FabricCatalogueProvider>
+        <SiteFooter signedIn={Boolean(customer)} /></FabricCatalogueProvider>
       </body>
     </html>
   );

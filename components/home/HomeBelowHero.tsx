@@ -17,7 +17,7 @@ const questions=[
  ['Can I see different curtain colors?','Choose a shade to update its photographic or digital fabric preview where available. The homepage shows your selected fabric palette; exact combinations are not currently rendered. Screen colors should be checked against a physical sample.'],
  ['How do I enquire about my selection?','Review your combination and choose Enquire About This Combination. Your fabric names, shades and saved details are carried into the consultation form. Submit the form to send your request.'],
 ];
-export default function HomeBelowHero(){const records=fabricRecords(),discovery=homeCategories(records,categories()),featured=homeFeaturedFabrics(records);return <>
+export default async function HomeBelowHero(){const records=(await fabricRecords()),discovery=homeCategories(records,(await categories())),featured=homeFeaturedFabrics(records);return <>
  <HomeCategoryDiscovery items={discovery}/>
  <DesignComposer/>
  <HomeFabricShowcase fabrics={featured}/>

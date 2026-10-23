@@ -4,21 +4,29 @@ import { fabrics as seed } from '@/lib/curtains/manual-config';
 import { fabricCategories, type FabricCategory } from '@/lib/curtains/categories';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import schema from '@/lib/curtains/supplier-catalogue.schema.json';
-import { databaseReady, rows, row, db, type RecordRow } from './db';
+import { databaseReady, rows, row, allRecords, put, transaction, type RecordRow } from './db';
 import { HttpError } from './security';
 
-export function allFabricRecords(): FabricRecord[] {
+export async function allFabricRecords(): Promise<FabricRecord[]> {
  const records=new Map(seed.map(f=>[f.id,f]));
  if(databaseReady()){
-  for(const item of rows('fabric')){const old=JSON.parse(item.data);if(records.has(old.id)){records.set(old.id,{...records.get(old.id)!,name:old.name,description:old.description,category:old.category,images:[old.image],active:!old.archived});}else records.set(old.id,{id:old.id,slug:old.id,name:old.name,category:old.category,description:old.description,source:'demo',usage:old.category==='Sheer'?['sheer']:['main'],images:[old.image],colors:[],compatibleHeadingStyles:[],active:!old.archived});}
-  for(const item of db().prepare('SELECT * FROM records WHERE kind=? ORDER BY id').all('fabric-record') as RecordRow[])records.set(item.id,JSON.parse(item.data));
+  for(const item of (await rows('fabric'))){const old=JSON.parse(item.data);if(records.has(old.id)){records.set(old.id,{...records.get(old.id)!,name:old.name,description:old.description,category:old.category,images:[old.image],active:!old.archived});}else records.set(old.id,{id:old.id,slug:old.id,name:old.name,category:old.category,description:old.description,source:'demo',usage:old.category==='Sheer'?['sheer']:['main'],images:[old.image],colors:[],compatibleHeadingStyles:[],active:!old.archived});}
+  for(const item of await allRecords('fabric-record'))records.set(item.id,JSON.parse(item.data));
  }
  return [...records.values()];
 }
-export function fabricRecords() { return allFabricRecords().filter(f=>f.active!==false); }
-export function categories(): FabricCategory[] {
+export async function fabricRecords() { return (await allFabricRecords()).filter(f=>f.active!==false); }
+export async function saveFabricRecords(records:FabricRecord[],operation:'create'|'update'){
+ await transaction(async()=>{
+  const existing=await allFabricRecords(),ids=new Set<string>();
+  for(const f of records){if(ids.has(f.id))throw new HttpError(409,'Duplicate fabric ID in batch: '+f.id);ids.add(f.id);const exists=existing.some(item=>item.id===f.id);if(operation==='create'&&exists)throw new HttpError(409,'Fabric ID already exists: '+f.id+'. No records saved.');if(operation==='update'&&!exists)throw new HttpError(404,'Fabric does not exist: '+f.id);}
+  const skus=new Set<string>();for(const f of [...existing.filter(f=>!ids.has(f.id)),...records]){if(f.source!=='supplier')continue;for(const sku of [f.sku,...f.colors.map(v=>v.variantSku)].filter((v):v is string=>Boolean(v))){const normalized=sku.trim().toLowerCase();if(skus.has(normalized))throw new HttpError(409,'Duplicate product or variant SKU: '+sku);skus.add(normalized);}}
+  for(const f of records)await put('fabric-record',f.id,'admin',f);
+ });
+}
+export async function categories(): Promise<FabricCategory[]> {
  const records=new Map(fabricCategories.map(c=>[c.id,c]));
- if(databaseReady())for(const item of db().prepare('SELECT * FROM records WHERE kind=? ORDER BY id').all('fabric-category') as RecordRow[])records.set(item.id,JSON.parse(item.data));
+ if(databaseReady())for(const item of await allRecords('fabric-category'))records.set(item.id,JSON.parse(item.data));
  return [...records.values()];
 }
 type Rule={type?:string|string[];const?:unknown;enum?:unknown[];minLength?:number;minItems?:number;pattern?:string;minimum?:number;maximum?:number;exclusiveMinimum?:number;required?:string[];properties?:Record<string,Rule>;items?:Rule};
@@ -33,20 +41,22 @@ function validate(value:unknown,rule:Rule,at:string):void {
  if(Array.isArray(value)){if(rule.minItems&&value.length<rule.minItems)bad('at least one entry required');value.forEach((v,i)=>validate(v,rule.items||{},`${at}[${i}]`));}
  else if(value&&typeof value==='object'){const object=value as Record<string,unknown>;for(const key of rule.required||[])if(object[key]===undefined)bad(`${key} is required`);for(const key of Object.keys(object))if(!rule.properties?.[key])bad(`unknown field ${key}`);for(const [key,sub]of Object.entries(rule.properties||{}))validate(object[key],sub,`${at}.${key}`);}
 }
-function imageExists(src:string) {
- if(/^\/api\/catalogue\/images\/[a-f0-9-]{36}$/.test(src))return databaseReady()&&Boolean(row('catalogue-image',src.split('/').pop()!));
+async function imageExists(src:string) {
+ if(/^\/api\/catalogue\/images\/[a-f0-9-]{36}$/.test(src))return databaseReady()&&Boolean((await row('catalogue-image',src.split('/').pop()!)));
  if(!/^\/images\/[a-zA-Z0-9_./-]+\.(jpg|jpeg|png|webp|avif)$/.test(src))return false;
  const resolved=path.resolve('public','.'+src),root=path.resolve('public','images')+path.sep;
  return resolved.startsWith(root)&&existsSync(resolved);
 }
-export function validateFabricRecord(input:unknown): FabricRecord {
+export async function validateFabricRecord(input:unknown): Promise<FabricRecord> {
  // Null supplier fields mean unknown; availability intentionally keeps null.
  const cleaned=JSON.parse(JSON.stringify(input, (key,value)=>value===null&&key!=='available'?undefined:value));
  validate(cleaned,schema.items as Rule,'fabric');
  const f=cleaned as FabricRecord;
+ if(f.publishedAt&&!Number.isFinite(Date.parse(f.publishedAt)))throw new HttpError(400,'Use a valid ISO publication date.');
+ if(f.technicalSheet){const root=path.resolve('public/documents')+path.sep,target=path.resolve('public','.'+f.technicalSheet);if(!target.startsWith(root)||!existsSync(target))throw new HttpError(400,'Technical sheet must be an existing authorized PDF in public/documents.');}
  if(f.slug!==f.id)throw new HttpError(400,'Use the stable fabric ID as the slug.');
  if(f.source==='supplier'&&!f.categoryId)throw new HttpError(400,'Choose a material category; use unclassified if not confirmed.');
- if(f.categoryId&&!categories().some(c=>c.id===f.categoryId))throw new HttpError(400,'Create the category first.');
+ if(f.categoryId&&!(await categories()).some(c=>c.id===f.categoryId))throw new HttpError(400,'Create the category first.');
  if(new Set(f.colors.map(c=>c.variantSku).filter(Boolean)).size!==f.colors.filter(c=>c.variantSku).length)throw new HttpError(400,'Variant SKUs must be unique within a fabric.');
  if(new Set(f.colors.map(c=>c.id)).size!==f.colors.length||new Set(f.colors.map(c=>c.colorCode)).size!==f.colors.length)throw new HttpError(400,'Variant IDs and shade codes must be unique within a fabric.');
  if(f.source==='supplier'&&(!f.sku||f.colors.some(c=>!c.variantSku)))throw new HttpError(400,'Supplier fabric and every shade need actual SKUs.');
@@ -54,7 +64,7 @@ export function validateFabricRecord(input:unknown): FabricRecord {
  if(f.colors.some(c=>c.active!==false&&c.available===true&&![c.mainImage,c.textureImage,c.drapedImage,c.swatchImage,c.digitalPreviewImage,...(c.images||[])].some(Boolean)))throw new HttpError(400,'Add a shade photograph or digital preview before marking a shade available.');
  if(f.pricePerMetre!=null&&!f.currency)throw new HttpError(400,'Price needs a currency.');
  const images=[...f.images,...f.colors.flatMap(c=>[c.swatchImage,c.mainImage,c.textureImage,c.drapedImage,c.digitalPreviewImage,c.digitalSwatchImage,...(c.images||[]),...(c.digitalPreviewImages||[])])].filter((x):x is string=>Boolean(x));
- if(images.some(src=>!imageExists(src)))throw new HttpError(400,'Every image must be an existing local or authenticated-admin-uploaded public catalogue asset.');
+ for(const src of images)if(!(await imageExists(src)))throw new HttpError(400,'Every image must be an existing local or authenticated-admin-uploaded public catalogue asset.');
  return f;
 }
 export function validateCategory(value:unknown): FabricCategory {

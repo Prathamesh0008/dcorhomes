@@ -1,0 +1,95 @@
+{
+  "mode": "built-in image_gen; offline precise-object-edit",
+  "jobs": [
+    {
+      "id": "02-after",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-02-before.png",
+      "prompt": "Use case: precise-object-edit. Edit this exact curtain-free BEFORE room into its matching AFTER. Add IVORY translucent sheers and CHAMPAGNE SILK main curtains. Sheer fabric must run across ALL actual window openings. Substantial opaque main panels on BOTH sides must cover 60-65 percent of each window group in total (roughly 30-32 percent each side); the remaining central 35-40 percent is translucent sheer, never naked glass. Strongly visible layered transformation, floor-length heavy realistic fabric folds, appropriate ceiling track and pleating. Do not use skinny edge strips. Respect arched windows with straight plausible high curtain tracks, no invented architecture. Preserve ALL people and their clothing, furniture, plants, lamps, decor, exact room architecture, window geometry, camera, framing, lighting and exposure from the input. Curtains behind foreground people and furniture. Modify only window dressings and their physically necessary shadows. Output exact 1448x1086, 4:3; one photorealistic image, no collage, text or labels."
+    },
+    {
+      "id": "03-after",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-03-before.png",
+      "prompt": "Use case: precise-object-edit. Edit this exact curtain-free BEFORE room into its matching AFTER. Add SOFT WHITE translucent sheers and CHARCOAL VELVET main curtains. Sheer fabric must run across ALL actual window openings. Substantial opaque main panels on BOTH sides must cover 60-65 percent of each window group in total (roughly 30-32 percent each side); the remaining central 35-40 percent is translucent sheer, never naked glass. Strongly visible layered transformation, floor-length heavy realistic fabric folds, appropriate ceiling track and pleating. Do not use skinny edge strips. Respect arched windows with straight plausible high curtain tracks, no invented architecture. Preserve ALL people and their clothing, furniture, plants, lamps, decor, exact room architecture, window geometry, camera, framing, lighting and exposure from the input. Curtains behind foreground people and furniture. Modify only window dressings and their physically necessary shadows. Output exact 1448x1086, 4:3; one photorealistic image, no collage, text or labels."
+    },
+    {
+      "id": "04-after",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-04-before.png",
+      "prompt": "Use case: precise-object-edit. Edit this exact curtain-free BEFORE room into its matching AFTER. Add CREAM translucent sheers and OLIVE GREEN LINEN main curtains. Sheer fabric must run across ALL actual window openings. Substantial opaque main panels on BOTH sides must cover 60-65 percent of each window group in total (roughly 30-32 percent each side); the remaining central 35-40 percent is translucent sheer, never naked glass. Strongly visible layered transformation, floor-length heavy realistic fabric folds, appropriate ceiling track and pleating. Do not use skinny edge strips. Respect arched windows with straight plausible high curtain tracks, no invented architecture. Preserve ALL people and their clothing, furniture, plants, lamps, decor, exact room architecture, window geometry, camera, framing, lighting and exposure from the input. Curtains behind foreground people and furniture. Modify only window dressings and their physically necessary shadows. Output exact 1448x1086, 4:3; one photorealistic image, no collage, text or labels."
+    },
+    {
+      "id": "05-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\5.png",
+      "prompt": "Use case: precise-object-edit. Edit target: source scene 5. Create the BEFORE image for an aligned curtain transformation. Remove EVERY sheer and main curtain from EVERY window. Restore clear glass, correct window geometry and a plausible continuation of the existing outside view only where fabric was removed. No curtain fabric or hanging sheers may remain. Preserve the exact source room composition, camera, furniture positions, artwork, lamps, decor, plants, floor, illumination and exposure. Preserve all people exactly, including faces, clothes, hands and pose, even if someone had been holding a curtain; never remove their garment or the person. Do not rearrange, crop, reframe, add objects, or change window mullions. Output a single photorealistic 1448x1086 4:3 image without text or collage."
+    },
+    {
+      "id": "06-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\6.png",
+      "prompt": "Use case: precise-object-edit. Edit target: source scene 6. Create the BEFORE image for an aligned curtain transformation. Remove EVERY sheer and main curtain from EVERY window. Restore clear glass, correct window geometry and a plausible continuation of the existing outside view only where fabric was removed. No curtain fabric or hanging sheers may remain. Preserve the exact source room composition, camera, furniture positions, artwork, lamps, decor, plants, floor, illumination and exposure. Preserve all people exactly, including faces, clothes, hands and pose, even if someone had been holding a curtain; never remove their garment or the person. Do not rearrange, crop, reframe, add objects, or change window mullions. Output a single photorealistic 1448x1086 4:3 image without text or collage."
+    },
+    {
+      "id": "07-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\7.png",
+      "prompt": "Use case: precise-object-edit. Edit target: source scene 7. Create the BEFORE image for an aligned curtain transformation. Remove EVERY sheer and main curtain from EVERY window. Restore clear glass, correct window geometry and a plausible continuation of the existing outside view only where fabric was removed. No curtain fabric or hanging sheers may remain. Preserve the exact source room composition, camera, furniture positions, artwork, lamps, decor, plants, floor, illumination and exposure. Preserve all people exactly, including faces, clothes, hands and pose, even if someone had been holding a curtain; never remove their garment or the person. Do not rearrange, crop, reframe, add objects, or change window mullions. Output a single photorealistic 1448x1086 4:3 image without text or collage."
+    },
+    {
+      "id": "02-after-v2",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-02-before.png",
+      "prompt": "Precise interior edit of THIS exact curtain-free image into an aligned AFTER. Add full-window translucent ivory sheer and champagne silk main curtains with a very substantial 60-65% opaque main-curtain coverage. Main window spans approximately x=50 to x=700 in this 1448px image. Draw the LEFT opaque champagne panel across x=50..255 and the RIGHT opaque champagne panel across x=480..700. These are substantial fabric areas OVER GLASS, not just outside the frame. Only x=255..480 should remain as visible sheer at the centre. Opaque silk must obscure roughly 65% of actual glass width. Use realistic floor-length weighty folded fabric, natural pleating, correct high rail, realistic drape and shadows. White/ivory/cream sheer fabric must run behind the opaque panels across the entire window opening. This is a major curtain transformation, not decorative narrow edge strips. Preserve exact 1448x1086 framing and every source furniture, plant, person, clothing, floor, lamp, wall, window geometry and camera position. Modify ONLY curtains and their local shadows. No text or collage."
+    },
+    {
+      "id": "03-after-v2",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-03-before.png",
+      "prompt": "Precise interior edit of THIS exact curtain-free image into an aligned AFTER. Add full-window translucent soft white sheer and charcoal velvet main curtains with a very substantial 60-65% opaque main-curtain coverage. Cover the glass itself substantially. On the FIRST large arched window (roughly x=100..535), opaque left fabric must occupy x=100..240 and opaque right fabric x=400..535, with ONLY x=240..400 left as visible sheer. Apply the same roughly 65%-opaque / 35%-sheer division to each remaining arched window. Do not park the velvet on wall columns or outside the glass. Pull the main curtains well inward over the window opening. Use realistic floor-length weighty folded fabric, natural pleating, correct high rail, realistic drape and shadows. White/ivory/cream sheer fabric must run behind the opaque panels across the entire window opening. This is a major curtain transformation, not decorative narrow edge strips. Preserve exact 1448x1086 framing and every source furniture, plant, person, clothing, floor, lamp, wall, window geometry and camera position. Modify ONLY curtains and their local shadows. No text or collage."
+    },
+    {
+      "id": "04-after-v2",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\.data\\hero-transformations\\sources\\hero-04-before.png",
+      "prompt": "Precise interior edit of THIS exact curtain-free image into an aligned AFTER. Add full-window translucent cream sheer and olive green linen main curtains with a very substantial 60-65% opaque main-curtain coverage. The large right-hand window spans roughly x=430..1448. Pull the LEFT opaque green panel inward to cover x=430..750; pull the RIGHT opaque green panel inward to cover x=1100..1448. Leave only x=750..1100 as the visible sheer-filled centre. Opaque fabric should hide at least 60% of the GLASS, not merely frame the window edges. Keep the seated woman and furniture in front of the curtains. Use realistic floor-length weighty folded fabric, natural pleating, correct high rail, realistic drape and shadows. White/ivory/cream sheer fabric must run behind the opaque panels across the entire window opening. This is a major curtain transformation, not decorative narrow edge strips. Preserve exact 1448x1086 framing and every source furniture, plant, person, clothing, floor, lamp, wall, window geometry and camera position. Modify ONLY curtains and their local shadows. No text or collage."
+    },
+    {
+      "id": "08-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\8.png",
+      "prompt": "Use case: precise-object-edit. Edit the supplied source scene 8 into a curtain-free BEFORE image. Remove ALL sheer and main curtain fabric from EVERY window, including curtain reflections in mirrors, restoring the actual clear glazing and a plausible continuation of the already visible outdoor scene. Preserve exact room identity, geometry, framing, camera, furnishings, artwork, plants, lights, people, faces, clothing, positions and poses. Do not remove clothing or people; only window-dressing fabric. Do not move furniture or change the global lighting or architecture. Keep matching 1448x1086 4:3 framing. One photorealistic room image, no text, collage or labels."
+    },
+    {
+      "id": "09-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\9.png",
+      "prompt": "Use case: precise-object-edit. Edit the supplied source scene 9 into a curtain-free BEFORE image. Remove ALL sheer and main curtain fabric from EVERY window, including curtain reflections in mirrors, restoring the actual clear glazing and a plausible continuation of the already visible outdoor scene. Preserve exact room identity, geometry, framing, camera, furnishings, artwork, plants, lights, people, faces, clothing, positions and poses. Do not remove clothing or people; only window-dressing fabric. Do not move furniture or change the global lighting or architecture. Keep matching 1448x1086 4:3 framing. One photorealistic room image, no text, collage or labels."
+    },
+    {
+      "id": "10-before",
+      "path": "C:\\Users\\AMD\\Desktop\\dcorhome\\public\\hero\\10.png",
+      "prompt": "Use case: precise-object-edit. Edit the supplied source scene 10 into a curtain-free BEFORE image. Remove ALL sheer and main curtain fabric from EVERY window, including curtain reflections in mirrors, restoring the actual clear glazing and a plausible continuation of the already visible outdoor scene. Preserve exact room identity, geometry, framing, camera, furnishings, artwork, plants, lights, people, faces, clothing, positions and poses. Do not remove clothing or people; only window-dressing fabric. Do not move furniture or change the global lighting or architecture. Keep matching 1448x1086 4:3 framing. One photorealistic room image, no text, collage or labels."
+    },
+    {
+      "id": "05-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-05-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add Ivory sheer + Taupe blackout curtains. Main window x720..1448: partly close the opaque taupe panels OVER GLASS left x720..950 and right x1200..1448; central x950..1200 only translucent sheer. Keep woman in front completely identical. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    },
+    {
+      "id": "06-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-06-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add White sheer + Mocha textured curtains. Main window x380..1448: opaque panels OVER GLASS left x380..720 and right x1100..1448, central sheer gap x720..1100. Keep both people identical in front. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    },
+    {
+      "id": "07-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-07-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add Warm ivory sheer + Deep brown velvet. Main large window wall: partly close substantial opaque velvet panels over the left third and right third of ACTUAL GLASS, leaving only central 35-40% translucent sheer. Keep child completely identical and unobscured foreground. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    },
+    {
+      "id": "08-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-08-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add Cream sheer + Sage green curtains. Dress each of the three window openings with substantial left and right opaque panels partly drawn CLOSED over 60% of actual glass combined, central 40% cream sheer. Do not put curtains merely on wall columns. Preserve architectural arched doorway. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    },
+    {
+      "id": "09-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-09-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add Pale grey sheer + Navy blue main curtains. Each arched window: partly close substantial navy panels over left 30% and right 30% actual glass, central 40% only translucent sheer. Maintain arch geometry behind fabric. Keep woman identical and foreground; mirror reflects new curtains correctly. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    },
+    {
+      "id": "10-after",
+      "path": "C:/Users/AMD/Desktop/dcorhome/.data/hero-transformations/sources/hero-10-before.png",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied curtain-free room. Create AFTER image for aligned comparison: add White sheer + Burgundy velvet. Primary window wall x0..1020: opaque burgundy panels OVER ACTUAL GLASS x0..320 and x700..1020 leaving central x320..700 white sheer. Preserve seated man identically in foreground. Full floor length panels. Full translucent sheer layer behind main panels covers all window glass. Main panels must physically cover 50-65% ACTUAL WINDOW GLASS WIDTH, not narrow strips outside it. Photorealistic luxury fabric folds, weight, floor length, plausible ceiling track. Change ONLY curtain installation, required filtered light and shadows. Keep every person, furniture, plants, decor, window geometry, camera, framing and perspective unchanged, matching source precisely. Output same 1448x1086. No text/watermarks. No room redesign."
+    }
+  ]
+}

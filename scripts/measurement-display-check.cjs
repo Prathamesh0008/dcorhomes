@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript');
+let current;
+const moduleValue={exports:{}};
+const source=ts.transpileModule(fs.readFileSync('lib/useMeasurementDimension.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
+new Function('require','module','exports',source)(name=>{assert.equal(name,'react');return{useState(initial){if(current===undefined)current=initial;return[current,value=>{current=value;}];}};},moduleValue,moduleValue.exports);
+const hook=moduleValue.exports.useMeasurementDimension;
+let [display,setValue,cm]=hook('240','cm');assert.equal(display,'240');assert.equal(cm,'240');
+[display,setValue,cm]=hook('240','in');assert.equal(display,'94.49');assert.equal(cm,'240');
+[display,setValue,cm]=hook('240','cm');assert.equal(cm,'240');assert.equal(display,'240');
+[display,setValue,cm]=hook('240','in');setValue('100');
+[display,setValue,cm]=hook('240','cm');assert.equal(cm,'254');assert.equal(display,'254');
+setValue('');[display,setValue,cm]=hook('240','in');assert.equal(display,'');assert.equal(cm,'');
+console.log('Measurement display units preserve original precision, inch edits convert to cm, and cleared values stay empty PASS');

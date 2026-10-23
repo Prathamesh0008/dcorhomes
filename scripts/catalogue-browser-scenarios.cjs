@@ -20,9 +20,9 @@ module.exports=async function({go,evaluate,call,delay}){
  await wait(`document.querySelector('dialog[aria-labelledby=quote-title]').textContent.includes('has been saved')`);assert.equal(await evaluate('window.quotePosts'),1);
  await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent==='Close quote').click()`);
  await evaluate(`[...document.querySelectorAll('summary')].find(b=>b.textContent==='Visualize this Fabric').click()`);await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent==='Design Curtains With This Fabric').click()`);
- await wait(`location.pathname==='/studio'&&document.querySelector('[data-fabric-id=verification-silk]')?.getAttribute('aria-pressed')==='true'`);
+ await wait(`location.pathname==='/studio'&&document.querySelector('[aria-label=\"main fabric\"]')?.value==='verification-silk'`);
  assert.equal(await evaluate(`document.querySelector('[aria-label="main color: Test Navy"]').getAttribute('aria-pressed')`),'true');
- const studioUrl=await evaluate('location.pathname+location.search');await go(studioUrl,1440);await wait(`document.querySelector('[data-fabric-id=verification-silk]')?.getAttribute('aria-pressed')==='true'`);assert.equal(await evaluate(`document.querySelector('[aria-label="main color: Test Navy"]').getAttribute('aria-pressed')`),'true');
+ const studioUrl=await evaluate('location.pathname+location.search');await go(studioUrl,1440);await wait(`document.querySelector('[aria-label=\"main fabric\"]')?.value==='verification-silk'`);assert.equal(await evaluate(`document.querySelector('[aria-label="main color: Test Navy"]').getAttribute('aria-pressed')`),'true');
  for(const width of [390,768,1440]){
   await go('/collections?category=silk',width);await go('/collections/verification-silk?shade=test-navy',width);
   await wait(`document.querySelector('[data-testid=selected-shade]').textContent.includes('TEST-SHADE-NAVY')`);

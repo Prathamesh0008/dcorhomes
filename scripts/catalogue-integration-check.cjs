@@ -28,6 +28,6 @@ const send=(route,method,body,cookie='')=>req(route,{method,headers:{'Content-Ty
  assert.equal((await patch({kind:'fabric-import',records:[imported]})).status,200);
  assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,active:false}})).status,200);assert.equal((await req('/collections/verification-silk')).status,404);
  assert.equal((await req('/api/admin',{headers:{Cookie:guestCookie}})).status,401);
- const manual=spawn(process.execPath,['scripts/browser-check.cjs'],{windowsHide:true,stdio:'inherit',env:{...process.env,DCORHOME_CATALOGUE_ONLY:'',DCORHOME_MANUAL_ONLY:'true',DCORHOME_TEST_BASE_URL:base}});assert.equal(await new Promise(resolve=>manual.on('exit',resolve)),0,'Manual configurator regression failed');
+ const manual=spawn(process.execPath,['scripts/browser-check.cjs'],{windowsHide:true,stdio:'inherit',env:{...process.env,DCORHOME_CATALOGUE_ONLY:'',DCORHOME_MANUAL_ONLY:'',DCORHOME_RESTORED_STUDIO:'true',DCORHOME_STUDIO_INTERACTIONS:'true',DCORHOME_TEST_BASE_URL:base}});assert.equal(await new Promise(resolve=>manual.on('exit',resolve)),0,'Manual configurator regression failed');
  console.log('Authenticated full-record CRUD, validation, supplier filters, metadata/sitemap, isolated quote persistence/idempotency, atomic create-only imports and inactive records PASS');
  }catch(error){console.error(error);console.error(logs.slice(-2500));process.exitCode=1;}finally{server.kill();console.log('Synthetic test data only: '+directory);}})();

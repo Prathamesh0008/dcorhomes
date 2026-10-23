@@ -1,0 +1,85 @@
+[
+  {
+    "file": "/images/composer/floral.webp",
+    "title": "Floral Decorated Textile",
+    "medium": "Cotton, mordant and resist dyed",
+    "source": "https://www.metmuseum.org/art/collection/search/78206",
+    "download": "https://images.metmuseum.org/CRDImages/as/original/DP-18058-001.jpg",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "publicDomain": true,
+    "transformation": "Cropped to upper floral textile register, excluding museum background and scale",
+    "usage": "Photograph of historical textile; pattern inspiration only, not stocked Dcorhome fabric"
+  },
+  {
+    "file": "/images/composer/geometric.webp",
+    "title": "Textile with geometric pattern",
+    "medium": "Silk embroidery on silk gauze",
+    "source": "https://www.metmuseum.org/art/collection/search/69810",
+    "download": "https://images.metmuseum.org/CRDImages/as/original/LC-46_133_69_front.jpg",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "publicDomain": true,
+    "transformation": "Resized photographic reference",
+    "usage": "Photograph of historical textile; pattern inspiration only, not stocked Dcorhome fabric"
+  },
+  {
+    "file": "/images/composer/damask.webp",
+    "title": "Furnishing damask",
+    "medium": "Silk; damask",
+    "source": "https://www.metmuseum.org/art/collection/search/236194",
+    "download": "https://images.metmuseum.org/CRDImages/es/original/DP169349.jpg",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "publicDomain": true,
+    "transformation": "Resized photographic reference",
+    "usage": "Photograph of historical textile; pattern inspiration only, not stocked Dcorhome fabric"
+  },
+  {
+    "file": "/images/composer/paisley.webp",
+    "title": "Shawl",
+    "medium": "wool",
+    "source": "https://www.metmuseum.org/art/collection/search/157155",
+    "download": "https://images.metmuseum.org/CRDImages/ci/original/42.207.1_CP4.jpg",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "publicDomain": true,
+    "transformation": "Resized photographic reference",
+    "usage": "Photograph of historical textile; pattern inspiration only, not stocked Dcorhome fabric"
+  },
+  {
+    "file": "/images/composer/botanical.webp",
+    "title": "Textile with Bamboo Leaves",
+    "medium": "Resist-dyed and painted plain-weave silk crepe (chirimen)",
+    "source": "https://www.metmuseum.org/art/collection/search/74595",
+    "download": "https://images.metmuseum.org/CRDImages/as/original/2008_335_4.JPG",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "publicDomain": true,
+    "transformation": "Resized photographic reference",
+    "usage": "Photograph of historical textile; pattern inspiration only, not stocked Dcorhome fabric"
+  },
+  {
+    "file": "/images/composer/dining.webp",
+    "source": "https://www.pexels.com/photo/elegant-dining-area-8092433/",
+    "download": "https://images.pexels.com/photos/8092433/pexels-photo-8092433.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial room context only; no furniture or interior-design service is offered"
+  },
+  {
+    "file": "/images/composer/office.webp",
+    "source": "https://www.pexels.com/photo/minimalist-design-of-a-home-office-8004011/",
+    "download": "https://images.pexels.com/photos/8004011/pexels-photo-8004011.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial room context only; no furniture or interior-design service is offered"
+  },
+  {
+    "file": "/images/composer/nursery.webp",
+    "source": "https://www.pexels.com/photo/white-crib-in-the-room-4682141/",
+    "download": "https://images.pexels.com/photos/4682141/pexels-photo-4682141.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial room context only; no furniture or interior-design service is offered"
+  },
+  {
+    "file": "/images/composer/guest.webp",
+    "source": "https://www.pexels.com/photo/bed-in-hotel-room-17495859/",
+    "download": "https://images.pexels.com/photos/17495859/pexels-photo-17495859.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial room context only; no furniture or interior-design service is offered"
+  }
+]

@@ -12,11 +12,11 @@ export async function session(role: "guest" | "admin" = "guest", create = false)
   const raw = jar.get(key)?.value;
   if (raw) {
     const [id, expires, signature] = raw.split(".");
-    if (/^[a-f0-9-]{36}$/.test(id) && Number(expires) > Date.now() && signature && equal(signature, sign(`${id}.${expires}.${role}`)) && (role !== "admin" || row("admin-session",id))) return id;
+    if (/^[a-f0-9-]{36}$/.test(id) && Number(expires) > Date.now() && signature && equal(signature, sign(`${id}.${expires}.${role}`)) && (role !== "admin" || (await row("admin-session",id)))) return id;
   }
   if (!create) return null;
   const id = randomUUID(), expires = Date.now() + (role === "admin" ? 8 * 3600000 : 30 * 86400000);
-  if(role === "admin") put("admin-session",id,"admin",{expires});
+  if(role === "admin") (await put("admin-session",id,"admin",{expires}));
   jar.set(key, `${id}.${expires}.${sign(`${id}.${expires}.${role}`)}`, { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV === "production" && process.env.ALLOW_LOCAL_HTTP !== "true", path: "/", maxAge: role === "admin" ? 28800 : 2592000 });
   return id;
 }
@@ -33,10 +33,10 @@ export async function jsonInput(request: NextRequest, maxBytes = 65536) {
   while (true) { const item = await reader.read(); if (item.done) break; size += item.value.length; if (size > maxBytes) { await reader.cancel(); throw new HttpError(413, "Request is too large."); } parts.push(item.value); }
   try { const value = JSON.parse(Buffer.concat(parts).toString()); if (!value || Array.isArray(value) || typeof value !== "object") throw Error(); return value as Record<string, unknown>; } catch { throw new HttpError(400, "Invalid JSON request."); }
 }
-export function throttle(request: NextRequest, kind: string, limit: number, ms = 3600000) {
+export async function throttle(request: NextRequest, kind: string, limit: number, ms = 3600000) {
   if (!databaseReady()) throw new HttpError(503, "This service is temporarily unavailable.");
   const identity = process.env.TRUST_PROXY === "true" ? (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim() : "shared";
-  try { consume(`${kind}:${createHash("sha256").update(identity).digest("hex")}`, limit, ms); } catch { throw new HttpError(429, "Too many requests. Please try again later."); }
+  try { (await consume(`${kind}:${createHash("sha256").update(identity).digest("hex")}`, limit, ms)); } catch { throw new HttpError(429, "Too many requests. Please try again later."); }
 }
 export function failure(error: unknown) { const status = error instanceof HttpError ? error.status : 500; return NextResponse.json({ error: error instanceof HttpError ? error.message : "Unable to complete this operation." }, { status, headers: { "Cache-Control": "no-store" } }); }
 export const privateHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };

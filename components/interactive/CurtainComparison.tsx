@@ -17,6 +17,7 @@ type Props = {
   autoPlay?: boolean;
   autoResumeDelay?: number;
   autoPlayDuration?: number;
+  aspectRatio?: number;
 };
 export default function CurtainComparison({
   before,
@@ -31,6 +32,7 @@ export default function CurtainComparison({
   autoPlay = false,
   autoResumeDelay = 4500,
   autoPlayDuration = 4500,
+  aspectRatio,
 }: Props) {
   const frame = useRef<HTMLDivElement>(null),
     value = useRef(50),
@@ -70,7 +72,7 @@ export default function CurtainComparison({
         ref={frame}
         className={`group/comparison relative cursor-ew-resize select-none overflow-hidden bg-sand touch-pan-y ${variant === "hero" ? "h-[420px] rounded-[22px] shadow-[0_16px_50px_#25342f12] sm:h-[550px] lg:h-[580px] xl:h-[610px]" : "aspect-[4/3]"}`}
         data-testid="curtain-comparison"
-        style={{ "--reveal": "50%" } as CSSProperties}
+        style={{ "--reveal": "50%", ...(variant !== "hero" && aspectRatio ? { aspectRatio } : {}) } as CSSProperties}
         onPointerDown={(e) => {
           if (!e.isPrimary || e.button !== 0) return;
           playback.interrupt("pointer");

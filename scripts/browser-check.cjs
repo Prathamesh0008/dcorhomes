@@ -53,7 +53,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
         if(!p)return;
         m.error ? p.reject(Error(m.error.message)) : p.resolve(m.result);
       } else if (m.method === "Runtime.exceptionThrown")
-        errors.push(m.params.exceptionDetails.text);
+        errors.push(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text);
     };
     let sessionId, activeTarget;
     const call = (method, params = {}) =>
@@ -129,6 +129,18 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
       if (layout.overflow || layout.broken.length || layout.vectors)
         throw Error(JSON.stringify({ route, width, ...layout }));
     }
+    if(process.env.DCORHOME_SWATCH_SEARCH){await require('./swatch-search-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_SWATCH_REFERENCE){await require('./swatch-reference-browser.cjs')({go,evaluate,call,delay});return;}
+    if(process.env.DCORHOME_HERO_TRANSFORMATIONS){await require('./hero-transformations-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_HERO_COMPARISON){await require('./hero-comparison-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_HERO_SHOWCASE){await require('./hero-showcase-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_ABOUT_STORY){await require('./about-story-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_NAVIGATION){await require('./navigation-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_PHASE3){await require('./phase3-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_AI_WINDOW){await require('./ai-window-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_COMPOSER){await require('./composer-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_RESTORED_STUDIO){await require('./studio-restoration-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
+    if(process.env.DCORHOME_INNER_ONLY){await require('./inner-page-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
     if(process.env.DCORHOME_HOME_REDESIGN){await require('./homepage-redesign-browser.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
     if(process.env.DCORHOME_FABRIC_IMAGES_ONLY){await require('./fabric-image-browser-scenarios.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}
     if(process.env.DCORHOME_CATALOGUE_ONLY==='true'){await require('./catalogue-browser-scenarios.cjs')({go,evaluate,call,delay});if(errors.length)throw Error(errors.join(';'));return;}

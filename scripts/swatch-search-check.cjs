@@ -1,0 +1,45 @@
+// Focused checks against isolated synthetic data, never the user's catalogue/accounts.
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),{spawn}=require('node:child_process');
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'dcorhome-swatches-')),base='http://localhost:3223',password=crypto.randomBytes(24).toString('hex');
+Object.assign(process.env,{DCORHOME_DATA_DIR:directory,DCORHOME_DATABASE_URL:'',SESSION_SECRET:crypto.randomBytes(32).toString('hex'),BETTER_AUTH_SECRET:crypto.randomBytes(32).toString('hex'),SITE_URL:base,ALLOW_LOCAL_HTTP:'true',ADMIN_PASSWORD:password,RESEND_API_KEY:'',ENQUIRY_FROM_EMAIL:'',TRUST_PROXY:'false'});
+require('./auth-loader.cjs');
+const {parseSwatchQuery}=require('../lib/curtains/swatch-query.ts'),{searchSwatches,memorySwatchSearch}=require('../lib/server/swatch-search.ts'),{validateFabricRecord,saveFabricRecords}=require('../lib/server/fabric-records.ts'),{allRecords}=require('../lib/server/db.ts');
+const fixture={id:'swatch-check',slug:'swatch-check',name:'Synthetic textile check',source:'supplier',description:'Isolated verification fixture, not supplier inventory.',category:'Linen',categoryId:'linen',collection:'Synthetic collection',brand:'Synthetic supplier',usage:['main'],applications:['Drapery'],composition:'Synthetic test composition',fabricWidthCm:280,weightGsm:180,linearWeightGm:504,abrasionRubCount:20000,countryOfOrigin:'Test origin',publishedAt:'2026-01-01T00:00:00Z',sku:'TEST-PARENT',pattern:'Plain',lightFiltering:'Test light filtering',compatibleHeadingStyles:[],images:['/images/linen-detail.jpg'],colors:Array.from({length:30},(_,i)=>({id:'shade-'+i,name:(i%2?'Blue':'Cream')+' check '+String(i).padStart(2,'0'),colorCode:'TEST-CODE-'+i,variantSku:'TEST-SKU-'+i,family:i%2?'Blue':'Cream',available:null,mainImage:i%2?'/images/dark-textile.jpg':'/images/linen-detail.jpg'}))};
+let server,logs='';const req=(route,options={})=>fetch(base+route,{...options,headers:{Origin:base,...options.headers}}),send=(route,body,cookie='',method='POST')=>req(route,{method,headers:{'Content-Type':'application/json',Cookie:cookie},body:JSON.stringify(body)}),cookie=r=>r.headers.getSetCookie().map(v=>v.split(';')[0]).join('; '),delay=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{try{
+ await saveFabricRecords([await validateFabricRecord(fixture)],'create');
+ const query=raw=>searchSwatches(parseSwatchQuery(raw));
+ assert.equal((await query({q:'TEST-SKU-17'})).items[0].variant.id,'shade-17');assert.equal((await query({q:'sYnThEtIc TeXtIlE'})).total,30);
+ assert.equal((await query({collection:fixture.collection,color:['Blue','Cream']})).total,30);
+ const filtered=await query({collection:fixture.collection,color:'Blue',composition:fixture.composition,widthMin:'270',gsmMax:'200',rubMin:'15000',usage:'Drapery'});assert.equal(filtered.total,15);assert.equal(filtered.facets.color.find(c=>c.value==='Cream').count,15);
+ assert.equal((await query({collection:fixture.collection,rubMin:'25000'})).total,0);assert.equal((await query({rubMin:'15000'})).total,30);assert.equal((await query({q:'%'})).total,0);
+ const p=await query({collection:fixture.collection,size:'12',page:'999999',sort:'code',direction:'desc'});assert.equal(p.page,3);assert.equal(p.items.length,6);
+ const raw={collection:fixture.collection,color:['Blue','Cream'],size:'12',sort:'name',direction:'desc'},a=await query(raw),b=memorySwatchSearch([fixture],parseSwatchQuery(raw));assert.deepEqual(a.items.map(i=>i.variant.id),b.items.map(i=>i.variant.id));
+ await assert.rejects(()=>saveFabricRecords([{...fixture,id:'duplicate-check',slug:'duplicate-check'}],'create'),/Duplicate/);
+ console.log('Indexed SQL shade search, OR/AND facets/counts, literal matching, numeric bounds, sorting, pagination, memory fallback and global SKU conflicts PASS');
+ const {csv}=require('./import-supplier-csv.cjs'),{convertFlat}=require('./import-swatch-csv.cjs');assert.ok(csv(fs.readFileSync('docs/supplier-swatch-template.csv','utf8')).length===0);
+ const row={'Fabric ID':'import-check','Fabric Name':'Synthetic import','Fabric SKU':'IMPORT-PARENT',Collection:'Import test',Category:'Linen','Category ID':'linen',Usage:'main','Shade ID':'ivory','Shade Name':'Ivory','Shade Code':'I-1','Variant SKU':'IMPORT-SHADE','Colour Family':'Cream','Shade Image':'/images/linen-detail.jpg','Image Rights Confirmed':'true','Published At':'2026-01-01T00:00:00Z'};
+ assert.equal(convertFlat([row])[0].colors[0].variantSku,'IMPORT-SHADE');assert.throws(()=>convertFlat([row,row]),/CSV row 3.*Duplicate/);assert.throws(()=>convertFlat([{...row,'Image Rights Confirmed':'false'}]),/authorization/);assert.throws(()=>convertFlat([{...row,'Width CM':'bad'}]),/CSV rows 2/);
+ console.log('Flat Excel/CSV template, normalized conversion, duplicate IDs/SKUs, row-number diagnostics and image rights checks PASS');
+ const {customerAuth}=require('../lib/server/customer-auth.ts'),{getMigrations}=await import('better-auth/db/migration');await(await getMigrations(customerAuth().options)).runMigrations();
+ server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3223'],{env:process.env,windowsHide:true,stdio:['ignore','pipe','pipe']});server.stdout.on('data',b=>logs+=b);server.stderr.on('data',b=>logs+=b);
+ let ready=false;for(let i=0;i<80;i++){try{if((await req('/api/fabrics/saved')).ok){ready=true;break;}}catch{}await delay(250);}assert.ok(ready,'Test server failed to start');
+ assert.equal((await req('/api/admin')).status,401);assert.equal((await send('/api/fabrics/saved',{fabricId:fixture.id,variantId:'shade-1',saved:true})).status,401);
+ const signup=async name=>{const r=await send('/api/auth/sign-up/email',{name,email:name+'@example.com',password:'TestOnly-'+crypto.randomBytes(16).toString('hex')});assert.equal(r.status,200,await r.clone().text());return cookie(r);};
+ const first=await signup('swatch-check-one'),second=await signup('swatch-check-two');
+ assert.equal((await send('/api/fabrics/saved',{fabricId:fixture.id,variantId:'shade-1',saved:true},first)).status,200);
+ assert.equal((await(await req('/api/fabrics/saved',{headers:{Cookie:first}})).json()).items[0].variantId,'shade-1');assert.equal((await(await req('/api/fabrics/saved',{headers:{Cookie:second}})).json()).items.length,0);
+ assert.equal((await send('/api/fabrics/saved',{fabricId:fixture.id,variantId:'shade-1',saved:false},first)).status,200);
+ console.log('Authenticated saved variants, durable retrieval, removal, guest authorization and account isolation PASS');
+ const publicSearch=await(await req('/api/fabrics?collection=Synthetic%20collection&color=Blue&color=Cream&size=12&page=2')).json();assert.equal(publicSearch.total,30);assert.equal(publicSearch.items.length,12);assert.equal(publicSearch.page,2);
+ const adminLogin=await send('/api/admin/session',{password}),adminCookie=cookie(adminLogin);assert.equal(adminLogin.status,200);
+ const patch=body=>send('/api/admin',body,adminCookie,'PATCH');
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,leadTime:'Test-only lead time'}})).status,200);
+ assert.equal((await patch({kind:'fabric-import',records:[{...fixture,id:'duplicate-sku-check',slug:'duplicate-sku-check'}]})).status,409);
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:{...fixture,active:false}})).status,200);assert.equal((await(await req('/api/fabrics?collection=Synthetic%20collection')).json()).total,0);
+ assert.equal((await patch({kind:'fabric-record',operation:'update',record:fixture})).status,200);
+ console.log('Paged public API, authenticated admin update/inactivation, projection refresh and rejected duplicate-SKU import PASS');
+ const browser=spawn(process.execPath,['scripts/browser-check.cjs'],{env:{...process.env,DCORHOME_TEST_BASE_URL:base,DCORHOME_SWATCH_SEARCH:'1'},stdio:'inherit',windowsHide:true});assert.equal(await new Promise(r=>browser.on('exit',r)),0,'Focused browser check failed');
+ const enquiries=await allRecords('enquiry');assert.equal(enquiries.length,2);for(const r of enquiries){const e=JSON.parse(r.data);assert.equal(e.selectedFabric.variantSku,'TEST-SKU-1');assert.ok(['swatch','quote'].includes(e.requestPurpose));assert.equal(e.notification,'not-configured');}
+ console.log('Swatch and quotation requests durably stored with selected variant/SKU; no email sent PASS');
+ }catch(error){console.error(error);if(logs)console.error(logs.slice(-3500));process.exitCode=1;}finally{server?.kill();console.log('Isolated synthetic verification directory: '+directory);}})();

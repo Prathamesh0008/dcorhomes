@@ -2,6 +2,7 @@
 // separate: none of their palettes or compatibility rules assert real availability.
 export type FabricVariant = { id: string; name: string; colorCode: string; hexPreview?: string; family: string; swatchImage?: string; variantSku?: string; available: boolean | null; mainImage?: string; textureImage?: string; drapedImage?: string; digitalPreviewImage?: string; digitalPreviewImages?: string[]; digitalSwatchImage?: string; images?: string[]; availability?: string; active?: boolean };
 export type FabricRecord = {
+  abrasionRubCount?: number; countryOfOrigin?: string; publishedAt?: string; technicalSheet?: string; stockQuantityMetres?: number;
   id: string; slug: string; name: string; category: string; description: string;
   categoryId?: string; variety?: string; active?: boolean; collection?: string; texture?: string; construction?: string; linearWeightGm?: number; rollLengthM?: number; lightFiltering?: string; liningCompatibility?: string; applications?: string[]; washing?: string; dryCleaning?: string; ironing?: string;
   source: 'demo' | 'supplier'; usage: ('main' | 'sheer')[]; sku?: string;
@@ -16,7 +17,7 @@ export type FabricRecord = {
 export const manualHeadings = ['Wave Pleat','Pinch Pleat','Eyelet','Pencil Pleat','Goblet Pleat','Rod Pocket'];
 export function specificationRows(f: FabricRecord): [string,string][] {
   const pending='Specification pending';
-  return [ ['Fabric ID',f.id],['Fabric name',f.name],['Brand / collection',f.collection || f.brand || pending],['Fabric SKU',f.sku || pending],
+  return [ ['Fabric ID',f.id],['Fabric name',f.name],['Brand / collection',f.collection || f.brand || pending],['Fabric SKU',f.sku || pending],['Country of origin',f.countryOfOrigin||pending],['Abrasion rub count',f.abrasionRubCount==null?pending:String(f.abrasionRubCount)],['Stock quantity (metres)',f.stockQuantityMetres==null?pending:String(f.stockQuantityMetres)],
     ['Fabric width (cm)',f.fabricWidthCm == null ? pending : String(f.fabricWidthCm)],
     ['Fabric weight (GSM)',f.weightGsm == null ? pending : String(f.weightGsm)],
     ['Composition',f.composition || pending],['Weave / texture',f.weave || pending],

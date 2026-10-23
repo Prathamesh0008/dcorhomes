@@ -1,0 +1,178 @@
+[
+  {
+    "group": "Style",
+    "name": "Modern",
+    "file": "/images/residential-room-640.webp",
+    "source": "https://www.pexels.com/photo/modern-living-room-with-elegant-decor-34538289/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Classic",
+    "file": "/images/curtain-room-640.webp",
+    "source": "https://www.pexels.com/photo/curtain-on-windows-16045145/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Minimalist",
+    "file": "/images/sheer-window-640.webp",
+    "source": "https://www.pexels.com/photo/opened-white-window-with-sheer-curtain-3255244/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Contemporary",
+    "file": "/images/living-drapery-640.webp",
+    "source": "https://www.pexels.com/photo/brown-couch-in-the-living-room-7786781/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Luxury",
+    "file": "/images/atelier-interior-640.webp",
+    "source": "https://www.pexels.com/photo/view-of-brown-curtains-hanging-in-a-room-17767778/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Bohemian",
+    "file": "/images/home/green-drapes-640.webp",
+    "source": "https://www.pexels.com/photo/green-and-white-striped-window-curtain-7679435/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Romantic",
+    "file": "/images/home/daylight-fall-640.webp",
+    "source": "https://www.pexels.com/photo/elegant-sunlight-streaming-through-sheer-curtains-35979769/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Style",
+    "name": "Traditional",
+    "file": "/images/home/bedroom-drapes-640.webp",
+    "source": "https://www.pexels.com/photo/brown-drapes-on-a-bedroom-window-7587742/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Editorial aesthetic direction, not a manufacturing specification"
+  },
+  {
+    "group": "Pattern",
+    "name": "Solid",
+    "file": "/images/linen-detail-640.webp",
+    "source": "https://www.pexels.com/photo/beige-wrinkled-fabric-15679399/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Striped",
+    "file": "/images/home/green-drapes-640.webp",
+    "source": "https://www.pexels.com/photo/green-and-white-striped-window-curtain-7679435/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Floral",
+    "file": "/images/composer/floral.webp",
+    "source": "https://www.metmuseum.org/art/collection/search/78206",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Geometric",
+    "file": "/images/composer/geometric.webp",
+    "source": "https://www.metmuseum.org/art/collection/search/69810",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Damask",
+    "file": "/images/composer/damask.webp",
+    "source": "https://www.metmuseum.org/art/collection/search/236194",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Paisley",
+    "file": "/images/composer/paisley.webp",
+    "source": "https://www.metmuseum.org/art/collection/search/157155",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Botanical",
+    "file": "/images/composer/botanical.webp",
+    "source": "https://www.metmuseum.org/art/collection/search/74595",
+    "license": "https://www.metmuseum.org/policies/image-resources",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Pattern",
+    "name": "Textured",
+    "file": "/images/sheer-detail-640.webp",
+    "source": "https://www.pexels.com/photo/checkered-curtain-near-glass-window-10624309/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Pattern inspiration, not verified inventory"
+  },
+  {
+    "group": "Room",
+    "name": "Living Room",
+    "file": "/images/living-drapery-640.webp",
+    "source": "https://www.pexels.com/photo/brown-couch-in-the-living-room-7786781/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  },
+  {
+    "group": "Room",
+    "name": "Bedroom",
+    "file": "/images/home/bedroom-drapes-640.webp",
+    "source": "https://www.pexels.com/photo/brown-drapes-on-a-bedroom-window-7587742/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  },
+  {
+    "group": "Room",
+    "name": "Dining Room",
+    "file": "/images/composer/dining.webp",
+    "source": "https://www.pexels.com/photo/elegant-dining-area-8092433/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  },
+  {
+    "group": "Room",
+    "name": "Home Office",
+    "file": "/images/composer/office.webp",
+    "source": "https://www.pexels.com/photo/minimalist-design-of-a-home-office-8004011/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  },
+  {
+    "group": "Room",
+    "name": "Guest Room",
+    "file": "/images/composer/guest.webp",
+    "source": "https://www.pexels.com/photo/bed-in-hotel-room-17495859/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  },
+  {
+    "group": "Room",
+    "name": "Nursery",
+    "file": "/images/composer/nursery.webp",
+    "source": "https://www.pexels.com/photo/white-crib-in-the-room-4682141/",
+    "license": "https://www.pexels.com/license/",
+    "usage": "Curtain preview context only"
+  }
+]

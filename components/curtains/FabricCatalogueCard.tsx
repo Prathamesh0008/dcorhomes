@@ -25,7 +25,7 @@ export default function FabricCatalogueCard({fabric,category}:{fabric:FabricReco
         </button>)}
         {variants.length>6&&<Link href={href} className="grid h-11 min-w-9 place-items-center text-[13px] text-muted" aria-label={`View ${variants.length-6} more ${fabric.name} shades`}>+{variants.length-6}</Link>}
       </div>
-      <p aria-live="polite" className="mb-4 mt-1 min-h-5 text-[12px] text-muted">{selected?.name}{photo?.mode==='digital'&&<span className="sr-only">, approximate digital color preview</span>}</p>
+      <p aria-live="polite" className="mb-4 mt-1 min-h-9 text-[13px] text-muted">{selected?.name}{photo?.mode==='digital'&&<span className="block text-[11px]">Approximate digital color preview</span>}</p>
       <Link href={href} className="mt-auto inline-flex min-h-11 items-center self-start gap-6 border-b border-solid border-[#b9b9aa] py-2 text-[14px] transition-colors hover:border-ink">View Fabric <ArrowUpRight size={17} strokeWidth={1.4}/></Link>
     </div>
   </article>;
