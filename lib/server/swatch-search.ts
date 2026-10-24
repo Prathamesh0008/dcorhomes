@@ -20,7 +20,7 @@ export function memorySwatchSearch(records:FabricRecord[],q:SwatchQuery):SwatchR
  for(const key of facetKeys){const counts=new Map<string,number>();for(const row of rows.filter(r=>matches(r,q,key)))for(const value of row.facets[key])counts.set(value,(counts.get(value)||0)+1);facets[key]=[...counts].map(([value,count])=>({value,count})).sort((a,b)=>a.value.localeCompare(b.value));}
  const selected=rows.filter(r=>matches(r,q));selected.sort((a,b)=>{if(q.sort==='newest'&&(a.published===null)!==(b.published===null))return a.published===null?1:-1;const av=q.sort==='newest'?a.published??0:a[q.sort],bv=q.sort==='newest'?b.published??0:b[q.sort];return ((typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv)))*(q.direction==='desc'?-1:1))||a.id.localeCompare(b.id);});
  const total=selected.length,pages=Math.max(1,Math.ceil(total/q.pageSize)),page=Math.min(q.page,pages);
- return {items:selected.slice((page-1)*q.pageSize,page*q.pageSize).map(r=>r.item),total,pages,page,pageSize:q.pageSize,facets,hasDates:rows.some(r=>r.published!==null),demo:records.some(f=>f.source==='demo'),storage:'memory'};
+ return {items:selected.slice((page-1)*q.pageSize,page*q.pageSize).map(r=>r.item),total,pages,page,pageSize:q.pageSize,facets,hasDates:rows.some(r=>r.published!==null),hasRubData:records.some(f=>f.source==='supplier'&&f.abrasionRubCount!==undefined),demo:records.some(f=>f.source==='demo'),storage:'memory'};
 }
 async function synchronize(records:FabricRecord[]){
  const digest=createHash('sha256').update(JSON.stringify(records)).digest('hex');
@@ -56,6 +56,6 @@ export async function searchSwatches(q:SwatchQuery):Promise<SwatchResult>{
   const column={name:'name',collection:'collection',code:'code',newest:'published'}[q.sort],direction=q.direction==='desc'?'DESC':'ASC';
   const data=await sql<{parent:string;variant:string}>(`SELECT p.data AS parent,v.data AS variant FROM swatch_variants v JOIN swatch_parents p ON p.id=v.fabric_id${filter.text} ORDER BY ${q.sort==='newest'?'CASE WHEN v.published IS NULL THEN 1 ELSE 0 END, ':''}v.${column} ${direction},v.id ASC LIMIT ? OFFSET ?`,[...filter.values,q.pageSize,(page-1)*q.pageSize]);
   const facets={} as SwatchResult['facets'];for(const key of facetKeys){const w=where(q,key);facets[key]=(await sql<{value:string;count:number}>(`SELECT facet.value,COUNT(*) AS count FROM swatch_variants v JOIN swatch_facets facet ON facet.variant_id=v.id${w.text}${w.text?' AND':' WHERE'} facet.facet=? GROUP BY facet.value ORDER BY facet.value`,[...w.values,key])).map(r=>({...r,count:Number(r.count)}));}
-  return {items:data.map(r=>({fabric:JSON.parse(r.parent),variant:JSON.parse(r.variant)})),total,pages,page,pageSize:q.pageSize,facets,hasDates:records.some(f=>Boolean(f.publishedAt)),demo:records.some(f=>f.source==='demo'),storage:'database'};
+  return {items:data.map(r=>({fabric:JSON.parse(r.parent),variant:JSON.parse(r.variant)})),total,pages,page,pageSize:q.pageSize,facets,hasDates:records.some(f=>Boolean(f.publishedAt)),hasRubData:records.some(f=>f.source==='supplier'&&f.abrasionRubCount!==undefined),demo:records.some(f=>f.source==='demo'),storage:'database'};
  });
 }

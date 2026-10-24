@@ -3,7 +3,7 @@ export const facetKeys = ['color','brand','collection','category','pattern','usa
 export type FacetKey = typeof facetKeys[number];
 export type SwatchQuery = { q:string; filters:Record<FacetKey,string[]>; sort:'name'|'collection'|'code'|'newest'; direction:'asc'|'desc'; view:'grid'|'list'; page:number; pageSize:number; widthMin?:number; widthMax?:number; gsmMin?:number; gsmMax?:number; rubMin?:number; rubMax?:number };
 export type SwatchItem = { fabric:Omit<FabricRecord,'colors'>; variant:FabricVariant };
-export type SwatchResult = { items:SwatchItem[]; total:number; page:number; pages:number; pageSize:number; facets:Record<FacetKey,{value:string;count:number}[]>; hasDates:boolean; demo:boolean; storage:'database'|'memory' };
+export type SwatchResult = { items:SwatchItem[]; total:number; page:number; pages:number; pageSize:number; facets:Record<FacetKey,{value:string;count:number}[]>; hasDates:boolean; hasRubData?:boolean; demo:boolean; storage:'database'|'memory' };
 export const numericKeys = ['widthMin','widthMax','gsmMin','gsmMax','rubMin','rubMax'] as const;
 export function parseSwatchQuery(input:Record<string,string|string[]|undefined>):SwatchQuery {
  const one=(key:string)=>[input[key]].flat().filter((v):v is string=>typeof v==='string')[0]||'';

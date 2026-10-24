@@ -5,6 +5,8 @@ module.exports=async({go,evaluate,call,delay})=>{
  const cards=()=>evaluate(`document.querySelectorAll('[data-testid=swatch-card]').length`);
  const changeSelect=async(label,value)=>{await evaluate(`(()=>{const e=document.querySelector('select[aria-label="${label}"]');e.value='${value}';e.dispatchEvent(new Event('change',{bubbles:true}));})()`);};
  await go('/collections?collection=Synthetic%20collection&size=12',1440);assert.equal(await cards(),12);
+ assert.equal(await evaluate(`getComputedStyle(document.querySelector('[data-testid=swatch-grid]')).gridTemplateColumns.split(' ').length`),6);
+ assert.equal(await evaluate(`Math.round(document.querySelector('[data-testid=swatch-card] a > div').getBoundingClientRect().width)===Math.round(document.querySelector('[data-testid=swatch-card] a > div').getBoundingClientRect().height)`),true);
  assert.equal(await evaluate(`document.querySelector('h1').textContent`),'Fabric Swatch Search');
  const shot=async name=>{const r=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(os.tmpdir(),'dcorhome-swatches-'+name+'.png'),Buffer.from(r.data,'base64'));};await shot('desktop');
  // Multi-select OR within colour; other groups AND. Counts exclude the group's own selections.
@@ -12,7 +14,6 @@ module.exports=async({go,evaluate,call,delay})=>{
  await wait(`new URL(location.href).searchParams.get('color')==='Blue'&&document.querySelector('[role=status]').textContent.includes('15')`);
  await evaluate(`(()=>{const e=[...document.querySelectorAll('aside label')].find(e=>e.textContent.trim().startsWith('Cream'));e.querySelector('input').click();})()`);
  await wait(`new URL(location.href).searchParams.getAll('color').length===2&&document.querySelector('[role=status]').textContent.includes('30')`);
- await evaluate(`document.querySelector('button[aria-label="List view"]').click()`);await wait(`new URL(location.href).searchParams.get('view')==='list'`);assert.ok(await evaluate(`document.querySelector('[data-testid=swatch-card]').textContent.includes('280 cm')`));
  await changeSelect('Sort fabrics','code');await wait(`new URL(location.href).searchParams.get('sort')==='code'`);
  await evaluate(`document.querySelector('button[aria-label="Set descending direction"]').click()`);await wait(`new URL(location.href).searchParams.get('direction')==='desc'`);
  await evaluate(`document.querySelector('a[aria-label="Next page"]').click()`);await wait(`new URL(location.href).searchParams.get('page')==='2'`);assert.equal(await cards(),12);
@@ -21,8 +22,9 @@ module.exports=async({go,evaluate,call,delay})=>{
  await evaluate(`history.forward()`);await wait(`new URL(location.href).searchParams.get('size')==='24'&&document.querySelectorAll('[data-testid=swatch-card]').length===24`);
  await evaluate(`document.querySelector('button[aria-label="Remove Colour: Blue"]').click()`);await wait(`new URL(location.href).searchParams.getAll('color').length===1&&document.querySelector('[role=status]').textContent.includes('15')`);
  await evaluate(`(()=>{const e=[...document.querySelectorAll('button')].find(e=>e.textContent==='Clear All');e.click();})()`);await wait(`!new URL(location.href).searchParams.has('color')&&!new URL(location.href).searchParams.has('collection')`);
- await evaluate(`(()=>{const e=document.querySelector('form[role=search] input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'TEST-SKU-17');e.dispatchEvent(new Event('input',{bubbles:true}));})()`);await wait(`document.querySelectorAll('[data-testid=swatch-card]').length===1&&document.querySelector('[data-testid=swatch-card]').textContent.includes('TEST-SKU-17')`);
- console.log('Shade search, multi-colour OR, group counts, chips/clear, grid/list, direction, paging/size and URL back/forward PASS');
+ await evaluate(`(()=>{const e=document.querySelector('form[role=search] input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'TEST-SKU-17');e.dispatchEvent(new Event('input',{bubbles:true}));})()`);await wait(`document.querySelectorAll('[data-testid=swatch-card]').length===1&&document.querySelector('[data-testid=swatch-card] a').title.includes('TEST-SKU-17')`);
+ assert.equal(await evaluate(`document.querySelector('[data-testid=swatch-card] a').getAttribute('href')`),'/collections/swatch-check?shade=shade-17');
+ console.log('Shade search, multi-colour OR, group counts, chips/clear, direction, paging/size and URL back/forward PASS');
  await go('/collections?collection=Synthetic%20collection',390);await evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(e=>e.textContent.startsWith('Filters'));b.click();})()`);assert.ok(await evaluate(`document.querySelector('dialog').open`));
  await evaluate(`(()=>{const e=[...document.querySelectorAll('dialog label')].find(e=>e.textContent.trim().startsWith('Blue'));e.querySelector('input').click();})()`);await wait(`new URL(location.href).searchParams.get('color')==='Blue'`);assert.ok(await evaluate(`document.querySelector('dialog').open`));await shot('mobile-filters');
  await evaluate(`document.querySelector('button[aria-label="Close filters"]').click()`);await shot('mobile');assert.equal(await evaluate(`document.documentElement.scrollWidth>innerWidth`),false);

@@ -1,0 +1,74 @@
+{
+  "version": "manual-v1",
+  "room": {
+    "source": "public/images/curtains/manual/room.webp",
+    "status": "Existing generated illustrative room, not a real photographed interior",
+    "provenance": "scripts/manual-base-sources.json"
+  },
+  "construction": {
+    "source": "public/images/curtains/manual/{main,sheer}.webp",
+    "status": "Existing generated fold/alpha assets, largest connected component retained; no new generation"
+  },
+  "textures": {
+    "sources": {
+      "linen": "sienna",
+      "velvet": "clay",
+      "silk": "silk-satin-study",
+      "textured-weave": "olive",
+      "plain-voile": "solstice",
+      "fine-voile": "pearl"
+    },
+    "provenance": "public/images/fabrics/asset-manifest.json",
+    "license": "Existing Pexels reference imagery with recorded modification permission; not supplier stock"
+  },
+  "assets": [
+    {
+      "path": "/images/manual-visualizer/v1/constructions/main-fold.webp",
+      "sha256": "c605d944c4e53f6c11b9c39b965b30e81084e15c5d4e38b39ad60b25735f7b21"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/constructions/main-mask.png",
+      "sha256": "6365bf73cb6543c4adfc2c00734b233a5f80f098840d9050e02b2a6a24f6491f"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/constructions/sheer-fold.webp",
+      "sha256": "8584171949a251a1d95ba654ddd32bfb3afead81bacb4b25c4e0248be4972506"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/constructions/sheer-mask.png",
+      "sha256": "bb266aee35ba868c68a62bc0deb73ff50f01dfee717e2bdc9f5402ae9dd425bc"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/fine-voile.webp",
+      "sha256": "b4e540e5f955b37813b640064a58a9a3a72d0c72600e12a33fd032967ff38c61"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/linen.webp",
+      "sha256": "09a703b573583c8066e2c38e90837c7ec9a73350e5d7961cc9ccb249cef56676"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/plain-voile.webp",
+      "sha256": "34963d0409e2b2474c04661359c676087e10485e426fc7d0490865455c4ff471"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/silk.webp",
+      "sha256": "d22ea577eecff8507ff227ea7f6ff286d32ae2c1987e642a06f0f7bf84179dd4"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/textured-weave.webp",
+      "sha256": "a90bb6be434b1a519b208e86f9e51cea470097aa62919ddd2028bca979f5b670"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/materials/velvet.webp",
+      "sha256": "d5e9542e5d5f42384af7a974cc17691df27cc93a12c57aaff2ba639b64d8e00a"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/rooms/garden-living/base.webp",
+      "sha256": "d6bd86d1d76632d3ddec2da057b7530de3ce0a299a449edd7d513b49d5d6382b"
+    },
+    {
+      "path": "/images/manual-visualizer/v1/rooms/garden-living/thumbnail.webp",
+      "sha256": "064223adf3c8de8be55466880855c7a9147a222f008482b1fa29d42c0eddaa94"
+    }
+  ]
+}
