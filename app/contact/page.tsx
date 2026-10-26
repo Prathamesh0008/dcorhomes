@@ -44,14 +44,14 @@ export default function ContactPage() {
                 headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId.current },
                 body: JSON.stringify({ ...form, ...extra }),
             });
-            const json = await response.json();
+            const json: { error?: string; stored?: boolean; notified?: boolean } = await response.json().catch(() => ({}));
             if (!response.ok)
                 throw new Error(json.error || "Could not submit your request.");
             if (!json.stored)
                 throw new Error("Your request was not confirmed as saved.");
             submissionId.current = "";
             setStatus("success");
-            setMessage(json.notified ? "Your enquiry was saved and its email notification was accepted for delivery." : "Your enquiry was saved. Email notification was not confirmed. You can also contact sales@dcorhome.com.");
+            setMessage(json.notified ? "Your enquiry was saved. Our email provider accepted the notification for delivery." : "Your enquiry was saved. Email notification was not confirmed. You can also contact sales@dcorhome.com.");
             setForm({
                 name: "",
                 email: "",
@@ -62,6 +62,7 @@ export default function ContactPage() {
                 enquiryType: "General Enquiry",
                 color: "",
             });
+            setExtra({ city: "", method: "Email", measurements: "", designId: "", website: "", consent: false });
         }
         catch (err) {
             setStatus("error");
