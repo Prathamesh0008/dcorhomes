@@ -32,13 +32,14 @@ async function HomePage() {
               <ActionLink href="/studio" className="rounded-full ">Try the curtain visualizer</ActionLink>
               <ActionLink href="/collections" variant="text" className="">Explore fabrics</ActionLink>
             </div>
-            <p className="mb-0 mt-5 text-[11px] leading-relaxed text-[#777c6e]">AI-edited curtain concepts shown for inspiration.</p>
+            <p className="mb-0 mt-5 text-[11px] leading-relaxed text-[#777c6e]">AI edited curtain concepts shown for inspiration.</p>
           </div>
           <div className={`order-1 min-w-0 lg:order-2 ${heroStyles.entrance}`}>
             <HeroComparisonSlider slides={heroComparisonSlides} illustration={{id:"existing-room-illustration",beforeSrc:pair.before,afterSrc:pair.after,alt:"Living room curtain illustration",label:"Room illustration"}}/>
           </div>
         </Container>
       </section>
+
       {/* <CurtainDesignComposer /> */}
       <HomeBelowHero />
     </>
