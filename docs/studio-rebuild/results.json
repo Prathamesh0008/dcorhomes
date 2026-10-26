@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "renderer": "atelier-2",
+  "canvas": {
+    "a": {
+      "hash": 2157447827,
+      "width": 836,
+      "height": 627
+    },
+    "white": {
+      "hash": 414562643,
+      "width": 836,
+      "height": 627
+    },
+    "velvet": {
+      "hash": 90173580,
+      "width": 836,
+      "height": 627
+    },
+    "b": {
+      "hash": 870482878,
+      "width": 836,
+      "height": 627
+    },
+    "noSheer": {
+      "hash": 1343706082,
+      "width": 836,
+      "height": 627
+    }
+  },
+  "independentLayers": true,
+  "unchangedBackground": {
+    "changed": 236412,
+    "outside": 0
+  },
+  "roomViews": 10,
+  "room01And09Different": true,
+  "comparisonSameBase": true,
+  "download": {
+    "width": 1600,
+    "height": 1200,
+    "meanRgbDifference": 1.238205525412778
+  },
+  "guestSaveAndRestore": true,
+  "layouts": [
+    {
+      "width": 1440,
+      "page": 1425,
+      "preview": {
+        "top": 276.515625,
+        "left": 50,
+        "width": 835.6875
+      },
+      "controls": {
+        "top": 276.515625,
+        "left": 925.6875,
+        "width": 449.296875
+      }
+    },
+    {
+      "width": 768,
+      "page": 768,
+      "preview": {
+        "top": 276.515625,
+        "left": 36,
+        "width": 696
+      },
+      "controls": {
+        "top": 926.515625,
+        "left": 36,
+        "width": 696
+      }
+    },
+    {
+      "width": 390,
+      "page": 390,
+      "preview": {
+        "top": 276.65625,
+        "left": 18,
+        "width": 354
+      },
+      "controls": {
+        "top": 694.15625,
+        "left": 18,
+        "width": 354
+      }
+    }
+  ],
+  "missingInputHandled": true,
+  "brokenImages": [],
+  "exceptions": [],
+  "httpFailures": [],
+  "aiRequests": []
+}

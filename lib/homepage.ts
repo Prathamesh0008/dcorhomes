@@ -1,6 +1,7 @@
 ﻿import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { categoryId, type FabricCategory } from '@/lib/curtains/categories';
 export type HomeCategory={id:string;name:string;description:string;image:string;href:string;count:number};
+export type CategoryFabric=Pick<FabricRecord,'id'|'category'|'categoryId'|'blackoutPercentage'|'active'|'images'> & {colors:{active?:boolean}[]};
 // Editorial scene choices are not claims about the composition of photographed cloth.
 const art:Record<string,{image:string;description:string}>={
  sheer:{image:'/images/home/window-greenery.jpg',description:'A softer way to welcome the daylight.'},
@@ -10,7 +11,7 @@ const art:Record<string,{image:string;description:string}>={
  blackout:{image:'/images/dark-textile.jpg',description:'Explore a more sheltered atmosphere.'},
  textured:{image:'/images/home/green-drapes.jpg',description:'Let the surface tell its own story.'},
 };
-export function homeCategories(records:FabricRecord[],categories:FabricCategory[]):HomeCategory[]{
+export function homeCategories(records:CategoryFabric[],categories:FabricCategory[]):HomeCategory[]{
  const result:HomeCategory[]=[];
  for(const id of ['sheer','silk','velvet','linen','blackout','textured',...categories.map(c=>c.id)]){
   if(result.some(c=>c.id===id))continue;

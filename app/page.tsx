@@ -1,3 +1,4 @@
+import ServerCatalogueProvider from '@/components/curtains/ServerCatalogueProvider';
 import CurtainDesignComposer from "@/components/curtains/CurtainDesignComposer";
 import HomeBelowHero from "@/components/home/HomeBelowHero";
 import { pageMetadata } from "@/lib/seo";
@@ -11,7 +12,7 @@ import ActionLink from "@/components/ui/ActionLink";
 import HeroComparisonSlider from "@/components/home/HeroComparisonSlider";
 import { heroComparisonSlides } from "@/lib/hero-comparisons";
 import heroStyles from "@/components/interactive/HeroEntrance.module.css";
-export default async function HomePage() {
+async function HomePage() {
   const pair=(await homepagePair());
   return (
     <>
@@ -38,8 +39,10 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
-      <CurtainDesignComposer />
+      {/* <CurtainDesignComposer /> */}
       <HomeBelowHero />
     </>
   );
 }
+
+export default function Page() {return <ServerCatalogueProvider><HomePage/></ServerCatalogueProvider>;}

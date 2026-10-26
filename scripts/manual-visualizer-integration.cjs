@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 // Isolated manual-design ownership checks plus one opt-in focused Studio journey.
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),{spawn}=require('node:child_process');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'dcorhome-manual-check-')),base='http://localhost:3231';

@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 const {spawn}=require('node:child_process'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),sharp=require('sharp');
 const base='http://localhost:3220',directory=path.resolve('.test-data/ai-window-'+crypto.randomUUID());fs.mkdirSync(directory,{recursive:true});const providerLog=path.join(directory,'provider.log');
 const cronSecret=crypto.randomBytes(32).toString('hex');

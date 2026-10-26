@@ -13,6 +13,6 @@ export const fabricCategories: FabricCategory[] = [
  ['textured','Textured','Curtain fabrics with a tactile woven surface.'],
  ['unclassified','Other curtain fabrics','Material classification awaiting supplier confirmation.'],
 ].map(([id,name,description])=>({id,name,description}));
-export function categoryId(f: FabricRecord) { return f.categoryId || ({Silk:'silk',Sheer:'sheer',Linen:'linen',Velvet:'velvet',Textured:'textured'} as Record<string,string>)[f.category] || 'unclassified'; }
+export function categoryId(f: Pick<FabricRecord,'categoryId'|'category'>) { return f.categoryId || ({Silk:'silk',Sheer:'sheer',Linen:'linen',Velvet:'velvet',Textured:'textured'} as Record<string,string>)[f.category] || 'unclassified'; }
 export function activeVariants(f: FabricRecord) { return f.colors.filter(c=>c.active!==false); }
 export { resolveFabricImages as variantPhotos } from './fabric-images';

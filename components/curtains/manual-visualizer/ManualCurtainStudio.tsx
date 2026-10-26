@@ -1,78 +1,64 @@
 "use client";
-import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useCallback, useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import { useFabricRecords } from '../FabricCatalogueProvider';
-import { localDesigns, saveLocalDesign } from '@/lib/local-designs';
-import { defaultSelection } from '@/lib/design-options';
-import { manualSummary, readManual } from '@/lib/curtains/manual-config';
-import { assetVersion, scenes } from '@/lib/manual-visualizer/manifest';
-import { defaultDesign, enquiryHref, fromManual, resolveLayer, validateDesign, type VisualizerDesign } from '@/lib/manual-visualizer/model';
-import { exportDesign } from '@/lib/manual-visualizer/renderer';
+import { defaultDesign, resolveLayer } from '@/lib/manual-visualizer/model';
+import { scenes } from '@/lib/manual-visualizer/manifest';
 import WindowPreview from './WindowPreview';
 import LayerChoices from './LayerChoices';
+import RoomChoices from './RoomChoices';
+import DesignReview from './DesignReview';
+import StudioImage from './StudioImage';
+import { useVisualizerConfiguration } from './useVisualizerConfiguration';
 
-const storageKey='dcorhome-visualizer-v1';
-const action='flex min-h-12 items-center justify-center border border-solid border-ink bg-transparent px-5 text-center text-[14px] disabled:cursor-wait disabled:opacity-40';
+type Step='room'|'sheer'|'main';
+function SelectionArea({id,number,title,selected,open,onToggle,children}:{id:Step;number:string;title:string;selected:string;open:boolean;onToggle:()=>void;children:ReactNode}){
+ return <section className="border-b border-solid border-[#d9ddd2] last:border-b-0">
+  <button type="button" id={'studio-'+id+'-tab'} data-studio-step={id} aria-expanded={open} aria-controls={'studio-'+id+'-panel'} onClick={onToggle} className="flex min-h-24 w-full items-center gap-4 border-0 bg-transparent px-0 py-5 text-left">
+   <span className="self-start pt-1 text-[10px] tracking-[1px] text-bronze">{number}</span>
+   <span className="min-w-0 flex-1"><span className="block font-serif text-[27px] leading-[1.1] tracking-[-.4px]">{title}</span><span className="mt-2 block truncate text-[11px] text-muted">{selected}</span></span>
+   <ChevronDown size={15} className={`shrink-0 transition-transform duration-200 motion-reduce:transition-none ${open?'rotate-180':''}`}/>
+  </button>
+  <div id={'studio-'+id+'-panel'} role="region" aria-labelledby={'studio-'+id+'-tab'} hidden={!open} className="min-w-0 pb-6">{children}</div>
+ </section>;
+}
+
 export default function ManualCurtainStudio(){
- const records=useFabricRecords(),query=useSearchParams();
- const [design,setDesign]=useState<VisualizerDesign>(()=>structuredClone(defaultDesign)),[initialized,setInitialized]=useState(false),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[account,setAccount]=useState<boolean|null>(null);
- const [legacy,setLegacy]=useState<{original:string;result?:string;name:string}|null>(null),[restoreError,setRestoreError]=useState(''),[originalContact,setOriginalContact]=useState('');
- const readiness=useCallback((value:boolean)=>setReady(value),[]);
- useEffect(()=>{
-  let active=true;const urls:string[]=[];setInitialized(false);setMessage('');setRestoreError('');setOriginalContact('');setLegacy(null);
-  (async()=>{try{
-   let restored:unknown;
-   if(query.get('local')){
-    const saved=(await localDesigns()).find(item=>item.id===query.get('local'));if(!saved)throw Error('This design is no longer saved on this device.');
-    if(saved.visualizer)restored=saved.visualizer;
-    else if(saved.original){const original=URL.createObjectURL(saved.original),result=saved.result?URL.createObjectURL(saved.result):undefined;urls.push(original,...(result?[result]:[]));if(active)setLegacy({original,result,name:saved.selection.fabric});}
-   }else if(query.get('saved')){
-    const response=await fetch('/api/manual-designs');if(!response.ok)throw Error('Could not reopen your account design.');const data=await response.json();const saved=data.designs.find((item:{id:string})=>item.id===query.get('saved'));if(!saved)throw Error('This design is unavailable in your current account.');restored=saved.design;
-   }else if(query.get('design')){
-    const response=await fetch('/api/designs/'+encodeURIComponent(query.get('design')!));if(!response.ok)throw Error('This private saved preview is unavailable.');const data=await response.json();if(active)setLegacy({original:'/api/designs/'+data.id+'/image?type=original',result:'/api/designs/'+data.id+'/image',name:data.selection.fabric});
-   }else if(query.get('visualizer'))restored=JSON.parse(query.get('visualizer')!);
-   else if(query.get('manual')||query.get('fabric')){
-    const config=readManual(Object.fromEntries(query.entries()),records);
-    const inspiration={style:(query.get('style')||'').slice(0,100),pattern:(query.get('inspirationPattern')||config.pattern).slice(0,100),room:config.room};
-    if(active)setOriginalContact('/contact?'+new URLSearchParams({interest:'Curtain design consultation',message:[manualSummary(config,records),'Consultation inspiration: '+[inspiration.style,inspiration.pattern,inspiration.room].filter(Boolean).join(' / ')].join('\n')}).toString());
-    restored=fromManual(config,records,inspiration);
-   }else {const saved=localStorage.getItem(storageKey);if(saved)restored=JSON.parse(saved);}
-   if(active)setDesign(restored?validateDesign(restored,records):structuredClone(defaultDesign));
-  }catch(error){if(active){setReady(false);setRestoreError(error instanceof Error?error.message:'Could not restore this design.');}}finally{if(active)setInitialized(true);}})();
-  return()=>{active=false;urls.forEach(url=>URL.revokeObjectURL(url));};
- },[query,records]);
- useEffect(()=>{if(!initialized||restoreError)return;try{validateDesign(design,records);localStorage.setItem(storageKey,JSON.stringify(design));}catch{/* Saving remains explicit when browser preferences are disabled. */}},[design,initialized,restoreError,records]);
- function change(next:VisualizerDesign){setReady(false);setRestoreError('');setOriginalContact('');setDesign(next);setMessage('');}
- async function perform(task:()=>Promise<void>){setBusy(true);setMessage('');try{await task();}catch(error){setMessage(error instanceof Error?error.message:'Unable to complete this action.');}finally{setBusy(false);}}
- async function download(){const blob=await exportDesign(design,records),url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='dcorhome-curtains-'+design.sceneId+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),10000);setMessage('Your composed curtain design has been downloaded.');}
- async function save(){
-  const clean=validateDesign(design,records);let response:Response;
-  try{response=await fetch('/api/manual-designs');if(!response.ok)throw Error('Account storage is unavailable. Use Save on this device.');}catch{throw Error('Could not check account storage. Use Save on this device.');}
-  const state=await response.json();setAccount(state.account===true);
-  if(state.account){const saved=await fetch('/api/manual-designs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({design:clean})});const data=await saved.json();if(!saved.ok)throw Error(data.error||'Could not save to your account.');setMessage('Saved to your account. Reopen it from Saved designs.');}
-  else await saveDevice(clean);
+ const records=useFabricRecords(),state=useVisualizerConfiguration(records);
+ const {design,initialized,restoreError,originalContact,legacy}=state;
+ const [step,setStep]=useState<Step|null>('room'),[renderState,setRenderState]=useState({key:'',ready:false});
+ const key=JSON.stringify(design),ready=renderState.key===key&&renderState.ready&&!restoreError;
+ const readiness=useCallback((value:boolean)=>setRenderState({key,ready:value}),[key]);
+ const room=scenes.find(scene=>scene.id===design.sceneId)!;
+ const initial=scenes.find(scene=>scene.id===defaultDesign.sceneId)!;
+ function selection(layer:'main'|'sheer'){
+  if(!design[layer].enabled)return layer==='sheer'?'Without sheers':'Without main curtains';
+  try{const choice=resolveLayer(design[layer],records);return choice.fabric.name+' / '+choice.shadeName;}catch{return 'Find your fabric';}
  }
- async function saveDevice(clean=validateDesign(design,records)){
-  const main=resolveLayer(clean.main,records);await saveLocalDesign({id:crypto.randomUUID(),created:Date.now(),selection:{...defaultSelection,fabric:main.fabric.id,color:main.hex,roomType:scenes.find(s=>s.id===clean.sceneId)!.name},status:'manual',visualizer:clean});setMessage('Saved on this device. Reopen it from Saved designs. Clearing browser data removes it.');
- }
- let summary:React.ReactNode,contact='/contact?interest=Manual%20curtain%20consultation';try{contact=enquiryHref(design,records);summary=(['sheer','main'] as const).map(key=>{const layer=resolveLayer(design[key],records);return <p key={key} className="mb-1 mt-0 text-[13px] leading-6"><span className="font-medium">{key==='sheer'?'Sheer':'Main curtains'}:</span> {design[key].enabled?layer.fabric.name+' / '+layer.shadeName:'Not included'}</p>;});}catch{summary=<p className="text-[13px]">Select a supported fabric to begin.</p>;}
- if(restoreError){contact=originalContact||'/contact?interest=Curtain%20preview%20assistance';summary=<p className="text-[13px] leading-6">Your previous selection has not been rendered. Choose a supported material to start a new sample.</p>;}
- return <div className="bg-paper">
-  <Container className="pb-6 pt-7 md:pt-10"><p className="m-0 text-[11px] uppercase tracking-[2.5px] text-bronze">THE DCORHOME DESIGN STUDIO</p><h1 className="mb-3 mt-3 text-[34px] font-medium leading-tight tracking-[-1px] md:text-[46px]">Your window. <em className="font-serif font-normal text-bronze">Your finishing touch.</em></h1><p className="m-0 max-w-2xl text-[15px] leading-7 text-muted">Choose your window, add a light sheer, then find the fabric and colour that feel like home.</p></Container>
-  {legacy&&<Container className="mb-8"><section className="border border-solid border-[#dedbd2] p-4"><h2 className="text-[20px] font-medium">Your saved preview</h2><p className="text-[13px] text-muted">This earlier design remains available to view and download. Create a new manual study below.</p><img src={legacy.result||legacy.original} alt={'Previously saved '+legacy.name+' curtain design'} className="max-h-[560px] w-full object-contain"/><a download="dcorhome-saved-design.webp" href={legacy.result||legacy.original} className="inline-flex min-h-11 items-center text-[13px] underline">Download saved preview</a></section></Container>}
-  <Container className="grid items-start gap-7 pb-12 lg:grid-cols-[minmax(300px,.72fr)_minmax(0,1.28fr)] lg:gap-10">
-   <div className="order-2 min-w-0 lg:order-1">
-    <section className="mb-5 border-b border-solid border-[#dedbd2] pb-5"><p className="mb-2 mt-0 text-[11px] uppercase tracking-[2px] text-bronze">STEP 01</p><h2 className="mb-4 mt-0 text-[23px] font-medium">Choose your window</h2><div className="grid grid-cols-2 gap-3">{scenes.filter(scene=>scene.status==='sample').map(scene=><button type="button" key={scene.id} aria-pressed={design.sceneId===scene.id} onClick={()=>change({...design,sceneId:scene.id,assetVersion})} className="border border-solid border-[#d5d5c9] bg-white p-2 text-left aria-pressed:border-ink aria-pressed:outline-1 aria-pressed:outline-ink"><img src={scene.base?.replace('base.webp','thumbnail.webp')} alt="Bare garden window in an illustrative living room" loading="lazy" className="aspect-[4/3] w-full object-cover"/><span className="mt-2 block text-[13px]">{scene.name}</span><span className="mt-1 block text-[11px] text-muted">Illustrative sample</span></button>)}</div><details className="mt-3"><summary className="min-h-11 cursor-pointer py-3 text-[12px] text-muted">More windows · photography in preparation ({scenes.filter(s=>s.status==='missing').length})</summary><ul className="m-0 list-none space-y-2 p-0">{scenes.filter(s=>s.status==='missing').map(scene=><li key={scene.id} className="border-b border-solid border-[#dedbd2] py-2 text-[12px] text-muted">{scene.name}<span className="mt-1 block text-[10px]">Curtain-free image and aligned layers required</span></li>)}</ul></details></section>
-    <details open className="mb-5 border-b border-solid border-[#dedbd2]"><summary className="min-h-14 cursor-pointer py-3"><span className="block text-[11px] uppercase tracking-[2px] text-bronze">STEP 02</span><span className="mt-2 block text-[23px] font-medium">Choose your sheer</span></summary><LayerChoices layer="sheer" value={design.sheer} records={records} onChange={sheer=>change({...design,sheer})}/></details>
-    <details open className="border-b border-solid border-[#dedbd2]"><summary className="min-h-14 cursor-pointer py-3"><span className="block text-[11px] uppercase tracking-[2px] text-bronze">STEP 03</span><span className="mt-2 block text-[23px] font-medium">Choose your main curtains</span></summary><LayerChoices layer="main" value={design.main} records={records} onChange={main=>change({...design,main})}/></details>
-    <details className="mt-3"><summary className="min-h-11 cursor-pointer py-3 text-[13px]">Curtain construction</summary><p className="m-0 text-[13px] leading-6 text-muted">This sample shows a wave drape. Our team can help with pleats, fullness and blackout lining; those options need their own prepared preview assets.</p></details>
+ const toggle=(value:Step)=>setStep(current=>current===value?null:value);
+ return <div className="bg-paper pb-12 md:pb-20">
+  <Container className="pb-5 pt-5 md:pb-7 md:pt-7">
+   <div className="mb-3 flex items-center justify-between gap-3"><p className="m-0 text-[10px] uppercase tracking-[2.5px] text-bronze">THE CURTAIN STUDIO</p><Link href="/designs" className="inline-flex min-h-9 shrink-0 items-center gap-2 text-[11px] underline underline-offset-4">Saved designs<ArrowUpRight size={13}/></Link></div>
+   <h1 className="m-0 text-[32px] font-medium leading-[1.12] tracking-[-1px] md:text-[46px]">Curtains, <em className="font-serif font-normal text-bronze">beautifully yours.</em></h1><p className="mb-0 mt-3 text-[13px] leading-6 text-muted">Find your fabric. Make it yours.</p>
+  </Container>
+  {legacy&&<Container className="mb-6"><details className="border-y border-solid border-[#dedbd2] py-2"><summary className="min-h-11 cursor-pointer py-3 text-[13px]">View your earlier saved preview</summary><StudioImage src={legacy.result||legacy.original} alt={'Earlier saved '+legacy.name+' design'} className="max-h-[480px] w-full object-contain"/><a download="dcorhome-saved-design.webp" href={legacy.result||legacy.original} className="inline-flex min-h-11 items-center text-[12px] underline">Download earlier preview</a></details></Container>}
+  <Container className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.86fr)_minmax(330px,1fr)] lg:gap-10">
+   <div className="min-w-0 lg:sticky lg:top-[108px]">
+    {restoreError?<div className="rounded-[6px] bg-cream p-7"><h2 className="mt-0 font-serif text-[30px] font-normal">Let’s reopen your design.</h2><p role="alert" className="text-[13px] leading-6">{restoreError} Your previous choice has not been previewed.</p><button type="button" onClick={state.startFresh} className="min-h-12 rounded-[3px] border-0 bg-ink px-5 text-[13px] text-paper">Start a new fabric study</button></div>
+     :initialized?<WindowPreview design={design} records={records} onReady={readiness} onSelectSample={()=>state.selectRoom('garden-living')}/>
+     :<div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-cream" role="status" aria-label="Opening the curtain studio"><StudioImage src={initial.base} alt="Garden sample room" priority className="h-full w-full object-contain"/></div>}
+    {initialized&&!restoreError&&<div className="mt-4 hidden flex-wrap items-center justify-between gap-3 border-t border-solid border-[#dedfd5] pt-4 lg:flex"><p className="m-0 max-w-md text-[12px] leading-6 text-muted">Prefer to feel the fabric first? Request samples with your enquiry.</p><a href="mailto:sales@dcorhome.com" className="inline-flex min-h-11 items-center gap-2 text-[12px]">Talk to the atelier<ArrowUpRight size={14}/></a></div>}
    </div>
-   <div className="order-1 min-w-0 lg:sticky lg:top-28 lg:order-2">
-    {restoreError?<div className="relative aspect-[4/3] bg-sand"><img src={scenes[0].base} alt="Unconfigured sample window without curtains" className="h-full w-full object-cover"/><p role="alert" className="absolute inset-x-4 bottom-4 bg-paper p-4 text-[14px] leading-6">{restoreError}</p></div>:initialized?<WindowPreview design={design} records={records} onReady={readiness}/>:<div className="grid aspect-[4/3] place-items-center bg-sand text-[13px]" role="status">Opening your curtain studio…</div>}
-    <section className="mt-6 border-t border-solid border-[#dedbd2] pt-5"><h2 className="mb-3 mt-0 text-[12px] uppercase tracking-[2px] text-bronze">YOUR CURTAIN DESIGN</h2>{summary}{design.inspiration&&!restoreError&&<p className="mt-2 text-[12px] leading-5 text-muted">Your consultation inspiration: {[design.inspiration.style,design.inspiration.pattern,design.inspiration.room].filter(Boolean).join(' / ')}. The preview uses the sample window and wave drape.</p>}<div className="mt-5 grid gap-2 sm:grid-cols-2"><button disabled={!ready||busy} type="button" onClick={()=>perform(download)} className={action}>Download My Design</button><button disabled={!ready||busy} type="button" onClick={()=>perform(save)} className={action}>Save My Design</button><Link href={contact} className={action+' bg-ink text-paper sm:col-span-2'}>Enquire About My Curtains</Link></div><div className="mt-2 flex flex-wrap items-center gap-x-5 text-[12px]"><Link href="/designs" className="inline-flex min-h-11 items-center underline">Saved designs</Link><button type="button" disabled={!ready||busy} onClick={()=>perform(()=>saveDevice())} className="min-h-11 bg-transparent underline disabled:opacity-40">Save on this device</button><a href="mailto:sales@dcorhome.com" className="inline-flex min-h-11 items-center underline">sales@dcorhome.com</a></div>{account===true&&<p className="text-[12px] text-muted">Account saves stay with your signed-in account.</p>}<p role="status" className="mb-0 text-[13px] leading-6 text-muted">{message}</p></section>
-   </div>
+   <aside aria-label="Create your curtain design" className="min-w-0 rounded-[6px] bg-cream px-5 pb-6 pt-1 sm:px-6 lg:px-6 xl:px-7">
+    {initialized?<>
+     <SelectionArea id="room" number="01" title="Where shall we begin?" selected={room.name} open={step==='room'} onToggle={()=>toggle('room')}><RoomChoices value={design.sceneId} onChange={state.selectRoom} onNext={()=>setStep('sheer')}/></SelectionArea>
+     <SelectionArea id="sheer" number="02" title="Let the light in." selected={selection('sheer')} open={step==='sheer'} onToggle={()=>toggle('sheer')}><LayerChoices layer="sheer" value={design.sheer} records={records} onChange={value=>state.selectLayer('sheer',value)} onNext={()=>setStep('main')}/></SelectionArea>
+     <SelectionArea id="main" number="03" title="Add the finishing touch." selected={selection('main')} open={step==='main'} onToggle={()=>toggle('main')}><LayerChoices layer="main" value={design.main} records={records} onChange={value=>state.selectLayer('main',value)}/></SelectionArea>
+     <DesignReview design={design} records={records} ready={ready} blocked={Boolean(restoreError)} originalContact={originalContact}/>
+    </>:<div className="py-6 text-[13px] text-muted" role="status">Opening your fabric collection...</div>}
+   </aside>
   </Container>
  </div>;
 }

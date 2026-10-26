@@ -1,0 +1,26 @@
+{
+  "font": "Inter, \"Inter Fallback\"",
+  "weight": "500",
+  "fontSize": "30px",
+  "dSize": "32.25px",
+  "dVerticalAlign": "baseline",
+  "letterSpacing": "-0.9px",
+  "wordSpacing": "-2px",
+  "renderedWordGap": 5.078125,
+  "text": "DCOR HOME",
+  "fontLoaded": true,
+  "icon": {
+    "src": "/_next/image?url=%2Fbranding%2Fgreen.png&w=96&q=75",
+    "width": 36,
+    "height": 36
+  },
+  "subtitle": {
+    "text": "Curtain atelier",
+    "fontSize": "10px",
+    "weight": "500",
+    "tracking": "2.7px",
+    "color": "rgb(138, 142, 127)"
+  },
+  "navbarHeight": 85,
+  "color": "rgb(37, 52, 47)"
+}

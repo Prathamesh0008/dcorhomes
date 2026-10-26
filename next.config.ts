@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
+import { acquireNextOutput } from "./scripts/next-output-lock.cjs";
 
-const nextConfig = (phase: string): NextConfig => ({
+const nextConfig = (phase: string): NextConfig => {
+  // This checkout lock is for local CLI processes, not immutable serverless deployments.
+  if (!process.env.VERCEL) acquireNextOutput(phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next");
+  return ({
   // Dev compilation must never overwrite the production manifests used by start.
   distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
   reactStrictMode: true,
@@ -13,5 +17,6 @@ const nextConfig = (phase: string): NextConfig => ({
     { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   ] }]; },
   poweredByHeader: false,
-});
+  });
+};
 export default nextConfig;

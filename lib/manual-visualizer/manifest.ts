@@ -1,17 +1,19 @@
-export type Rect = { x:number; y:number; width:number; height:number };
-export type ConstructionAssets={mask:string;fold:string;rightMask?:string;rightFold?:string};
-export type Scene = { id:string; name:string; version:string; status:'sample'|'missing'; base?:string; width:number; height:number; provenance:string; window?:Rect; mount?:{x:number;y:number;width:number}; sheer?:Rect; main?:[Rect,Rect]; construction?:{main:ConstructionAssets;sheer:ConstructionAssets}; shadow?:string; occlusion?:string };
+import { libraryMaterials, libraryScenes } from './library';
+import type { RoomScene, FabricMaterial } from './types';
+export type { Rect, CurtainLayer as ConstructionAssets, RoomScene as Scene, FabricMaterial as Material } from './types';
+export const rendererVersion='atelier-2';
 export const assetVersion='manual-v1';
 const root='/images/manual-visualizer/v1';
-export const scenes:Scene[]=[
+export const scenes:RoomScene[]=[
+ ...libraryScenes,
  {id:'garden-living',name:'Garden living room',version:assetVersion,status:'sample',base:root+'/rooms/garden-living/base.webp',width:1280,height:960,provenance:'Existing generated architectural sample; scripts/manual-base-sources.json. Not a photographed customer interior.',window:{x:.165,y:.09,width:.68,height:.62},mount:{x:.12,y:.067,width:.77},sheer:{x:.16,y:.073,width:.69,height:.70},main:[{x:.125,y:.067,width:.205,height:.72},{x:.675,y:.067,width:.205,height:.72}],construction:{main:{mask:root+'/constructions/main-mask.png',fold:root+'/constructions/main-fold.webp'},sheer:{mask:root+'/constructions/sheer-mask.png',fold:root+'/constructions/sheer-fold.webp'}}},
  ...[
   ['master-bedroom','Master bedroom · full-height window'],['dining','Contemporary dining · tall windows'],['panoramic-living','Luxury living · panoramic window'],['compact-apartment','Compact apartment · small window'],['premium-hall','Premium hall · multiple windows'],['guest-bedroom','Guest bedroom · standard window'],['home-office','Home office · wide window'],['arched-living','Classic living · arched window'],['balcony-bedroom','Minimal bedroom · balcony doors'],
- ].map(([id,name]):Scene=>({id,name,version:assetVersion,status:'missing',width:0,height:0,provenance:'Curtain-free photograph, measured geometry and aligned construction assets required.'})),
+ ].map(([id,name] ):RoomScene=>({id,name,version:assetVersion,status:'missing',width:0,height:0,provenance:'Curtain-free photograph, measured geometry and aligned construction assets required.'})),
 ];
-export type Material = { id:string; name:string; layer:'main'|'sheer'; fabricId?:string; catalogueSource:'demo'|'supplier'; texture?:string; thumbnail?:string; opacity:number; sheen:number; textureStrength:number; repeat:number; colorMode:'tint'|'photographic'; status:'sample'|'missing' };
-const material=(id:string,name:string,layer:'main'|'sheer',fabricId?:string,properties:Partial<Material>={}):Material=>({id,name,layer,fabricId,catalogueSource:'demo',status:fabricId?'sample':'missing',texture:fabricId?root+'/materials/'+id+'.webp':undefined,thumbnail:fabricId?'/images/fabrics/'+fabricId+'/texture-reference.webp':undefined,opacity:layer==='sheer'?.38:1,sheen:0,textureStrength:.18,repeat:96,colorMode:'tint',...properties});
-export const materials:Material[]=[
+const material=(id:string,name:string,layer:'main'|'sheer',fabricId?:string,properties:Partial<FabricMaterial>={}):FabricMaterial=>({id,name,layer,fabricId,catalogueSource:'demo',status:fabricId?'sample':'missing',texture:fabricId?root+'/materials/'+id+'.webp':undefined,thumbnail:fabricId?'/images/fabrics/'+fabricId+'/texture-reference.webp':undefined,opacity:layer==='sheer'?.38:1,sheen:0,textureStrength:.18,repeat:96,colorMode:'tint',...properties});
+export const materials:FabricMaterial[]=[
+ ...libraryMaterials,
  material('linen','Linen','main','sienna',{textureStrength:.32}),material('cotton','Cotton','main'),material('cotton-linen','Cotton–linen blend','main'),material('velvet','Velvet','main','clay',{sheen:.13,textureStrength:.15,repeat:140}),material('silk','Silk satin study','main','silk-satin-study',{sheen:.26,textureStrength:.1,repeat:160}),material('silk-blend','Silk blend','main'),material('faux-silk','Faux silk','main'),material('jacquard','Jacquard','main'),material('chenille','Chenille','main'),material('textured-weave','Textured weave','main','olive',{textureStrength:.36,repeat:72}),
  material('plain-voile','Plain voile study','sheer','solstice',{opacity:.32,textureStrength:.15}),material('fine-voile','Fine voile study','sheer','pearl',{opacity:.24,textureStrength:.1,repeat:120}),material('linen-sheer','Linen sheer','sheer'),material('cotton-sheer','Cotton sheer','sheer'),material('organza','Organza','sheer'),material('embroidered-sheer','Embroidered sheer','sheer'),material('net-sheer','Net sheer','sheer'),material('textured-sheer','Textured sheer','sheer'),material('striped-sheer','Striped sheer','sheer'),material('jacquard-sheer','Jacquard sheer','sheer'),
 ];

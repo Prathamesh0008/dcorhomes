@@ -1,13 +1,13 @@
-import { fabricRecords } from '@/lib/server/fabric-records';
-import FabricCatalogueProvider from '@/components/curtains/FabricCatalogueProvider';
+import { ShowroomContactProvider } from '@/components/curtains/FabricCatalogueProvider';
 import { siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 import { customerSession } from "@/lib/server/customer-auth";
-// Admin catalogue changes must reach direct Studio visits as well as collection navigation.
+// Catalogue queries are scoped to the routes that consume them.
 export const dynamic='force-dynamic';
+export const runtime='nodejs';
 export const metadata: Metadata = {
   title: {
     default: "Dcorhome | Curtains, beautifully considered",
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const customer = await customerSession();
+  const customer = await customerSession(true);
   return (
     <html lang="en" className="scroll-pt-[100px]">
       <body>
-        <FabricCatalogueProvider records={(await fabricRecords())} whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader signedIn={Boolean(customer)} />
+        <ShowroomContactProvider whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader signedIn={Boolean(customer)} isAdmin={customer?.user.role === "admin" && !customer.user.mustChangePassword} />
         <main>{children}</main>
-        <SiteFooter signedIn={Boolean(customer)} /></FabricCatalogueProvider>
+        <SiteFooter signedIn={Boolean(customer)} /></ShowroomContactProvider>
       </body>
     </html>
   );

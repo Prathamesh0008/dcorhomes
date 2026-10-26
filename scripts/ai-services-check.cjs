@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 // Focused service/error checks; no external network or billable requests.
 const fs=require('node:fs'),path=require('node:path'),ts=require('typescript'),Module=require('node:module'),assert=require('node:assert/strict');
 const resolve=Module._resolveFilename;Module._resolveFilename=function(id,...args){return resolve.call(this,id.startsWith('@/')?path.resolve(id.slice(2)):id,...args);};

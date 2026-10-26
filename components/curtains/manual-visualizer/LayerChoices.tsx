@@ -1,27 +1,50 @@
 "use client";
 import { useState } from 'react';
+import { Check, ArrowRight } from 'lucide-react';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
-import { demoColors, materials } from '@/lib/manual-visualizer/manifest';
+import { demoColors, materials, type Material } from '@/lib/manual-visualizer/manifest';
 import { availableMaterial, resolveLayer, type LayerSelection } from '@/lib/manual-visualizer/model';
+import { visualizerFabric } from '@/lib/manual-visualizer/library';
+import StudioImage from './StudioImage';
+import { useSelectionRail } from './useSelectionRail';
 
-export default function LayerChoices({layer,value,records,onChange}:{layer:'main'|'sheer';value:LayerSelection;records:FabricRecord[];onChange:(value:LayerSelection)=>void}){
- const [all,setAll]=useState(false);
- const choices=materials.filter(m=>m.layer===layer),available=choices.filter(m=>availableMaterial(m,records)),missing=choices.filter(m=>!availableMaterial(m,records));
+export default function LayerChoices({layer,value,records,onChange,onNext}:{layer:'main'|'sheer';value:LayerSelection;records:FabricRecord[];onChange:(value:LayerSelection)=>void;onNext?:()=>void}){
+ const [allColors,setAllColors]=useState(false);
+ const rail=useSelectionRail(value.materialId);
  let current:ReturnType<typeof resolveLayer>|undefined;try{current=resolveLayer(value,records);}catch{}
- const variants=current?.fabric.colors.filter(v=>v.active!==false&&v.hexPreview)||[];
- const previewMode=Boolean(value.previewColorId),colors=previewMode?demoColors:variants.map(v=>({id:v.id,name:v.name,hex:v.hexPreview!,image:v.swatchImage||v.digitalSwatchImage,disabled:v.available===false}));
- return <div className="pb-6">
-  <fieldset className="m-0 mb-5 min-w-0 border-0 p-0"><legend className="mb-2 text-[14px]">{layer==='sheer'?'Would you like sheer curtains?':'Include main curtains?'}</legend><div className="flex flex-wrap gap-2">{[true,false].map(enabled=><button key={String(enabled)} type="button" aria-pressed={value.enabled===enabled} onClick={()=>onChange({...value,enabled})} className="min-h-11 border border-solid border-[#c9cbbf] bg-transparent px-3 text-[13px] aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper">{enabled?(layer==='sheer'?'Yes, add sheers':'Yes, add main curtains'):(layer==='sheer'?"Don't add sheers":'Sheers only')}</button>)}</div></fieldset>
+ const choices=materials.filter(material=>material.layer===layer&&availableMaterial(material,records)&&(material.library||material.id===value.materialId));
+ const variants=current?.fabric.colors.filter(variant=>variant.active!==false&&variant.hexPreview)||[];
+ const previewMode=Boolean(value.previewColorId);
+ const colors:{id:string;name:string;hex:string;image?:string;disabled?:boolean}[]=previewMode?demoColors:variants.map(variant=>({id:variant.id,name:variant.name,hex:variant.hexPreview!,image:variant.swatchImage||variant.digitalSwatchImage,disabled:variant.available===false}));
+ const selectedColor=previewMode?value.previewColorId:value.variantId;
+ const visible=allColors?colors:[...colors.slice(0,6),...colors.slice(6).filter(color=>color.id===selectedColor)];
+ function choose(material:Material){
+  const fabric=visualizerFabric(material.fabricId,records)!;
+  const variant=fabric.colors.find(variant=>variant.id===value.variantId&&variant.available!==false)||fabric.colors.find(variant=>variant.id===(layer==='sheer'?'soft-ivory':'ivory')&&variant.available!==false)||fabric.colors.find(variant=>variant.available!==false)!;
+  onChange({enabled:true,materialId:material.id,fabricId:fabric.id,...(material.colorMode==='tint'&&value.previewColorId?{previewColorId:value.previewColorId}:{variantId:variant.id})});
+ }
+ return <div>
+  <fieldset className="m-0 mb-5 flex min-w-0 items-center justify-between gap-3 border-0 p-0">
+   <legend className="float-left text-[13px]">{layer==='sheer'?'Add sheer curtains?':'Include main curtains?'}</legend>
+   <div className="inline-flex rounded-full border border-solid border-[#d5d9ce] p-0.5">{[true,false].map(enabled=><button type="button" key={String(enabled)} aria-label={`${layer==='sheer'?'Add sheer curtains':'Include main curtains'}: ${enabled?'Yes':'No'}`} data-layer-toggle={`${layer}-${enabled?'on':'off'}`} aria-pressed={value.enabled===enabled} onClick={()=>onChange({...value,enabled})} className="min-h-10 min-w-12 rounded-full border-0 bg-transparent px-3 text-[12px] aria-pressed:bg-ink aria-pressed:text-paper">{enabled?'Yes':'No'}</button>)}</div>
+  </fieldset>
   {value.enabled&&<>
-   <div role="group" aria-label={layer+' fabric varieties'} className="grid grid-cols-2 gap-3">{available.map(material=><button type="button" key={material.id} aria-pressed={value.materialId===material.id} onClick={()=>{setAll(false);onChange({enabled:true,materialId:material.id,fabricId:material.fabricId!,previewColorId:value.previewColorId||'preview-ivory'});}} className="min-w-0 border border-solid border-[#d5d5c9] bg-white p-2 text-left aria-pressed:border-ink aria-pressed:outline-1 aria-pressed:outline-ink"><img src={material.thumbnail} alt="" loading="lazy" className="aspect-[1.7] w-full object-cover"/><span className="mt-2 block text-[13px] font-medium">{material.name}</span><span className="mt-1 block text-[11px] text-muted">{value.materialId===material.id?'Selected · ':''}Material study</span></button>)}</div>
-   {!available.length&&<p className="text-[13px] leading-6 text-muted">Compatible fabric textures are being prepared. Enquire for our current range.</p>}
-   {current&&<fieldset className="m-0 mt-6 min-w-0 border-0 p-0"><legend className="text-[14px]">Choose your colour <span className="text-muted">/ {current.shadeName}</span></legend>
-    <div role="group" aria-label={layer+' shade source'} className="my-3 flex flex-wrap gap-2"><button type="button" aria-pressed={previewMode} onClick={()=>{setAll(false);onChange({...value,variantId:undefined,previewColorId:'preview-ivory'});}} className="min-h-11 border-b border-solid border-transparent bg-transparent px-1 text-[12px] aria-pressed:border-ink">Preview colours</button>{variants.length>0&&<button type="button" aria-pressed={!previewMode} onClick={()=>{setAll(false);onChange({...value,previewColorId:undefined,variantId:variants.find(v=>v.available!==false)?.id});}} className="min-h-11 border-b border-solid border-transparent bg-transparent px-1 text-[12px] aria-pressed:border-ink">{current.fabric.source==='supplier'?'Catalogue shades':'Reference shades'}</button>}</div>
-    <div role="group" aria-label={layer+' colours'} className="grid grid-cols-3 gap-2">{(all?colors:colors.slice(0,6)).map(color=>{const selected=(previewMode?value.previewColorId:value.variantId)===color.id;return <button type="button" key={color.id} disabled={'disabled' in color&&Boolean(color.disabled)} aria-label={layer+' colour: '+color.name} aria-pressed={selected} onClick={()=>onChange({...value,variantId:previewMode?undefined:color.id,previewColorId:previewMode?color.id:undefined})} className="flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 border border-solid border-[#d9d9cf] bg-white px-1 py-2 text-center text-[11px] aria-pressed:border-ink aria-pressed:outline-1 aria-pressed:outline-ink disabled:opacity-40"><span style={{backgroundColor:color.hex}} className="block h-6 w-6 rounded-full border border-solid border-black/10"/><span>{color.name}{selected?' ✓':''}</span></button>;})}</div>
-    {colors.length>6&&<button type="button" onClick={()=>setAll(!all)} className="mt-2 min-h-11 bg-transparent text-[12px] underline underline-offset-4">{all?'Show popular colours':'View all colours ('+colors.length+')'}</button>}
-    <p className="mb-0 mt-2 text-[12px] leading-5 text-muted">{previewMode?'Preview palette only; these colours are not confirmed supplier shades.':current.fabric.source==='supplier'?'Shades follow the selected catalogue record.':'Reference shades are illustrative; availability requires confirmation.'}</p>
+   <p className="mb-2 text-[11px] uppercase tracking-[1.5px] text-muted">Fabric <span className="ml-1 normal-case tracking-normal text-ink">/ {current?.fabric.name}</span></p>
+   <div ref={rail} role="group" aria-label={layer+' fabric varieties'} className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-3 [scrollbar-width:thin]">
+    {choices.map(material=><button type="button" key={material.id} data-material-id={material.id} aria-label={material.name} aria-pressed={value.materialId===material.id} onClick={()=>choose(material)} className="group w-[100px] shrink-0 snap-start border-0 bg-transparent p-0 text-left">
+     <span className="relative block overflow-hidden rounded-[4px] border-2 border-solid border-transparent group-aria-pressed:border-ink"><StudioImage src={material.thumbnail} alt={material.name+' texture'} className="aspect-[1.35] w-full object-cover"/>{value.materialId===material.id&&<Check size={14} className="absolute bottom-1 right-1 rounded-full bg-paper p-0.5"/>}</span>
+     <span className="mt-2 block min-h-8 text-[11px] leading-[1.4] group-aria-pressed:font-semibold">{material.name}</span>
+    </button>)}
+   </div>
+   {current&&<fieldset className="m-0 mt-4 min-w-0 border-0 p-0"><legend className="text-[11px] uppercase tracking-[1.5px] text-muted">Colour <span className="ml-1 normal-case tracking-normal text-ink">/ {current.shadeName}</span></legend>
+    {!current.material.library&&current.material.colorMode==='tint'&&<div role="group" aria-label={layer+' shade source'} className="my-2 flex gap-4 text-[11px]"><button type="button" onClick={()=>onChange({...value,variantId:undefined,previewColorId:'preview-ivory'})} className="min-h-11 border-0 bg-transparent p-0 underline">Illustrative palette</button><button type="button" onClick={()=>onChange({...value,previewColorId:undefined,variantId:variants.find(variant=>variant.available!==false)?.id})} className="min-h-11 border-0 bg-transparent p-0 underline">{current.fabric.source==='supplier'?'Catalogue shades':'Reference shades'}</button></div>}
+    <div role="group" aria-label={layer+' colours'} className="mt-3 flex flex-wrap gap-x-2 gap-y-3">{visible.map(color=><button type="button" key={color.id} title={color.name} aria-label={layer+' colour: '+color.name} aria-pressed={selectedColor===color.id} disabled={color.disabled} onClick={()=>onChange({...value,variantId:previewMode?undefined:color.id,previewColorId:previewMode?color.id:undefined})} className="group grid h-11 w-11 shrink-0 place-items-center rounded-full border border-solid border-transparent bg-transparent p-1 aria-pressed:border-ink disabled:opacity-35">
+     <span style={{backgroundColor:color.hex}} className="relative block h-8 w-8 overflow-hidden rounded-full border border-solid border-black/10">{color.image&&<StudioImage src={color.image} alt="" className="h-full w-full object-cover"/>}{selectedColor===color.id&&<span className="absolute inset-0 grid place-items-center"><Check size={13} className="rounded-full bg-paper/90 p-0.5 text-ink"/></span>}</span>
+    </button>)}</div>
+    {colors.length>6&&<button type="button" onClick={()=>setAllColors(!allColors)} className="mt-2 min-h-11 border-0 bg-transparent p-0 text-[11px] underline underline-offset-4">{allColors?'Show fewer colours':`View all colours (${colors.length})`}</button>}
    </fieldset>}
+   <p className="mb-0 mt-3 text-[11px] leading-5 text-muted">{current?.commercial?'Confirm your shade with a physical sample.':'Illustrative textiles and colours. Availability confirmed with your enquiry.'}</p>
   </>}
-  {missing.length>0&&<details className="mt-4 border-t border-solid border-[#dedbd2] pt-1"><summary className="min-h-11 cursor-pointer py-3 text-[12px] text-muted">More varieties · textures in preparation ({missing.length})</summary><ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">{missing.map(material=><li key={material.id} className="border border-solid border-[#dedbd2] px-3 py-2 text-[12px] text-muted">{material.name}<span className="mt-1 block text-[10px]">Preview unavailable</span></li>)}</ul></details>}
+  {onNext&&<button type="button" onClick={onNext} className="mt-3 flex min-h-11 items-center gap-2 border-0 bg-transparent p-0 text-[12px] font-medium">Choose your main curtain<ArrowRight size={14}/></button>}
  </div>;
 }

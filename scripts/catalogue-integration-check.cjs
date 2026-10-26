@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 const {spawn}=require('node:child_process'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve('.test-data'),directory=path.join(root,'catalogue-'+crypto.randomUUID()),port=3210,base='http://localhost:'+port,password=crypto.randomBytes(24).toString('hex');
 const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p',String(port)],{windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,SITE_URL:base,DCORHOME_DATA_DIR:directory,SESSION_SECRET:crypto.randomBytes(32).toString('hex'),ADMIN_PASSWORD:password,ALLOW_LOCAL_HTTP:'true',AI_ENABLED:'false',RESEND_API_KEY:'',ENQUIRY_FROM_EMAIL:'',ENQUIRY_TO_EMAIL:'',DCORHOME_WHATSAPP_NUMBER:'15555550123'}});

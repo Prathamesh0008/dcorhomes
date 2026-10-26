@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({reset}:{error:Error;reset:()=>void}) {return <section role="alert" className="mx-auto max-w-2xl px-6 py-16"><h1 className="text-[28px] font-medium">This page is temporarily unavailable</h1><p className="my-6 text-muted">We could not load the required information. Please try again or contact sales@dcorhome.com.</p><button type="button" onClick={reset} className="min-h-12 bg-ink px-6 text-paper">Try again</button></section>;}

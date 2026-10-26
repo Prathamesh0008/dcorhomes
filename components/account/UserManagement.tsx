@@ -1,0 +1,31 @@
+"use client";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { buttonClass, Feedback, Field, inputClass } from './FormControls';
+type Member = { id: string; userId: string; fullName: string; email: string; role: string; status: string; mustChangePassword: boolean; createdAt: string; lastLoginAt: string | null; createdBy: string | null };
+export default function UserManagement() {
+  const [users, setUsers] = useState<Member[]>([]), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
+  const [credential, setCredential] = useState<{ userId: string; password: string } | null>(null), [selected, setSelected] = useState<Member | null>(null);
+  const secretPanel = useRef<HTMLDivElement>(null);
+  const load = useCallback(async () => { const response = await fetch('/api/admin/users', { cache: 'no-store' }); const result = await response.json(); if (!response.ok) throw Error(result.error || 'Unable to load users.'); setUsers(result.users); }, []);
+  useEffect(() => { load().catch(error => setMessage(error.message)); }, [load]);
+  useEffect(() => { if (credential) secretPanel.current?.focus(); }, [credential]);
+  async function create(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (busy) return; const form = event.currentTarget, data = new FormData(form);
+    setBusy(true); setMessage(''); setCredential(null);
+    try { const response = await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(data)) }); const result = await response.json(); if (!response.ok) throw Error(result.error || 'Unable to create user.');
+      setCredential({ userId: String(data.get('userId')), password: result.temporaryPassword }); form.reset(); await load();
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to create user.'); } finally { setBusy(false); }
+  }
+  async function manage(user: Member, action: string) {
+    if (busy || !window.confirm(`${action === 'reset-password' ? 'Reset password for' : action === 'disable' ? 'Disable' : 'Enable'} ${user.userId}? Existing sessions will be invalidated.`)) return;
+    setBusy(true); setMessage(''); setCredential(null);
+    try { const response = await fetch(`/api/admin/users/${user.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }) }); const result = await response.json(); if (!response.ok) throw Error(result.error || 'Unable to update user.');
+      if (result.temporaryPassword) setCredential({ userId: user.userId, password: result.temporaryPassword }); else setMessage('Account updated. Previous sessions are invalid.'); await load();
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to update user.'); } finally { setBusy(false); }
+  }
+  return <div className="space-y-9"><Feedback>{message}</Feedback>{credential && <div ref={secretPanel} tabIndex={-1} role="status" className="border border-solid border-ink bg-[#e9eee7] p-6"><h2 className="text-xl font-medium">Temporary password for {credential.userId}</h2><p className="my-3 text-[14px]">Shown only in this response. Share privately with the member. It cannot be retrieved later.</p><p className="break-all select-all font-mono text-lg">{credential.password}</p><button type="button" className="mt-4 min-h-11 underline" onClick={() => setCredential(null)}>I have saved it securely — dismiss</button></div>}
+    <section><h2 className="mb-5 text-[26px] font-medium">Create user</h2><form onSubmit={create} className="grid max-w-3xl gap-5 sm:grid-cols-2"><Field name="fullName" label="Full name" required minLength={2} maxLength={100}/><Field name="userId" label="Unique User ID" required minLength={3} maxLength={30} pattern="[a-zA-Z0-9][a-zA-Z0-9_.\-]{2,29}" autoComplete="off"/><Field name="email" label="Email (optional)" type="email" maxLength={200}/><label className="text-[14px]">Role<select name="role" className={inputClass} defaultValue="user"><option value="user">User</option><option value="admin">Administrator</option></select></label><button className={`${buttonClass} justify-self-start`} disabled={busy}>{busy ? 'Please wait…' : 'Create user'}</button></form></section>
+    <section><h2 className="mb-5 text-[26px] font-medium">Members</h2><p className="mb-4 text-sm text-muted">Most recent 500 accounts. Passwords are never included in this list.</p><div className="overflow-x-auto"><table className="w-full text-left text-[14px]"><thead><tr>{['User ID', 'Full name', 'Role', 'Status', 'Last login', 'Created', 'Actions'].map(label => <th key={label} className="whitespace-nowrap border-b p-3">{label}</th>)}</tr></thead><tbody>{users.map(user => <tr key={user.id}><td className="p-3 font-medium">{user.userId}</td><td className="p-3">{user.fullName}</td><td className="p-3">{user.role}</td><td className="p-3">{user.status}</td><td className="p-3">{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}</td><td className="p-3">{new Date(user.createdAt).toLocaleDateString()}</td><td className="p-3"><div className="flex flex-wrap gap-x-4"><button type="button" disabled={busy} onClick={() => setSelected(user)} className="min-h-11 underline">Details</button><button type="button" disabled={busy} onClick={() => manage(user, 'reset-password')} className="min-h-11 underline">Reset password</button><button type="button" disabled={busy} onClick={() => manage(user, user.status === 'active' ? 'disable' : 'enable')} className="min-h-11 underline">{user.status === 'active' ? 'Disable' : 'Enable'}</button></div></td></tr>)}</tbody></table></div></section>
+    {selected && <section className="border border-solid border-[#cbcfc2] p-6"><h2 className="text-xl font-medium">{selected.userId}</h2><p>{selected.fullName} · {selected.email || 'No email supplied'}</p><p>{selected.role} · {selected.status} · {selected.mustChangePassword ? 'Password change required' : 'Password established'}</p><p className="break-all text-sm text-muted">Created by: {selected.createdBy}</p><button type="button" className="min-h-11 underline" onClick={() => setSelected(null)}>Close details</button></section>}
+  </div>;
+}

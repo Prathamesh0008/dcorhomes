@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "roomCount": 10,
+  "roomResults": [
+    "room-01",
+    "room-02",
+    "room-03",
+    "room-04",
+    "room-05",
+    "room-06",
+    "room-07",
+    "room-08",
+    "room-09",
+    "room-10"
+  ],
+  "canvasHashes": {
+    "initial": 3068981204,
+    "sheer": 2364253667,
+    "velvet": 1577071789,
+    "burgundy": 2309389141,
+    "noSheer": 1350489932
+  },
+  "independentLayers": true,
+  "localSaveAndReload": true,
+  "pngDownload": true,
+  "mobile": {
+    "previewTop": 310,
+    "controlsTop": 1407.5,
+    "viewport": 390,
+    "page": 390
+  },
+  "brokenImages": [],
+  "httpFailures": [],
+  "browserExceptions": [],
+  "aiRequests": []
+}

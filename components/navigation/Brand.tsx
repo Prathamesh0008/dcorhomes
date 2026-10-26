@@ -1,13 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], weight: "500", display: "swap" });
+
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link
       href="/"
-      aria-label="Dcorhome home"
+      aria-label="DCOR HOME — home"
       className={`inline-flex flex-col gap-2 ${light ? "text-paper" : "text-ink"}`}
     >
-      <span className="flex items-center gap-3 text-[30px] font-semibold leading-none tracking-[-1px] sm:text-[34px]">
+      <span aria-hidden="true" className="flex items-center gap-3 leading-none">
         <Image
           src={light ? "/branding/cream.png" : "/branding/green.png"}
           alt=""
@@ -16,8 +20,8 @@ export function Brand({ light = false }: { light?: boolean }) {
           height={36}
           className="h-9 w-9 shrink-0 object-contain"
         />
-        <span className="whitespace-nowrap">
-          <span className="text-[1.13em] leading-[0]">D</span>COR{" "}<span className="font-normal">HOME</span>
+        <span className={`${inter.className} whitespace-nowrap text-[30px] font-medium tracking-[-0.03em] [word-spacing:-2px] [font-kerning:normal]`}>
+          <span className="text-[1.075em]">D</span>COR HOME
         </span>
       </span>
       <span

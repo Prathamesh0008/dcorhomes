@@ -1,0 +1,713 @@
+{
+  "all_requested_folders_present": true,
+  "fabric_varieties": {
+    "sheers/plain-voile": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/fine-voile": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/linen-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/cotton-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/organza-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/embroidered-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/net-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/textured-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/striped-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "sheers/jacquard-sheer": {
+      "required": 12,
+      "present": 12,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/pure-linen": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/cotton": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/cotton-linen-blend": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/velvet": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/silk": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/silk-blend": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/faux-silk": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/jacquard": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/chenille": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    },
+    "main-curtains/textured-polyester-weave": {
+      "required": 11,
+      "present": 11,
+      "missing": [],
+      "exact_duplicate_files": 0,
+      "unique_mean_colors": 10
+    }
+  },
+  "room_layers": {
+    "room-01": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 248
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 248
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 99
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 255
+        }
+      },
+      "quality": "existing proof-of-concept; furniture occlusion requires review",
+      "background_source": "original prior asset"
+    },
+    "room-02": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-03": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-04": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-05": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-06": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-07": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-08": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    },
+    "room-09": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 248
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 248
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 99
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 255
+        }
+      },
+      "quality": "existing proof-of-concept; furniture occlusion requires review",
+      "background_source": "original prior asset"
+    },
+    "room-10": {
+      "missing": [],
+      "dimensions": [
+        2048,
+        1280
+      ],
+      "all_layers_aligned": true,
+      "alpha": {
+        "main-left-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "curtain-track-layer.webp": {
+          "min": 0,
+          "max": 225
+        },
+        "main-right-layer.webp": {
+          "min": 0,
+          "max": 247
+        },
+        "foreground-occlusion.webp": {
+          "min": 0,
+          "max": 0
+        },
+        "sheer-layer.webp": {
+          "min": 0,
+          "max": 81
+        }
+      },
+      "mask_ranges": {
+        "main-right-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "window-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "sheer-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "main-left-mask.webp": {
+          "min": 0,
+          "max": 255
+        },
+        "foreground-occlusion-mask.webp": {
+          "min": 0,
+          "max": 0
+        }
+      },
+      "quality": "provisional scene-sheet crop; NOT production ready; foreground occlusion unresolved",
+      "background_source": "cropped from generated multi-scene illustration (NOT an independent full-resolution photograph)"
+    }
+  },
+  "errors": [],
+  "warnings": [
+    "room-02 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-03 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-04 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-05 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-06 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-07 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-08 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "room-10 is a low-resolution upscaled illustration crop; curtain-free provenance and furniture occlusion FAILED production requirements.",
+    "No photo-perfect room set: 8 new scenes created as provisional cropped concept images; independent room-generation service unavailable."
+  ],
+  "file_count": 370,
+  "original_files_preserved": 254,
+  "two_combination_test": {
+    "room": "room-01",
+    "A": "room-01_ivory-voile_olive-linen_proof.webp",
+    "B": "room-01_white-fine-voile_burgundy-velvet_proof.webp",
+    "background_sha256": "06857e068bdaef9dde656a9645b9a5ac87a262449d10ca83a46a15d8868af63d",
+    "pixels_changed": 1055895,
+    "changed_pixels_outside_curtain_masks": 0,
+    "pass_same_background_and_mask_limited_differences": true,
+    "note": "Both use byte-identical base.webp. Existing foreground/track overlays are the same in both compositions; only texture/material/colour inputs differ."
+  },
+  "manifest_references_all_exist": true,
+  "original_files_sha_unchanged": true
+}

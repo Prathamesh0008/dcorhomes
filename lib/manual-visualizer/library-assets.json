@@ -1,0 +1,2979 @@
+{
+  "version": "library-v1",
+  "rooms": [
+    {
+      "id": "room-01",
+      "name": "Modern living room",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-01/base.png",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-01/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.208701,
+        0.136089,
+        0.796343,
+        0.642137
+      ],
+      "provisional": false,
+      "notice": "Room view only. Curtain placement and furniture edges need refinement before this room can show your selection."
+    },
+    {
+      "id": "room-02",
+      "name": "Luxury Master Bedroom",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-02/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-02/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.3,
+        0.18,
+        0.87,
+        0.79
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-03",
+      "name": "Premium Dining Room",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-03/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-03/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.37,
+        0.13,
+        0.96,
+        0.8
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-04",
+      "name": "Contemporary Apartment",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-04/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-04/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.28,
+        0.13,
+        0.97,
+        0.83
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-05",
+      "name": "Classic Luxury Living Room",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-05/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-05/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.22,
+        0.16,
+        0.88,
+        0.85
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-06",
+      "name": "Modern Guest Bedroom",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-06/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-06/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.42,
+        0.16,
+        0.89,
+        0.76
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-07",
+      "name": "Luxury Drawing Room",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-07/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-07/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.2,
+        0.13,
+        0.94,
+        0.83
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-08",
+      "name": "Contemporary Home Office",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-08/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-08/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.38,
+        0.16,
+        0.96,
+        0.82
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    },
+    {
+      "id": "room-09",
+      "name": "Minimalist living room",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-09/base.png",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-09/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.24338,
+        0.164315,
+        0.789407,
+        0.646169
+      ],
+      "provisional": false,
+      "notice": "Room view only. Curtain placement and furniture edges need refinement before this room can show your selection."
+    },
+    {
+      "id": "room-10",
+      "name": "Elegant Bedroom with Balcony Doors",
+      "base": "/images/manual-visualizer/library-v1/rooms/room-10/base.webp",
+      "thumbnail": "/images/manual-visualizer/library-v1/rooms/room-10/thumbnail.webp",
+      "width": 2048,
+      "height": 1280,
+      "window": [
+        0.23,
+        0.12,
+        0.69,
+        0.88
+      ],
+      "provisional": true,
+      "notice": "Room inspiration only. This concept may already contain curtains; your selected fabrics are not shown here."
+    }
+  ],
+  "fabrics": [
+    {
+      "id": "library-sheer-cotton-sheer",
+      "name": "Cotton Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/blush.png",
+          "hex": "#e6cccd"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/champagne.png",
+          "hex": "#e2d2b8"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/cream.png",
+          "hex": "#ebe0cb"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/light-beige.png",
+          "hex": "#d9cab3"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/pale-blue.png",
+          "hex": "#b9cfd9"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/pure-white.png",
+          "hex": "#f3f3f0"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/sage-green.png",
+          "hex": "#b6c0ae"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/sand.png",
+          "hex": "#d0bda2"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/soft-ivory.png",
+          "hex": "#f0ebe2"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/cotton-sheer/warm-grey.png",
+          "hex": "#bdbab4"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-embroidered-sheer",
+      "name": "Embroidered Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/blush.png",
+          "hex": "#edd2d3"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/champagne.png",
+          "hex": "#e9d8bd"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/cream.png",
+          "hex": "#f3e7d1"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/light-beige.png",
+          "hex": "#e0d0b9"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/pale-blue.png",
+          "hex": "#bfd5e0"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/pure-white.png",
+          "hex": "#fbfbf8"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/sage-green.png",
+          "hex": "#bbc6b3"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/sand.png",
+          "hex": "#d6c2a6"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/soft-ivory.png",
+          "hex": "#f8f3e9"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/embroidered-sheer/warm-grey.png",
+          "hex": "#c3c0ba"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-fine-voile",
+      "name": "Fine Voile",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/blush.png",
+          "hex": "#efd5d6"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/champagne.png",
+          "hex": "#ecdcbf"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/cream.png",
+          "hex": "#f5ead4"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/light-beige.png",
+          "hex": "#e3d3bb"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/pale-blue.png",
+          "hex": "#c1d8e3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/pure-white.png",
+          "hex": "#fbfbf9"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/sage-green.png",
+          "hex": "#bec9b5"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/sand.png",
+          "hex": "#d8c5a8"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/soft-ivory.png",
+          "hex": "#f8f4ec"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/fine-voile/warm-grey.png",
+          "hex": "#c5c2bc"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-jacquard-sheer",
+      "name": "Jacquard Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/blush.png",
+          "hex": "#dfc6c7"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/champagne.png",
+          "hex": "#dbccb2"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/cream.png",
+          "hex": "#e5d9c5"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/light-beige.png",
+          "hex": "#d3c4ae"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/pale-blue.png",
+          "hex": "#b4c8d3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/pure-white.png",
+          "hex": "#eeeeea"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/sage-green.png",
+          "hex": "#b0bba9"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/sand.png",
+          "hex": "#c9b79d"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/soft-ivory.png",
+          "hex": "#eae5dc"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/jacquard-sheer/warm-grey.png",
+          "hex": "#b7b5af"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-linen-sheer",
+      "name": "Linen Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/blush.png",
+          "hex": "#dec6c7"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/champagne.png",
+          "hex": "#dbccb2"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/cream.png",
+          "hex": "#e4dac5"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/light-beige.png",
+          "hex": "#d3c4ae"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/pale-blue.png",
+          "hex": "#b4c9d3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/pure-white.png",
+          "hex": "#ebebe8"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/sage-green.png",
+          "hex": "#b1bba9"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/sand.png",
+          "hex": "#c9b79d"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/soft-ivory.png",
+          "hex": "#e8e4db"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/linen-sheer/warm-grey.png",
+          "hex": "#b7b5af"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-net-sheer",
+      "name": "Net Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/blush.png",
+          "hex": "#edd2d3"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/champagne.png",
+          "hex": "#e9d8bd"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/cream.png",
+          "hex": "#f2e7d1"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/light-beige.png",
+          "hex": "#e0d0b8"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/pale-blue.png",
+          "hex": "#bfd5e0"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/pure-white.png",
+          "hex": "#f6f6f5"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/sage-green.png",
+          "hex": "#bbc6b3"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/sand.png",
+          "hex": "#d6c2a6"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/soft-ivory.png",
+          "hex": "#f5f2e9"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/net-sheer/warm-grey.png",
+          "hex": "#c2c0b9"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-organza-sheer",
+      "name": "Organza Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/blush.png",
+          "hex": "#f0d5d6"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/champagne.png",
+          "hex": "#ecdbc0"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/cream.png",
+          "hex": "#f5ead4"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/light-beige.png",
+          "hex": "#e3d3bb"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/pale-blue.png",
+          "hex": "#c1d8e3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/pure-white.png",
+          "hex": "#fafaf9"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/sage-green.png",
+          "hex": "#bec9b5"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/sand.png",
+          "hex": "#d8c5a8"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/soft-ivory.png",
+          "hex": "#f9f5ec"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/organza-sheer/warm-grey.png",
+          "hex": "#c5c2bc"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-plain-voile",
+      "name": "Plain Voile",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/blush.png",
+          "hex": "#efd5d6"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/champagne.png",
+          "hex": "#ecdcbf"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/cream.png",
+          "hex": "#f5ead4"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/light-beige.png",
+          "hex": "#e3d3bb"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/pale-blue.png",
+          "hex": "#c1d8e3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/pure-white.png",
+          "hex": "#fbfbf9"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/sage-green.png",
+          "hex": "#bec9b5"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/sand.png",
+          "hex": "#d8c5a8"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/soft-ivory.png",
+          "hex": "#f9f5ec"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/plain-voile/warm-grey.png",
+          "hex": "#c5c2bc"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-striped-sheer",
+      "name": "Striped Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/blush.png",
+          "hex": "#f0d5d6"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/champagne.png",
+          "hex": "#ecdcc0"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/cream.png",
+          "hex": "#f5ead4"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/light-beige.png",
+          "hex": "#e3d3bb"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/pale-blue.png",
+          "hex": "#c1d8e3"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/pure-white.png",
+          "hex": "#fafaf9"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/sage-green.png",
+          "hex": "#bec9b5"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/sand.png",
+          "hex": "#d9c5a8"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/soft-ivory.png",
+          "hex": "#f9f5ec"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/striped-sheer/warm-grey.png",
+          "hex": "#c5c2bc"
+        }
+      ]
+    },
+    {
+      "id": "library-sheer-textured-sheer",
+      "name": "Textured Sheer",
+      "layer": "sheer",
+      "master": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/master.png",
+      "opacityMap": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/opacity-mask.png",
+      "colors": [
+        {
+          "id": "blush",
+          "name": "Blush",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/blush.png",
+          "hex": "#ecd3d4"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/champagne.png",
+          "hex": "#e8d9bd"
+        },
+        {
+          "id": "cream",
+          "name": "Cream",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/cream.png",
+          "hex": "#f1e7d2"
+        },
+        {
+          "id": "light-beige",
+          "name": "Light Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/light-beige.png",
+          "hex": "#e0d1b9"
+        },
+        {
+          "id": "pale-blue",
+          "name": "Pale Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/pale-blue.png",
+          "hex": "#bfd5e0"
+        },
+        {
+          "id": "pure-white",
+          "name": "Pure White",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/pure-white.png",
+          "hex": "#f7f7f4"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/sage-green.png",
+          "hex": "#bcc7b4"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/sand.png",
+          "hex": "#d6c3a6"
+        },
+        {
+          "id": "soft-ivory",
+          "name": "Soft Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/soft-ivory.png",
+          "hex": "#f4f0e9"
+        },
+        {
+          "id": "warm-grey",
+          "name": "Warm Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/sheers/textured-sheer/warm-grey.png",
+          "hex": "#c3c0ba"
+        }
+      ]
+    },
+    {
+      "id": "library-main-chenille",
+      "name": "Chenille",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/burgundy.png",
+          "hex": "#6b3042"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/champagne.png",
+          "hex": "#c2b08e"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/charcoal-grey.png",
+          "hex": "#46484a"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/ivory.png",
+          "hex": "#d3cab8"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/mocha.png",
+          "hex": "#69503f"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/navy-blue.png",
+          "hex": "#2e405c"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/olive-green.png",
+          "hex": "#5d6643"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/sage-green.png",
+          "hex": "#859174"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/sand-beige.png",
+          "hex": "#b09c7f"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/chenille/taupe.png",
+          "hex": "#897a6c"
+        }
+      ]
+    },
+    {
+      "id": "library-main-cotton",
+      "name": "Cotton",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/burgundy.png",
+          "hex": "#743549"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/champagne.png",
+          "hex": "#d3bf9b"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/charcoal-grey.png",
+          "hex": "#4c4e51"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/ivory.png",
+          "hex": "#e5dbc8"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/mocha.png",
+          "hex": "#725744"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/navy-blue.png",
+          "hex": "#334664"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/olive-green.png",
+          "hex": "#656f49"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/sage-green.png",
+          "hex": "#919e7e"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/sand-beige.png",
+          "hex": "#bfa98a"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton/taupe.png",
+          "hex": "#958576"
+        }
+      ]
+    },
+    {
+      "id": "library-main-cotton-linen-blend",
+      "name": "Cotton Linen Blend",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/burgundy.png",
+          "hex": "#753448"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/champagne.png",
+          "hex": "#d3bf9b"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/charcoal-grey.png",
+          "hex": "#4c4e51"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/ivory.png",
+          "hex": "#e5dbc8"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/mocha.png",
+          "hex": "#735745"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/navy-blue.png",
+          "hex": "#334664"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/olive-green.png",
+          "hex": "#646f49"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/sage-green.png",
+          "hex": "#919e7f"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/sand-beige.png",
+          "hex": "#bfaa8a"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/cotton-linen-blend/taupe.png",
+          "hex": "#958576"
+        }
+      ]
+    },
+    {
+      "id": "library-main-faux-silk",
+      "name": "Faux Silk",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/burgundy.png",
+          "hex": "#753548"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/champagne.png",
+          "hex": "#d3bf9b"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/charcoal-grey.png",
+          "hex": "#4c4e51"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/ivory.png",
+          "hex": "#e4dbc8"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/mocha.png",
+          "hex": "#725745"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/navy-blue.png",
+          "hex": "#334664"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/olive-green.png",
+          "hex": "#656f49"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/sage-green.png",
+          "hex": "#919e7e"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/sand-beige.png",
+          "hex": "#bfaa8a"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/faux-silk/taupe.png",
+          "hex": "#958575"
+        }
+      ]
+    },
+    {
+      "id": "library-main-jacquard",
+      "name": "Jacquard",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/burgundy.png",
+          "hex": "#6b3042"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/champagne.png",
+          "hex": "#c2b08e"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/charcoal-grey.png",
+          "hex": "#45474a"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/ivory.png",
+          "hex": "#d3cab8"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/mocha.png",
+          "hex": "#69503e"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/navy-blue.png",
+          "hex": "#2e405b"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/olive-green.png",
+          "hex": "#5c6543"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/sage-green.png",
+          "hex": "#859174"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/sand-beige.png",
+          "hex": "#b09c7f"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/jacquard/taupe.png",
+          "hex": "#897a6c"
+        }
+      ]
+    },
+    {
+      "id": "library-main-pure-linen",
+      "name": "Pure Linen",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/burgundy.png",
+          "hex": "#713346"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/champagne.png",
+          "hex": "#ccb996"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/charcoal-grey.png",
+          "hex": "#4a4c4f"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/ivory.png",
+          "hex": "#ded5c2"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/mocha.png",
+          "hex": "#6f5442"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/navy-blue.png",
+          "hex": "#314461"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/olive-green.png",
+          "hex": "#626b47"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/sage-green.png",
+          "hex": "#8c997b"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/sand-beige.png",
+          "hex": "#b9a486"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/pure-linen/taupe.png",
+          "hex": "#908172"
+        }
+      ]
+    },
+    {
+      "id": "library-main-silk",
+      "name": "Silk",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/burgundy.png",
+          "hex": "#723346"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/champagne.png",
+          "hex": "#cdba97"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/charcoal-grey.png",
+          "hex": "#4a4c4f"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/ivory.png",
+          "hex": "#ded6c3"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/mocha.png",
+          "hex": "#6f5543"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/navy-blue.png",
+          "hex": "#314461"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/olive-green.png",
+          "hex": "#626c47"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/sage-green.png",
+          "hex": "#8d9a7b"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/sand-beige.png",
+          "hex": "#baa587"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk/taupe.png",
+          "hex": "#918273"
+        }
+      ]
+    },
+    {
+      "id": "library-main-silk-blend",
+      "name": "Silk Blend",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/burgundy.png",
+          "hex": "#733447"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/champagne.png",
+          "hex": "#d0bd99"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/charcoal-grey.png",
+          "hex": "#4b4d50"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/ivory.png",
+          "hex": "#e2d9c6"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/mocha.png",
+          "hex": "#715644"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/navy-blue.png",
+          "hex": "#324562"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/olive-green.png",
+          "hex": "#646d48"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/sage-green.png",
+          "hex": "#8f9c7d"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/sand-beige.png",
+          "hex": "#bda888"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/silk-blend/taupe.png",
+          "hex": "#938374"
+        }
+      ]
+    },
+    {
+      "id": "library-main-textured-polyester-weave",
+      "name": "Textured Polyester Weave",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/burgundy.png",
+          "hex": "#733447"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/champagne.png",
+          "hex": "#d0bd99"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/charcoal-grey.png",
+          "hex": "#4b4d50"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/ivory.png",
+          "hex": "#e2d9c6"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/mocha.png",
+          "hex": "#715644"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/navy-blue.png",
+          "hex": "#324663"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/olive-green.png",
+          "hex": "#636d48"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/sage-green.png",
+          "hex": "#8f9c7d"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/sand-beige.png",
+          "hex": "#bda788"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/textured-polyester-weave/taupe.png",
+          "hex": "#938474"
+        }
+      ]
+    },
+    {
+      "id": "library-main-velvet",
+      "name": "Velvet",
+      "layer": "main",
+      "master": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/master.png",
+      "colors": [
+        {
+          "id": "burgundy",
+          "name": "Burgundy",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/burgundy.png",
+          "hex": "#6d3143"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/champagne.png",
+          "hex": "#c4b290"
+        },
+        {
+          "id": "charcoal-grey",
+          "name": "Charcoal Grey",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/charcoal-grey.png",
+          "hex": "#47494b"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/ivory.png",
+          "hex": "#d4ccbb"
+        },
+        {
+          "id": "mocha",
+          "name": "Mocha",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/mocha.png",
+          "hex": "#6b513f"
+        },
+        {
+          "id": "navy-blue",
+          "name": "Navy Blue",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/navy-blue.png",
+          "hex": "#2f415d"
+        },
+        {
+          "id": "olive-green",
+          "name": "Olive Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/olive-green.png",
+          "hex": "#5e6744"
+        },
+        {
+          "id": "sage-green",
+          "name": "Sage Green",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/sage-green.png",
+          "hex": "#879376"
+        },
+        {
+          "id": "sand-beige",
+          "name": "Sand Beige",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/sand-beige.png",
+          "hex": "#b29e81"
+        },
+        {
+          "id": "taupe",
+          "name": "Taupe",
+          "texture": "/images/manual-visualizer/library-v1/fabrics/main-curtains/velvet/taupe.png",
+          "hex": "#8b7c6d"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "rooms/room-01/base.png",
+      "sha256": "64f7f25f85927542b7ba5ca929cfb3511958df0893576b9b80e1fd081b3aa6f1",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-02/base.webp",
+      "sha256": "92f385f052b784a2132f776325c93b81a0b7288b65a34f415d4378e91436581f",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-03/base.webp",
+      "sha256": "286ad7cb923dcf56b4d95fec5f083809d5b4bd1449490fef7fe08ffbce256b00",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-04/base.webp",
+      "sha256": "a3b52743803b4ebaea847a36a21cd13ffcb7657590d30306ea8769a995855577",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-05/base.webp",
+      "sha256": "490c968179fcdb78c0f332f044d884ff062efd72a5768ab4e83c18f07916c5fb",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-06/base.webp",
+      "sha256": "a951b22e40ca35b400654420bbd045a526fbbb465e7e89fadf53c26f2af7c4fd",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-07/base.webp",
+      "sha256": "82e7a4db480a157a1a511be6e443fb3f78c8c1fef8b8761873668fbe7a15d9f2",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-08/base.webp",
+      "sha256": "6090fa43ef465dffaade6e5def7623e78dc8e76f3faad0ef31566ee4eda6e88e",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-09/base.png",
+      "sha256": "8047696d3305a62fb7eed38b043199510de71555e6acfa978f226341a00bb3b5",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "rooms/room-10/base.webp",
+      "sha256": "016ff553e4d6d53a85482a05df25e6ca4d6ad24c5faf85494c6138064765b2a8",
+      "width": 2048,
+      "height": 1280
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/master.png",
+      "sha256": "116dba5dc343d9301ccf00fcb180e0ec557e0adfd56da59afdd570ba2a3a462a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/opacity-mask.png",
+      "sha256": "784b8d3f1579b28916b54e6fdc631ea3167cf5b7b7836abf1d1bb13a555f131c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/blush.png",
+      "sha256": "87928ef73f89c15f254b29e88c0187bc2380821beb1a0430fe7c140335454faa",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/champagne.png",
+      "sha256": "d13ba2b0f1e2340f1220d291d967747ab27a5e9b1d098a765c8286a16da65cbd",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/cream.png",
+      "sha256": "a7cda43d24f64943b18999cfbb8169d1ffb809d33b4e1509b402eb7fc978f1a9",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/light-beige.png",
+      "sha256": "3aa1f9a240adad7304e225a874d8b38bc76d951b5777ff7cc48fe65a283c11f2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/pale-blue.png",
+      "sha256": "8dd9ebf75013d3fb7c2c26cfd100a699069844052d7970b983c9bdbfc35c1c52",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/pure-white.png",
+      "sha256": "015816eb5e323eae5128e71a5d6f87f56e0829f299d0e3f8050f0d9b292c9d66",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/sage-green.png",
+      "sha256": "7756d2b65f3731b9b3971fa98f70de153204dc6a8d0d8a1db7e238653a302b92",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/sand.png",
+      "sha256": "e0306d20047d4d3360239dfab8689658f2b1f33904407f777ced071535bc19bc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/soft-ivory.png",
+      "sha256": "4c15718b96750ce898fca4abf33f6965d2b99ce4b60f71bf7a5ed2f89785cb9e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/cotton-sheer/warm-grey.png",
+      "sha256": "2b0fd9db2fc0d10a5dada4cb77e52e8f6c263e4278b8b0587ffefe310e2750a3",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/master.png",
+      "sha256": "a5f2cd6d072e239ee22608d5acd5f5f87fe592b37889da363482f671bb063d85",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/opacity-mask.png",
+      "sha256": "33e6fa233e4ed8a08f5c9fb07f55c6804b52ef1ea753c93b36b7832315fb9707",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/blush.png",
+      "sha256": "707f1ab19a37db184f59c89e93b917cb8ff402982d1c5c0c59cc6037f81d7592",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/champagne.png",
+      "sha256": "2a81b7a3ccbee81a147fa4240d44ce960c8ea6a05429239a6fa381cd0f9e27dc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/cream.png",
+      "sha256": "8c3fefc99febea38849b0846e47ac31a98203cc6e9b6f6c2fd49e4d361d4c1ea",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/light-beige.png",
+      "sha256": "6fb48941394459f78c828ddbf8dfeb3c3dc6ee3b840f8a1da0b51943ade068e8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/pale-blue.png",
+      "sha256": "d096b2f9f2c34cbc4a3f02be4f7d6c5b7644d55b34c9580985e00527ab3bfa9a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/pure-white.png",
+      "sha256": "e1c0a3eb5e0488b3c84cbd838f4f807d875e9a077c23a3851c7b933124a82d06",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/sage-green.png",
+      "sha256": "6238c3acc93c77457f3f9eb77218ae38bb5ee7df093995a6e01a2870f558abb3",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/sand.png",
+      "sha256": "b1e08506017838fa4364673128db69161225f8102d44eeb5f2533026169f703b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/soft-ivory.png",
+      "sha256": "d605b1399e7ad9b992e89aaaca4bb823c56376bbf6fcd37137ca658ecb713680",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/embroidered-sheer/warm-grey.png",
+      "sha256": "563b3ede020f95947b846fa9beabc301efc52fad9d5e98387c0c9bca4c3b4eed",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/master.png",
+      "sha256": "06cda14eba7a578ed49c2f8276a902ea998be5984e2e1580546e871ec8d6ab86",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/opacity-mask.png",
+      "sha256": "67e0787fdc38b78f848c3d54cb3f118d02ca540f491e6e515ee264b659abcd71",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/blush.png",
+      "sha256": "fff394d47f73919ba75d16946961d7fe11d909269027eabec714514d19452e76",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/champagne.png",
+      "sha256": "23840b99509f0c98abfdb7d90292f965f4c26dbb6c5d7dc5a1ce437cd44b5e45",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/cream.png",
+      "sha256": "f04e92ef6fb062fdc82afdee7cd1e7f23114c75e4480a811e3e7d92436df0cd7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/light-beige.png",
+      "sha256": "9d172d012a8df68b77af7fc3b2c645ef9021b61f03ffe064778af83964b8887e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/pale-blue.png",
+      "sha256": "ebaa39854c763aaecb694f1aa424d3561d492a66323f4f083aa8f2169e87d684",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/pure-white.png",
+      "sha256": "3b995c9c0883ed81427aeec0ea18c92980d106e32cc43cfb0942e295993d9259",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/sage-green.png",
+      "sha256": "70bab7af6fbb990ab85ebfb84489ea30632542a74583e59e2a226f7dbcb5e165",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/sand.png",
+      "sha256": "8cc8b14dc6605ee41ef161797deee8c4512fca87455b2c901f923e06d2ae3d14",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/soft-ivory.png",
+      "sha256": "21e837cf32d3141ce84e5e4c5f3dc5c16affdd837c8af44b145259d6aec88cd6",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/fine-voile/warm-grey.png",
+      "sha256": "cf54ea22a4721e25f5379932accb0174bfd9def0ad28665d4089bda3c99b5dc9",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/master.png",
+      "sha256": "8e4a5ae36573e20f7b5bbc485e06596bcd66244b576c1a9575b948f082e66330",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/opacity-mask.png",
+      "sha256": "a89374898471bfd3766c062d0aed896fec8b23d10062f3a9ff4df2e165760271",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/blush.png",
+      "sha256": "5d6247e9e0ec09ca12cc82203a39104da6d2cdec160aec2ba68a7a710a6a393a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/champagne.png",
+      "sha256": "1846408e4f8558bb31fbf78526d444c2e6d2014bfd3ce71449290a9cd4b7c19d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/cream.png",
+      "sha256": "6557118c19a7bb66d8886b6def5226e89df3460bf219672326947bb68ca5b04e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/light-beige.png",
+      "sha256": "c0302983f557eaf4a92c2237fe7f3c9c5e92c52d8151ec6ff3de39b2cf5708e5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/pale-blue.png",
+      "sha256": "bbb0fbdf1fef07812ba519f9af8b2ce3e689197c6fe4afdd4a22b89830aa3834",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/pure-white.png",
+      "sha256": "d8ade2cd22d128d49e345500513e59ca83a488467e72c9a53b4667c84c3f766e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/sage-green.png",
+      "sha256": "c479a4ffedb48f106eafbfb166e49d5433217316bb840b6305cb1205f7d8a6e1",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/sand.png",
+      "sha256": "e30bec6c87ff1b2a6d1c96badc0ce8df272debb473f46282af4b0355985aea12",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/soft-ivory.png",
+      "sha256": "630c11983e7876dea810b8f26dfc45cdedd07bb73c14a333f90daa7545e6997b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/jacquard-sheer/warm-grey.png",
+      "sha256": "7190e16dd08f4268eac9e58906656781f36a73bea0de3bf91e7a8dac561705b1",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/master.png",
+      "sha256": "f6f87e662fb93e51c8ea9db03a975535a2ea773bfad6a71dcf1f7b7c03915f39",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/opacity-mask.png",
+      "sha256": "a89374898471bfd3766c062d0aed896fec8b23d10062f3a9ff4df2e165760271",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/blush.png",
+      "sha256": "19be3b419cd103e81c3e5dcc9a4104fb7772a97ee49a568a5d67fca3a27515e7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/champagne.png",
+      "sha256": "902266dcc29c84d3e375f83fd75586e2087859d14aeb07cf7ef45d580ef161b2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/cream.png",
+      "sha256": "a1c6b80e02aac1ef95fab6cb36ba38cf109b72471e2e415eb775d64ab7e5144e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/light-beige.png",
+      "sha256": "a91f523f589aea6e287459a0135660623ec1800f7777ee690dfdeaa02d12dada",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/pale-blue.png",
+      "sha256": "8613fcbd10dc7093f7cba6923aced1f8e883c2c34938a21aeb997c8556451a2b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/pure-white.png",
+      "sha256": "400d96c92914eae02ac5e657d3c766c8e2ec32480b198a7d46df6a4451eb62c0",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/sage-green.png",
+      "sha256": "3ea86905f710711272ede43edfe6400bce694f90935853950f93873b62ff14d6",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/sand.png",
+      "sha256": "9d3c22930dcf5c7f5cd37f81d57c531d832aa0502cfc74107b106ca36180bea7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/soft-ivory.png",
+      "sha256": "2368d384c089eb2e698a3bb378a57449be51368896e8882706d0a6f91c25fd15",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/linen-sheer/warm-grey.png",
+      "sha256": "e8cc4e15e287c7107639b1bceee8d12d8df436f8d4f1476afe27313de243baa8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/master.png",
+      "sha256": "a1dbfdbff8cc3400615fae7f6effdf12721f3d82f86699d0894e61adec596a1f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/opacity-mask.png",
+      "sha256": "ce1773efe848a4aad79e8cedaf1d1af5661652bb0666b3ffacdd2275df0361ec",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/blush.png",
+      "sha256": "103e30d9a86b1647e579caf389f795dc70723eca4b1f8861f4afa6cee971d5c9",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/champagne.png",
+      "sha256": "2652363958723ad29b0f5c220102e6e52c35905d9e4ec43ecf25cda47c660611",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/cream.png",
+      "sha256": "f9db13a886f2b4139fc3e8c142f478d98a3a3494b279c641fa5e67c810476154",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/light-beige.png",
+      "sha256": "c8575c17400e6f29d72cad68317d85e578e87f13f6dfddb42bf557d67c7ed413",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/pale-blue.png",
+      "sha256": "a7a3bd0360d0d643616de9069f30f35cdad8dde052376733dace904d27a4acf2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/pure-white.png",
+      "sha256": "4a36fc8f0b64a53dc5d851f7c09d05a2410a42cf01a16134e80fd230e5fc8fd6",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/sage-green.png",
+      "sha256": "43c6f047665744f72a2a875607becd5479f3cb43f5fe8d57af09fec2f8973bce",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/sand.png",
+      "sha256": "2f4e150033a50983dea9d005abdedfec89227e765a69230848507eb54402be20",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/soft-ivory.png",
+      "sha256": "f6f3a5ab800b211719152e2843627eac42c1ee4acde734aeb97fff18eecfbf4d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/net-sheer/warm-grey.png",
+      "sha256": "c993ac4194d8499a798982f87859d94d038520227a9f106bcd1d885eaa81edcc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/master.png",
+      "sha256": "db25ed9fa1adcba33d19ce97bb36b3abece4ae65894d328ca4de1b5a2bf8c0ed",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/opacity-mask.png",
+      "sha256": "696c975a457b540eee04cd9881e19c7dab0d2b0ae1fe291f756ad09844f4e403",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/blush.png",
+      "sha256": "1c33477532c706c758aceb9eadca285198610d127afe7372133096cc8403a87d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/champagne.png",
+      "sha256": "bf844c5fb08643d1f56641ff20ae0537aadd941fe47b628417822e7549141c9e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/cream.png",
+      "sha256": "1a32f20e46d02931b096f5f76041dd09e1a370df9e9728504e1dd7f3dcaf63c3",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/light-beige.png",
+      "sha256": "56d8b8231a9d528a96294222d76072b4659ed9008b80e3912855e98ca268a24f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/pale-blue.png",
+      "sha256": "7ba0aa4d0fdb15e38e196ff32075fbf3ff73253ac465fe0d5dfbb98093adb7d8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/pure-white.png",
+      "sha256": "4ec8c00e7b3259f1867feeb2ba1880414a5c639e11e67b54e3f76dee67954331",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/sage-green.png",
+      "sha256": "c092501f783ec53ffafb5040e0a58f9395cbb47cf2047562e449c5b2a7a8ae91",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/sand.png",
+      "sha256": "e31b1195c57bb7987eec21b463de7fac99d1815e276c54c12a8ae982b21e88cf",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/soft-ivory.png",
+      "sha256": "13a35e776c1b587d419db9882914bbf1321e7ea826c88a107812eac84a68c578",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/organza-sheer/warm-grey.png",
+      "sha256": "d2aa64f495d9fed061cb68a7b7ffca619ec0d0443f4faacc76c3e7821d6d4dc6",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/master.png",
+      "sha256": "7762d427f92ff8100a19c2c412695717efd56c75047e542bf485a5d4f6b658b7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/opacity-mask.png",
+      "sha256": "3421201bf7c9a6c9e32779e60aea0fd1b4a3ddbe2fe6062e07a43466e8eefba4",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/blush.png",
+      "sha256": "2521250aba4dadfe3a6043dfb0bb671fdcc2ede3b5f5281708479ffa0c34cd8d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/champagne.png",
+      "sha256": "0648450f8bf180d2dd5d120af45a053dc6b672a29005c165ba353fb20bb8a3ad",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/cream.png",
+      "sha256": "c5c33e5c164e3513f22ec3af56dc5b28bce539e4107b705a686b4fb6da221933",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/light-beige.png",
+      "sha256": "13480e4dc52a88f5dbd4af4242f43b154324f28129a17b91b883f7084a0ee343",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/pale-blue.png",
+      "sha256": "b723cac2f7ed21c92252cb5f36d70e0ba909daf8fc814fc3fcd4db03fc694bd8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/pure-white.png",
+      "sha256": "d4e373896cdf5accaf231a2da655403be16c3be7b489bc37bc9a06d7b85fb48b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/sage-green.png",
+      "sha256": "1f5fc0bc371c27d92b40ded3a8a7475e55139578ce07ecd0604d420673fb1bc8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/sand.png",
+      "sha256": "4f6ba93a74286bea3323298fa8f6b2b5361dc485785c8d38714a9bcf51fe139d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/soft-ivory.png",
+      "sha256": "5c23e23266abc3662a48ad083cc3e645ce2646bc1401998a36fc4380986b05ac",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/plain-voile/warm-grey.png",
+      "sha256": "dc5b5791daff34fc8b2f60ba6a246a1c4a8e0194d48dbec8d0bf4d72b63c596f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/master.png",
+      "sha256": "3504a258834bca38ac3029e054ebe1ea235e9053f1a71de7c4604a2330f22c80",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/opacity-mask.png",
+      "sha256": "76261077d9275de6aba6ddc42bcd5b436c063c4df0a050a7f43ad62d4f3df463",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/blush.png",
+      "sha256": "a3f79ae92e9dcfef88e8fde5ab7f9deaf524184f4e06e63383589d0c380eebaa",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/champagne.png",
+      "sha256": "63440fd8c827e55029b7349037228fa727a2f1fceef3b4c31c137879cc9295e5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/cream.png",
+      "sha256": "497221d6bb42d180f66c348ca77c08cef78b5658498036a16a9abb287a603d24",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/light-beige.png",
+      "sha256": "4baaf6df9c5ca5c3c7b966ed89e409fcfa9d52d0c633f4c0810291987e145ba6",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/pale-blue.png",
+      "sha256": "bb9dcd92f20223d92da52fbf3d3b167591cae6c59aee6708e06ef6fb4fda96b5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/pure-white.png",
+      "sha256": "9501df3487a31ace0581211e3c4e85d36748daec2f2234c9dc803559eaeb122c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/sage-green.png",
+      "sha256": "df940b98c3af7700fc00007e10360f29350bbc8c2358f22ed40ea19e866cc80e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/sand.png",
+      "sha256": "ae9d71cbe98b52aa275b39a5064df5de83c14afc123b102e3916e9cc5b65fcc7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/soft-ivory.png",
+      "sha256": "32b945b86af6c072cc4e629e03af30598179cf0af7e48d61ef43d428eb631d89",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/striped-sheer/warm-grey.png",
+      "sha256": "fe15c57efa469687910c8da9ff2ed830319b4e5984bb1a0730f8758c3cb01504",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/master.png",
+      "sha256": "0617898118cc5f4208872322f94764f8b40e91a7275b54a7ae86a7ac86f5cf4d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/opacity-mask.png",
+      "sha256": "1d953da79a6b4c6e796bb9485fb19a9296a67456c3b5845387a77be86bdc7a06",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/blush.png",
+      "sha256": "fa0a613d7b286c9577b5feba2da7008ac929333f92c3bc4ecb49950f3efc44ed",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/champagne.png",
+      "sha256": "c6b7cbeeecd9c843e6c119250087e9593f87ed440969632fa499786dec031200",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/cream.png",
+      "sha256": "868e5324f1dd26f3b63953be3285b30430b72ef4ad8e36e42280d7cff510702d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/light-beige.png",
+      "sha256": "c380cc2572fcd599c96aecb088bec0a748fee38303d45c7c856d48fa45a662b4",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/pale-blue.png",
+      "sha256": "8580132a27f8bf9ba242d402661683b2dae5e608d2fffdf8989891a19bf57403",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/pure-white.png",
+      "sha256": "2e1a2c8d3e4775fb12784483786627414619a9b1277d552d1241d16845dd2411",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/sage-green.png",
+      "sha256": "8a1213ac25e4fd7c44c8aab6f3a70e16bc3da9cf938766b4dbe978aeb194b33c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/sand.png",
+      "sha256": "4440b0514ad5f0222cef94ea37978a8c3d88a11a7d4fa5e1a1871a5486160ea3",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/soft-ivory.png",
+      "sha256": "f9a187ea3d9f06f43b2b282a8c209e37777a3fadbe4149b3c0cd42cb55aad2dd",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/sheers/textured-sheer/warm-grey.png",
+      "sha256": "b95ef886e4a228239c3efc8bba1de259cee9f56f1bfb882edbdac074894e88a5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/master.png",
+      "sha256": "2c5d6515358208a4622f2b3d5c747f3756045df810d9473527caeb5d48717c72",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/burgundy.png",
+      "sha256": "79163cfa2835a237f24f98e575ec2ca334352bea650aa1c24737445e85c3112d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/champagne.png",
+      "sha256": "7f2d71e4931caf6c3d3ee54a4c9b989f56e006ec0f568c91ba33c90ab87ea206",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/charcoal-grey.png",
+      "sha256": "e57ca11946a51f8dd536bc9de97b557fa2453ed34bbf801d48841d966fc61c80",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/ivory.png",
+      "sha256": "955311962c678258d40be9d845bcdf171a37e10d8c5363380700e8022b1c4b76",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/mocha.png",
+      "sha256": "28035e7b7831bf07929ac789a8e33bc4a4c1d2c08fa6f9386f2200d9c84837a4",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/navy-blue.png",
+      "sha256": "894e6fdd3f046fb62d6e0592585f0ecf621a8bfc7b936d855d37779e8d1504ac",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/olive-green.png",
+      "sha256": "4f6665442752b61b0426d9d5455ddc7cc28749f742886a7cd2fa17e4b883e6c7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/sage-green.png",
+      "sha256": "edad2d370d7b81146eb0d907a5f4871a325c9b05e832eae36fa827fb38656fc2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/sand-beige.png",
+      "sha256": "3f32b356cc6f260190ed84f6c38b2f183c305c09de6ccd501b0323679845af59",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/chenille/taupe.png",
+      "sha256": "39f4d6909357d0f89220189b25cdee41a9c3ad01e0160a5f16c33b41fc3c1d0d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/master.png",
+      "sha256": "1ff5fde06fefd624386e854785562da567bde37f4f46be158b67d051439f48af",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/burgundy.png",
+      "sha256": "19c577e5a2556e717c6ef651140c60783d1004c976a6147e21461a033b0c1a7a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/champagne.png",
+      "sha256": "2cd20e83d7186ebea43e327fb2eaad26576f2fa669a567b413aa93bc2ec6b9bb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/charcoal-grey.png",
+      "sha256": "a7b63e65054026e3012d45805b1263bb43626f06fd46a480d8d740ddd89e4517",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/ivory.png",
+      "sha256": "8a91dd04816b8e93502604dab2ccbed2a8114d642d475b470df1801e41916ca5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/mocha.png",
+      "sha256": "f5ea973cc784ef3d6d67f44d80d249970935a00e74878a030d5ff7c6274dea04",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/navy-blue.png",
+      "sha256": "4e6f9c45a0d4249b954b8aa5a7b2e2b09e1f692d27da3d77f7e1712f77f42ec0",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/olive-green.png",
+      "sha256": "0d5478656414912cf831a03264b667b03611b50ca837e83da623d402275f5c0e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/sage-green.png",
+      "sha256": "6502e0b07b08d794e661e695c67ab782afe10aa7225310639cbf85252cbac11d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/sand-beige.png",
+      "sha256": "da6580f08045ebd9d87386e52a9c42853d176b537f99931c12528e39b3490f0e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton/taupe.png",
+      "sha256": "1687908dd25cfacc4b959bd9c21d7479246d4cdc664a558c1f79049266658ceb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/master.png",
+      "sha256": "d159d21deb45becd61e904fecb2c674633ebb750438f70d9d9846bdbe2d6b139",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/burgundy.png",
+      "sha256": "e594756f710d6a0270bd1e0ff64f09e7c5730b9710f39e66deb1849bbf159045",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/champagne.png",
+      "sha256": "16a1bd00e22868e7ab7cb9d617766b749bacc03daa82561cabce17a6145b3a8b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/charcoal-grey.png",
+      "sha256": "a80d2254fee8db679fc51ed955c0325119522afb45ff9578aaae9edd13a90c80",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/ivory.png",
+      "sha256": "9e39ce5d966feccdbead4989b529bfe3a661ce3c0876b12b18b146a1f945eaf0",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/mocha.png",
+      "sha256": "363ddec9d6297a9fcd82e4da05ee4ecd1ed1b74cea346b19d44b6e82e636ae7a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/navy-blue.png",
+      "sha256": "a59868b5940e7519dcfd9569e61f0116c97604dab7b651cbe3f8238ce8a9c914",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/olive-green.png",
+      "sha256": "f4959abf6f8b6d2e0a3f13602b1e8623db9fdee7dc0688519174968d4ac1fa43",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/sage-green.png",
+      "sha256": "8b94ee601fd41c96bcf3d7792d87c20987b11bfecd795808e3a88e864488ae93",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/sand-beige.png",
+      "sha256": "aa591e964db7659d448ea012f543ddb6cdc3b73e89cb7f3f815908729e540b3d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/cotton-linen-blend/taupe.png",
+      "sha256": "a2bc1890b4b918d6fd5e2f6f9abb0b563927c38d0a520c4910cae570540fdf77",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/master.png",
+      "sha256": "e1f4b3167e92808752f5e95983bcd78358991bde57240152b001d41e2d77d700",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/burgundy.png",
+      "sha256": "e91bc64309fb541947ccaa83a241111e83ec7958abd86f68ea4f5254a4b0f149",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/champagne.png",
+      "sha256": "acd2c4c6f4bd0f2e931e2a61e9abbf79cb8ef1de0b9fa079c40958f5ec535828",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/charcoal-grey.png",
+      "sha256": "b22f2ec5151bbf7fb695850255a2622b8b1f09bf5b59763bf2023e815a04f0cf",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/ivory.png",
+      "sha256": "1bee59a8fd8347d1584e8553891eaba3ad9ee7d4f0a7873fae9fe21e2e954247",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/mocha.png",
+      "sha256": "0f7954676e49e0e7dd96f50e177f897c7feebe8cb3848cec46a6f229b6f1adbb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/navy-blue.png",
+      "sha256": "4e6a27d1a43543139c0d9da00209af046fee7ea4d5326c229ad70fb25923a5cd",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/olive-green.png",
+      "sha256": "cb04a684a7e82906af365cdc35b24e2fea646b0945c91bdd1f531ef8a3457642",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/sage-green.png",
+      "sha256": "cf9f757bda6dbd9e640cddd0465f742b9ef10d7608dac7e0a0d3bdc1cc33bc45",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/sand-beige.png",
+      "sha256": "d1488408fcd4e4d8d45d45bb72311f66e1c3a51f1287b650c701a68924331791",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/faux-silk/taupe.png",
+      "sha256": "2f114f7ce85c949d58a71e64dc9936d8151b837f0eb2b5cbfbebaae83d2e8ee7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/master.png",
+      "sha256": "88f7be0a46358f8c14f893319f75d1b8fb815fcb962217c63480f02a1259b6d8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/burgundy.png",
+      "sha256": "83d2aba5d836f7ee52f36eecd369c0787c0ecdd136d4d738af4d8fbf73fb9e56",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/champagne.png",
+      "sha256": "783a3d0f013ef236ba7b418ae7f2bca21d4522877d699fa8c1691e6ff4ec40f1",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/charcoal-grey.png",
+      "sha256": "8a216be0f53bd62a1f745e8d41f813776471fb3809ec2db3b8d49b71d800591b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/ivory.png",
+      "sha256": "7ebd4eb10bffbb0b9f0539ef6dde391e615a0c45905286622917e504b249fe8e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/mocha.png",
+      "sha256": "f6e9bf872dfd2d62fe45d27a4fd6af8e1db1672d0055202e196c46d04d6cc4cf",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/navy-blue.png",
+      "sha256": "6df10699d9460dd501c98122229ae3792323cd4b97a145e4950063bcb5e867aa",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/olive-green.png",
+      "sha256": "8a10068b19412d3e39ae02ac62e80c16198545227309af5ebc2fb7a4db9db267",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/sage-green.png",
+      "sha256": "56780fe182cec142a58dc6f3dca90334b7725a7ecace305a80ae13b0f0103e52",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/sand-beige.png",
+      "sha256": "4536bb65c7f42a7a400d4da93eb6b17a695881a96f8f5a54cd336e08d8893d85",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/jacquard/taupe.png",
+      "sha256": "8973a982144446d14647b5832621bc2669cc00d2f0183ed16ebdee36330e846e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/master.png",
+      "sha256": "ba274f06aa0612957705cd52590e96ffef9adf3a81c12e8802bfc7ca28678389",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/burgundy.png",
+      "sha256": "8727c791b1fe96d3e26fb3283d18a71d058118e79a422f9cc624805e70874083",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/champagne.png",
+      "sha256": "41fd4451658ceec40a623f884b325bd84ae843925e534da803de5fe4c474087d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/charcoal-grey.png",
+      "sha256": "472e8cf4090fdc8a971f2497d987f70652663bdf3f68e9cbff96588da6a81b30",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/ivory.png",
+      "sha256": "e226e91e60ed5758dd3ce054f5fb1580e82e5eb4c66b0606aff2c41f5e957427",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/mocha.png",
+      "sha256": "bbe464a7425bb0839d8b856057c0fb729138d8d0d841dd622d0d341866721b2e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/navy-blue.png",
+      "sha256": "44638803ca6317f42e1ccf501abb06bc9af0aabb7ab9e8413ffaa1e133958efc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/olive-green.png",
+      "sha256": "28fe08e3801b39132d45fa8f5452bb9c1377745245746630dd7afb5715c68dcc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/sage-green.png",
+      "sha256": "b209dded4d73956813ec26c6967e630472e0f76cb2003310c485cc84c32d3bde",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/sand-beige.png",
+      "sha256": "d9cfec90ce432c354e943de188e2838500049c6cdbfc059c4c3e89671abcd2fa",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/pure-linen/taupe.png",
+      "sha256": "0805bf037ea85d27be18b50361e06d874772aa47035da33d1ebe944dbcbfb966",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/master.png",
+      "sha256": "ddb349c158bfa92e6f61bcdb8501be2dd6358d7c59b2e7008d39ce8dad0e936f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/burgundy.png",
+      "sha256": "2df3d8cee2cfdf0287c34cf4f3ca98b1bb34da0501b0088f6844b44ee3f1eb6f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/champagne.png",
+      "sha256": "b83d2059fb4e894a7a933a2d75a55d186152576467de29413db0d202a017b17d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/charcoal-grey.png",
+      "sha256": "183e32c2d71c405106520fa6b6ee4519769ed9aa3e75c0a7f78baf0ab6eb938f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/ivory.png",
+      "sha256": "4ff52c48933d97f84964e539de482f10da80de4927a9cf5b2c80e47fcd353050",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/mocha.png",
+      "sha256": "7466442c1fed9e61159e6c4b8cca3cf3b8ab3fef4ae36628d5cbe4d5ed2f72c7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/navy-blue.png",
+      "sha256": "a1bb66d6f12fa28e7abfa1c0eeaa33088c5ecca160a42743197ab0c5ef870bf2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/olive-green.png",
+      "sha256": "cfb8ef2036f57f9e026a476345bb8ad7688ef4120fb372f3096203ef90800d8a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/sage-green.png",
+      "sha256": "e2976349f638195b84c23478106c620344ebc31bd928c07199798ed4c62e4759",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/sand-beige.png",
+      "sha256": "0c62e4c4a1c9aaef1732e1677784321fedbf6a9b27b454e195f016a115ede877",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk/taupe.png",
+      "sha256": "5d75499f0f323191a4b48ddb347beefc1b082f4f23c337e53eddf5dc16130d33",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/master.png",
+      "sha256": "9bfc8d2ac0313f766eb79de98fca07361cc7fd4bd1cb54ea433c77c1553b1985",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/burgundy.png",
+      "sha256": "2dce44dcbaeedba4c0c92bc6fdcc0768661abb47f0db7abc3ad3b6e25155c226",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/champagne.png",
+      "sha256": "49fe85968bfef568249df5d0e8388938790d9071f5e657d80b58bba7dafb785b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/charcoal-grey.png",
+      "sha256": "5d19c5538ea621c70e1e8d5e5b5f7afbf5a3ba8235a5b9c1898de1c1067877bd",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/ivory.png",
+      "sha256": "99886a166b2fbb2f0e115213025596de4c316b967b416ad717cd9ee891d03a7e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/mocha.png",
+      "sha256": "72f2d26374afe1aa81102f805b214635a67c392b38c0b346a38efef501577eea",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/navy-blue.png",
+      "sha256": "f6b6f01c5fbf1d0c404fb42f6ec7020ae0650a482f6828ca766111abe102d67c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/olive-green.png",
+      "sha256": "17e524891b37225b707d2303de11bf8ddb1499c057d66ae290289352f42f5ece",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/sage-green.png",
+      "sha256": "000ee42b85dc4b1df6b433c4c05cc2b861c83b6e31c9104589eea3e355e52b02",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/sand-beige.png",
+      "sha256": "0dc7eae3a43667b9d8bc2976f514a0ddcc0c20bb0a76ed3ed61bfd21ca0cd67f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/silk-blend/taupe.png",
+      "sha256": "db75479566dfa61256e4ad01b0fb5064277a5cc11a330cb59fd03a14b07c623b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/master.png",
+      "sha256": "b99a8f1e6562f910912515f62b3bdd09dce8f891498ec1ea2bf4980897aa1eb7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/burgundy.png",
+      "sha256": "1119bb6f389867f73344866e6c97ad9c60db6277d140123d21a5cb89be857d23",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/champagne.png",
+      "sha256": "6fe43eb55fca4a23a1e8e8e66f19ca5d729b5e7e886c742e9ffb9db7c62a8615",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/charcoal-grey.png",
+      "sha256": "64f1527c8d8af0f334e5987a56b9ae6841fd1082cb1e22cb538cba48095aa578",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/ivory.png",
+      "sha256": "080105ddaf796dae270533b1efc36ed4149972e18af43073d5f23c3b803b677c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/mocha.png",
+      "sha256": "522d6838eb87614a0cb36debec78287b3d9da0b1c7aba4ab1559b099783d06a8",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/navy-blue.png",
+      "sha256": "60e49b5486b48146b739aaade9914ba35a347d2714f053b2c04c438153090063",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/olive-green.png",
+      "sha256": "5201ec66856bc474c77a86f5d7c06d6561ecda807b92fd34318e92d623cf0e81",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/sage-green.png",
+      "sha256": "785d4e662903cea1f7b1e08e20b4b51e81be5c204bc30f5ed91efcdf5acbff3c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/sand-beige.png",
+      "sha256": "c005e5ce39a1291ee298f734bf871fb100cdedd031db58cc35b6add70ba04b2e",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/textured-polyester-weave/taupe.png",
+      "sha256": "6545f4d55794450c28542f81247f3658119417481de1e95ec3e034ae417eb55a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/master.png",
+      "sha256": "59088e7b354b006bb1587920f17837c3821976afc5923202ec536b673b9797c4",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/burgundy.png",
+      "sha256": "d497165e2fb41c4f35b0a9a72a02e5d63b977ff5c3ab3f5e0bed7fa4a373377b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/champagne.png",
+      "sha256": "4e37de3a9793f521ff3268db79338f2954a72f8d8a2a91fed21c353c431898f5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/charcoal-grey.png",
+      "sha256": "f5abad5feb2822bf805a27be4daf21d079c725194edba6ae8375e27961e3f5ee",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/ivory.png",
+      "sha256": "e538718115245fe1ba73ea1c486c236621bbbac3d80047d09eb487cb9ca77bde",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/mocha.png",
+      "sha256": "09d65684d69c6642af472e0fa5708c97aa70993c6a90e32cb5254b912280a9e7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/navy-blue.png",
+      "sha256": "116723789a3f57b1bd8421de7db04c79a9edd9c5ed37ca001d05a8fd510f056c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/olive-green.png",
+      "sha256": "c39c3ffd62f49c2821636654ec4b18fb70fa0ecc0cb71d376b42e045fab9a424",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/sage-green.png",
+      "sha256": "cc8e3f0696a9069ff04ae274c8f64b39eef578b1323d9db3c4ac46707cfdfc07",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/sand-beige.png",
+      "sha256": "882add33cbfa635df2bb56c19f6ce4eb51a60ee843035429d7cbbc20e3d93f80",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "fabrics/main-curtains/velvet/taupe.png",
+      "sha256": "aefe0d27c5123dee48560a0a75675063d45f4346ba2c44964022f796e5beb023",
+      "width": 1024,
+      "height": 1024
+    }
+  ]
+}

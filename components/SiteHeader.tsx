@@ -8,7 +8,7 @@ import MobileNavigation from "@/components/navigation/MobileNavigation";
 import StudioLink from "@/components/navigation/StudioLink";
 import AccountNavigation from "@/components/account/AccountNavigation";
 export { Brand } from "@/components/navigation/Brand";
-export default function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
+export default function SiteHeader({ signedIn = false, isAdmin = false }: { signedIn?: boolean; isAdmin?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false), [scrolled, setScrolled] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
@@ -26,9 +26,9 @@ export default function SiteHeader({ signedIn = false }: { signedIn?: boolean })
     <div className="mx-auto flex h-[80px] max-w-[1840px] flex-nowrap items-center gap-5 px-[18px] sm:h-[84px] sm:px-7 lg:gap-4 xl:gap-6 xl:px-10 min-[1600px]:px-14">
       <div className="shrink-0"><Brand/></div>
       <DesktopNavigation/>
-      <div className="ml-auto hidden shrink-0 items-center gap-5 lg:flex xl:gap-6"><AccountNavigation signedIn={signedIn}/><span aria-hidden="true" className="h-5 w-px bg-[#d6ccba]"/><StudioLink/></div>
+      <div className="ml-auto hidden shrink-0 items-center gap-5 lg:flex xl:gap-6"><AccountNavigation signedIn={signedIn} isAdmin={isAdmin}/><span aria-hidden="true" className="h-5 w-px bg-[#d6ccba]"/><StudioLink/></div>
       <div className="ml-auto flex items-center gap-5 lg:hidden"><StudioLink tabletOnly/><button ref={toggle} type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? "mobile-menu" : undefined} onClick={() => setOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center bg-transparent text-ink"><Menu size={25} strokeWidth={1.25}/></button></div>
     </div>
-    <MobileNavigation open={open} signedIn={signedIn} onClose={close}/>
+    <MobileNavigation open={open} signedIn={signedIn} isAdmin={isAdmin} onClose={close}/>
   </header>;
 }

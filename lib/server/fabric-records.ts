@@ -1,3 +1,4 @@
+import 'server-only';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fabrics as seed } from '@/lib/curtains/manual-config';
@@ -9,7 +10,7 @@ import { HttpError } from './security';
 
 export async function allFabricRecords(): Promise<FabricRecord[]> {
  const records=new Map(seed.map(f=>[f.id,f]));
- if(databaseReady()){
+ {
   for(const item of (await rows('fabric'))){const old=JSON.parse(item.data);if(records.has(old.id)){records.set(old.id,{...records.get(old.id)!,name:old.name,description:old.description,category:old.category,images:[old.image],active:!old.archived});}else records.set(old.id,{id:old.id,slug:old.id,name:old.name,category:old.category,description:old.description,source:'demo',usage:old.category==='Sheer'?['sheer']:['main'],images:[old.image],colors:[],compatibleHeadingStyles:[],active:!old.archived});}
   for(const item of await allRecords('fabric-record'))records.set(item.id,JSON.parse(item.data));
  }
@@ -26,7 +27,7 @@ export async function saveFabricRecords(records:FabricRecord[],operation:'create
 }
 export async function categories(): Promise<FabricCategory[]> {
  const records=new Map(fabricCategories.map(c=>[c.id,c]));
- if(databaseReady())for(const item of await allRecords('fabric-category'))records.set(item.id,JSON.parse(item.data));
+ for(const item of await allRecords('fabric-category'))records.set(item.id,JSON.parse(item.data));
  return [...records.values()];
 }
 type Rule={type?:string|string[];const?:unknown;enum?:unknown[];minLength?:number;minItems?:number;pattern?:string;minimum?:number;maximum?:number;exclusiveMinimum?:number;required?:string[];properties?:Record<string,Rule>;items?:Rule};
@@ -47,11 +48,14 @@ async function imageExists(src:string) {
  const resolved=path.resolve('public','.'+src),root=path.resolve('public','images')+path.sep;
  return resolved.startsWith(root)&&existsSync(resolved);
 }
-export async function validateFabricRecord(input:unknown): Promise<FabricRecord> {
+export function validateFabricStructure(input:unknown): FabricRecord {
  // Null supplier fields mean unknown; availability intentionally keeps null.
  const cleaned=JSON.parse(JSON.stringify(input, (key,value)=>value===null&&key!=='available'?undefined:value));
  validate(cleaned,schema.items as Rule,'fabric');
- const f=cleaned as FabricRecord;
+ return cleaned as FabricRecord;
+}
+export async function validateFabricRecord(input:unknown): Promise<FabricRecord> {
+ const f=validateFabricStructure(input);
  if(f.publishedAt&&!Number.isFinite(Date.parse(f.publishedAt)))throw new HttpError(400,'Use a valid ISO publication date.');
  if(f.technicalSheet){const root=path.resolve('public/documents')+path.sep,target=path.resolve('public','.'+f.technicalSheet);if(!target.startsWith(root)||!existsSync(target))throw new HttpError(400,'Technical sheet must be an existing authorized PDF in public/documents.');}
  if(f.slug!==f.id)throw new HttpError(400,'Use the stable fabric ID as the slug.');

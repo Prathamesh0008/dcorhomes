@@ -1,6 +1,9 @@
-import { cookies } from "next/headers";
-import { remove } from "@/lib/server/db";
-import { NextRequest,NextResponse } from "next/server";
-import { equal,failure,HttpError,jsonInput,mutation,session,throttle } from "@/lib/server/security";
-export async function POST(request:NextRequest){try{const data=await jsonInput(request,2048);(await throttle(request,"admin-login",5,900000));const password=process.env.ADMIN_PASSWORD;if(!password||password.length<20)throw new HttpError(503,"Administrator access has not been configured.");if(typeof data.password!=="string"||!equal(data.password,password))throw new HttpError(401,"Invalid sign-in.");await session("admin",true);return NextResponse.json({ok:true});}catch(e){return failure(e);}}
-export async function DELETE(request:NextRequest){try{mutation(request);const id=await session("admin");if(id)(await remove("admin-session",id));(await cookies()).delete("dcorhome_admin");return NextResponse.json({ok:true});}catch(e){return failure(e);}}
+import { NextRequest, NextResponse } from 'next/server';
+import { failure, HttpError, mutation, requireAdmin, privateHeaders } from '@/lib/server/security';
+export async function POST(request: NextRequest) {
+  try { mutation(request); await requireAdmin(); return NextResponse.json({ ok: true }, { headers: privateHeaders }); }
+  catch (error) { return failure(error instanceof HttpError ? error : new HttpError(503, 'Administrator authentication is unavailable.')); }
+}
+export async function DELETE() {
+  return NextResponse.json({ error: 'Use the account Logout action to end your authenticated session.' }, { status: 405, headers: privateHeaders });
+}

@@ -10,33 +10,37 @@
     "predev": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs",
     "prebuild": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs",
     "check:catalogue": "node scripts/catalogue-logic-check.cjs",
-    "test:catalogue": "node scripts/catalogue-integration-check.cjs",
+    "test:catalogue": "node scripts/mongodb-runtime-check.cjs",
     "import:supplier-csv": "node scripts/import-supplier-csv.cjs",
     "prepare:fabric-previews": "node scripts/prepare-fabric-previews.cjs",
     "check:fabric-images": "node scripts/fabric-image-check.cjs",
-    "auth:migrate": "node scripts/auth-migrate.cjs"
+    "auth:migrate": "node scripts/auth-migrate.cjs",
+    "auth:bootstrap": "node scripts/bootstrap-admin.cjs",
+    "auth:check": "node scripts/customer-auth-check.cjs",
+    "check:mongodb": "node scripts/mongodb-runtime-check.cjs",
+    "db:migrate:sqlite": "node scripts/migrate-sqlite-to-mongodb.cjs"
   },
   "dependencies": {
+    "@better-auth/mongo-adapter": "^1.7.12",
     "better-auth": "^1.7.12",
     "lucide-react": "^0.468.0",
+    "mongodb": "^6.21.0",
     "next": "^15.5.0",
     "openai": "^7.43.0",
-    "pg": "^8.23.1",
-    "postgres": "^3.4.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.0.0",
-    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "mongodb-memory-server": "^10.4.3",
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": "24.x"
   }
 }

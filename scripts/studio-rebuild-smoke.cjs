@@ -1,0 +1,75 @@
+// Focused acceptance check against a local server and disposable Chrome on :9227.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const output=path.resolve(__dirname,'../docs/studio-rebuild');fs.mkdirSync(output,{recursive:true});
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+(async()=>{
+ const target=await(await fetch('http://127.0.0.1:9227/json/new?about:blank',{method:'PUT'})).json();
+ const socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.onopen=resolve;socket.onerror=reject;});
+ let seq=0,loaded,stage='opening';const pending=new Map(),errors=[],failures=[],requests=[];
+ socket.onmessage=event=>{const m=JSON.parse(event.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);}else if(m.method==='Page.loadEventFired')loaded?.();else if(m.method==='Runtime.exceptionThrown')errors.push({stage,error:m.params.exceptionDetails.exception?.description||m.params.exceptionDetails.text});else if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);else if(m.method==='Network.responseReceived'&&m.params.response.status>=400)failures.push({url:m.params.response.url,status:m.params.response.status});};
+ const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params}));});
+ const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
+ const until=async(expression,label)=>{const end=Date.now()+45000;while(Date.now()<end){if(await evaluate('Boolean('+expression+')'))return;await delay(150);}throw Error('Timed out: '+label);};
+ const click=async selector=>{await evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);};
+ const open=async id=>{await evaluate(`(()=>{const b=document.querySelector('[data-studio-step="${id}"]');if(b.getAttribute('aria-expanded')!=='true')b.click();})()`);};
+ const ready=()=>until(`document.querySelector('[data-testid="manual-window-preview"]')?.dataset.renderState==='ready'`,'selected composition');
+ const state=()=>evaluate(`JSON.parse(localStorage.getItem('dcorhome-visualizer-v1'))`);
+ const snapshot=()=>evaluate(`(()=>{const c=document.querySelector('[data-testid="composed-curtains"]'),p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let hash=2166136261;for(let i=0;i<p.length;i++)hash=Math.imul(hash^p[i],16777619);return {hash:hash>>>0,width:c.width,height:c.height};})()`);
+ const captureComposition=async name=>{const data=await evaluate(`document.querySelector('[data-testid="composed-curtains"]').toDataURL('image/png')`);fs.writeFileSync(path.join(output,name),Buffer.from(data.split(',')[1],'base64'));};
+ const navigate=async url=>{const done=new Promise(resolve=>loaded=resolve);await send('Page.navigate',{url});await done;};
+ await send('Page.enable');await send('Runtime.enable');await send('Network.enable');
+ await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+ const base=process.env.STUDIO_URL||'http://127.0.0.1:4317';
+ const initial={version:1,assetVersion:'manual-v1',sceneId:'garden-living',main:{enabled:true,materialId:'library-main-pure-linen',fabricId:'library-main-pure-linen',variantId:'olive-green'},sheer:{enabled:true,materialId:'library-sheer-plain-voile',fabricId:'library-sheer-plain-voile',variantId:'soft-ivory'}};
+ await navigate(base+'/studio?visualizer='+encodeURIComponent(JSON.stringify(initial)));await ready();
+ const a=await snapshot(),aState=await state();await captureComposition('A-ivory-voile-olive-linen.png');
+ await evaluate(`window.__studioPixelsA=document.querySelector('[data-testid="composed-curtains"]').getContext('2d').getImageData(0,0,${a.width},${a.height}).data;true`);
+ stage='fabric and colour';await open('sheer');
+ assert.equal(await evaluate(`document.querySelectorAll('[aria-label="sheer fabric varieties"] button').length`),10);
+ await click('[aria-label="sheer colour: Pure White"]');await ready();
+ const white=await snapshot();assert.notEqual(a.hash,white.hash);assert.deepEqual((await state()).main,aState.main);
+ await click('[data-material-id="library-sheer-fine-voile"]');await ready();const fineState=await state();
+ await open('main');assert.equal(await evaluate(`document.querySelectorAll('[aria-label="main fabric varieties"] button').length`),10);
+ await click('[data-material-id="library-main-velvet"]');await ready();const velvet=await snapshot();assert.notEqual(white.hash,velvet.hash);assert.deepEqual((await state()).sheer,fineState.sheer);
+ await click('[aria-label="main colour: Burgundy"]');await ready();const b=await snapshot(),bState=await state();assert.notEqual(velvet.hash,b.hash);assert.deepEqual(bState.sheer,fineState.sheer);
+ await captureComposition('B-white-voile-burgundy-velvet.png');
+ const outside=await evaluate(`(()=>{const c=document.querySelector('[data-testid="composed-curtains"]'),b=c.getContext('2d').getImageData(0,0,c.width,c.height).data,a=window.__studioPixelsA;let changed=0,outside=0;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){const i=(y*c.width+x)*4;if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]){changed++;const nx=x/c.width,ny=y/c.height;if(nx<.12||nx>.89||ny<.064||ny>.79)outside++;}}return {changed,outside};})()`);
+ assert.ok(outside.changed>10000);assert.equal(outside.outside,0,'room pixels outside curtain footprint unchanged');
+ // Comparison uses the same underlying base; it never requests a different room.
+ const beforeSrc=await evaluate(`document.querySelector('[data-testid="manual-window-preview"] img').src`);
+ await evaluate(`[...document.querySelectorAll('[aria-label="Compare your curtains"] button')].find(b=>b.textContent==='Before').click()`);
+ assert.equal(await evaluate(`document.querySelector('[data-testid="composed-curtains"]').style.opacity`),'0');
+ assert.equal(await evaluate(`document.querySelector('[data-testid="manual-window-preview"] img').src`),beforeSrc);
+ await evaluate(`[...document.querySelectorAll('[aria-label="Compare your curtains"] button')].find(b=>b.textContent==='After').click()`);
+ await open('sheer');await click('[data-layer-toggle="sheer-off"]');await ready();const noSheer=await snapshot();assert.notEqual(noSheer.hash,b.hash);assert.deepEqual((await state()).main,bState.main);
+ await click('[data-layer-toggle="sheer-on"]');await ready();
+ stage='rooms';await open('room');assert.equal(await evaluate(`document.querySelectorAll('[aria-label="Room inspirations"] button').length`),10);
+ const rooms=[];
+ for(let number=1;number<=10;number++){const id='room-'+String(number).padStart(2,'0');await click(`[data-scene-id="${id}"]`);await until(`document.querySelector('[data-testid="manual-window-preview"]').dataset.renderState==='room-only'`,'honest room view');await until(`(()=>{const img=document.querySelector('[data-testid="manual-window-preview"] img');return img?.src.includes('/${id}/')&&img.complete&&img.naturalWidth>0;})()`,'actual room base');rooms.push(await evaluate(`document.querySelector('[data-testid="manual-window-preview"] img').src`));assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Download Design')).disabled`),true);}
+ assert.equal(new Set(rooms).size,10);assert.notEqual(rooms[0],rooms[8]);await click('[data-scene-id="garden-living"]');await ready();
+ stage='download and save';const enquiry=await evaluate(`[...document.querySelectorAll('a')].find(a=>a.textContent.includes('Enquire About This Design')).href`);assert.match(decodeURIComponent(enquiry),/Velvet/);assert.match(decodeURIComponent(enquiry),/Burgundy/);
+ await send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:output});const download=path.join(output,'dcorhome-curtains-garden-living.png');fs.rmSync(download,{force:true});
+ await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Download Design')).click()`);
+ await until(`document.body.textContent.includes('Your curtain design has been downloaded.')`,'download completed');
+ const downloadDeadline=Date.now()+15000;while(!fs.existsSync(download)&&Date.now()<downloadDeadline)await delay(100);assert.ok(fs.existsSync(download));
+ const exported=fs.readFileSync(download).toString('base64');
+ const exportMatch=await evaluate(`(async()=>{const image=new Image();image.src='data:image/png;base64,${exported}';await image.decode();const live=document.querySelector('[data-testid="composed-curtains"]'),copy=document.createElement('canvas');copy.width=live.width;copy.height=live.height;const context=copy.getContext('2d');context.drawImage(image,0,0,copy.width,copy.height);const a=live.getContext('2d').getImageData(0,0,live.width,live.height).data,b=context.getImageData(0,0,copy.width,copy.height).data;let error=0;for(let i=0;i<a.length;i+=4)for(let c=0;c<3;c++)error+=Math.abs(a[i+c]-b[i+c]);return {width:image.naturalWidth,height:image.naturalHeight,meanRgbDifference:error/(live.width*live.height*3)};})()`);
+ assert.equal(exportMatch.width,1600);assert.ok(exportMatch.meanRgbDifference<5,'download must match the configured preview after resolution scaling');
+ await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent==='Save on this device').click()`);await until(`document.body.textContent.includes('Your design is saved on this device.')`,'guest save');
+ await navigate(base+'/studio');await ready();assert.equal((await state()).main.variantId,'burgundy');assert.equal((await state()).rendererVersion,'atelier-2');
+ const layouts=[];
+ for(const width of [1440,768,390]){
+  stage='layout '+width;await send('Emulation.setDeviceMetricsOverride',{width,height:width===390?844:1000,deviceScaleFactor:1,mobile:width<1024});
+  await evaluate(`new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))`);await ready();await open('main');await evaluate('scrollTo(0,0)');
+  const layout=await evaluate(`(()=>{const p=document.querySelector('[data-testid="manual-window-preview"]').getBoundingClientRect(),c=document.querySelector('aside[aria-label="Create your curtain design"]').getBoundingClientRect();return {width:innerWidth,page:document.documentElement.scrollWidth,preview:{top:p.top,left:p.left,width:p.width},controls:{top:c.top,left:c.left,width:c.width}};})()`);
+  assert.ok(layout.page<=layout.width+1);if(width>=1024){assert.ok(layout.preview.left<layout.controls.left);assert.ok(layout.preview.width>layout.controls.width*1.6);}else assert.ok(layout.preview.top<layout.controls.top);
+  layouts.push(layout);const screenshot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,`studio-${width}.png`),Buffer.from(screenshot.data,'base64'));
+ }
+ stage='missing input';await send('Network.setBlockedURLs',{urls:['*faux-silk/sage-green.*']});await open('main');await click('[data-material-id="library-main-faux-silk"]');await ready();
+ await evaluate(`[...document.querySelectorAll('#studio-main-panel button')].find(b=>b.textContent.startsWith('View all colours')).click()`);await click('[aria-label="main colour: Sage Green"]');
+ await until(`document.querySelector('[data-testid="manual-window-preview"]').dataset.renderState==='error'`,'missing texture handled');assert.equal(await evaluate(`document.querySelector('[data-testid="composed-curtains"]').style.visibility`),'hidden');assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Download Design')).disabled`),true);
+ await send('Network.setBlockedURLs',{urls:[]});await click('[data-material-id="library-main-pure-linen"]');await ready();
+ stage='image decoding';const broken=await evaluate(`(async()=>{const imgs=[...document.querySelectorAll('main img')];return (await Promise.all(imgs.map(async img=>{img.loading='eager';try{await img.decode();return null;}catch{return img.src;}}))).filter(Boolean);})()`);assert.deepEqual(broken,[]);
+ const ai=requests.filter(url=>/api\/(generate|ai|visualize)|api\.openai\.com/.test(url));assert.deepEqual(ai,[]);assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
+ const results={passed:true,renderer:'atelier-2',canvas:{a,white,velvet,b,noSheer},independentLayers:true,unchangedBackground:outside,roomViews:rooms.length,room01And09Different:true,comparisonSameBase:true,download:exportMatch,guestSaveAndRestore:true,layouts,missingInputHandled:true,brokenImages:broken,exceptions:errors,httpFailures:failures,aiRequests:ai};fs.writeFileSync(path.join(output,'results.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));socket.close();
+})().catch(error=>{console.error(error);process.exit(1);});

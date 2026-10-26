@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 // Focused checks against isolated synthetic data, never the user's catalogue/accounts.
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),{spawn}=require('node:child_process');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'dcorhome-swatches-')),base='http://localhost:3223',password=crypto.randomBytes(24).toString('hex');

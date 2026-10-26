@@ -1,0 +1,42 @@
+{
+  "id": "room-09",
+  "name": "Minimalist living room",
+  "canvas": {
+    "width": 2048,
+    "height": 1280
+  },
+  "source_image": {
+    "original_size": [
+      1586,
+      992
+    ],
+    "upscaled_size": [
+      2048,
+      1280
+    ],
+    "generated": true
+  },
+  "window": {
+    "normalized_bounds": [
+      0.24338,
+      0.164315,
+      0.789407,
+      0.646169
+    ]
+  },
+  "track": {
+    "from_normalized": [
+      0.227617,
+      0.159274
+    ],
+    "to_normalized": [
+      0.80517,
+      0.159274
+    ]
+  },
+  "hem_y_normalized": 0.938508,
+  "recommended_curtain_length": "floor length in the visual rendering; actual dimensions require onsite measurements",
+  "mask_alignment": "All masks and layers are 2048\u00d71280 and share the exact base image coordinates.",
+  "occlusion": "GrabCut segmentation from hand-marked seed masks; preview-quality only, manual cleanup required",
+  "note": "Digitally approximated curtain materials. Validate against supplier fabric and production photography before showing as exact product representation."
+}

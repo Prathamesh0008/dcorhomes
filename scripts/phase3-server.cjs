@@ -1,3 +1,4 @@
+require('./sqlite-fixture-retired.cjs');
 // Dedicated local verification server; never reads or writes live account data.
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 process.env.DCORHOME_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'dcorhome-phase3-'));

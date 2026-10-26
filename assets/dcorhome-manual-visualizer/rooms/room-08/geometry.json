@@ -1,0 +1,54 @@
+{
+  "id": "room-08",
+  "name": "Contemporary Home Office",
+  "canvas": {
+    "width": 2048,
+    "height": 1280
+  },
+  "source": {
+    "type": "AI-generated multi-scene concept sheet cropped into individual frames",
+    "file": "a_clean_high_resolution_collage_mockup_presentati.png",
+    "crop": [
+      1192,
+      234,
+      1585,
+      419
+    ],
+    "native_crop_dimensions": [
+      393,
+      185
+    ],
+    "upscaled": true
+  },
+  "window": {
+    "normalized_bounds": [
+      0.38,
+      0.16,
+      0.96,
+      0.82
+    ],
+    "accuracy": "manual approximation; not pixel-accurate window segmentation"
+  },
+  "track": {
+    "from_normalized": [
+      0.365723,
+      0.139844
+    ],
+    "to_normalized": [
+      0.974121,
+      0.139844
+    ]
+  },
+  "hem_y_normalized": 0.959375,
+  "recommended_curtain_length": "visualization only; requires onsite measurement",
+  "mask_alignment": "all layers same W,H and same coordinate system as cropped/upscaled base",
+  "occlusion": "UNRESOLVED: layer intentionally transparent until accurate segmentation is available; no fake furniture cutout",
+  "quality_tier": "layout / compositing prototype only \u2014 does NOT meet independent, high-resolution curtain-free photograph requirement",
+  "known_issues": [
+    "cropped low resolution concept render upscaled 5x",
+    "possible existing curtains within source concept",
+    "manual window geometry is not precision segmented",
+    "fabric folds digitally approximated",
+    "foreground furniture not masked"
+  ]
+}
