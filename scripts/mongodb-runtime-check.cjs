@@ -17,6 +17,11 @@ async function stopServer() {
   assert.match(uri, /^mongodb:\/\/127\.0\.0\.1:/, 'Refuse any nonlocal test database.');
   Object.assign(process.env, { MONGODB_URI: uri, MONGODB_DB: 'dcorhome_check', SITE_URL: 'http://localhost:3349', SESSION_SECRET: crypto.randomBytes(32).toString('hex'), BETTER_AUTH_SECRET: crypto.randomBytes(32).toString('hex'), VERCEL: '1', ALLOW_LOCAL_HTTP: 'true', DCORHOME_DATA_DIR: path.join(fixtureRoot, 'must-not-create'), DCORHOME_AI_ENABLED: 'false', OPENAI_API_KEY: '', RESEND_API_KEY: '', ENQUIRY_FROM_EMAIL: '', S3_ENDPOINT: '', S3_BUCKET: '', S3_ACCESS_KEY_ID: '', S3_SECRET_ACCESS_KEY: '', TRUST_PROXY: 'false' });
   require('./auth-loader.cjs');
+  const diagnostics = require('../lib/server/database-diagnostics.ts');
+  for (const [error, expected] of [[new diagnostics.DatabaseConfigurationError('missing_configuration'), 'missing_configuration'], [new diagnostics.DatabaseConfigurationError('invalid_configuration'), 'invalid_configuration'], [{code:18}, 'authentication'], [{code:13}, 'permission'], [{name:'MongoServerSelectionError'}, 'network_timeout'], [{code:2}, 'query']]) assert.equal(diagnostics.databaseFailure(error), expected);
+  const originalConsole = console.error, logs = []; console.error = value => logs.push(value);
+  try { diagnostics.logDatabaseFailure('fixture', {code:18, message:'PRIVATE_SENTINEL', stack:'PRIVATE_SENTINEL'}); } finally { console.error = originalConsole; }
+  assert.ok(!logs.join('').includes('PRIVATE_SENTINEL')); pass('Database failure categories and redacted structured diagnostics');
   const repository = require('../lib/server/db.ts');
   const connection = require('../lib/server/mongodb.ts'); mongo = await connection.mongoClient(); const db = await connection.mongoDatabase();
   stage = 'repository guarantees';
@@ -91,11 +96,13 @@ async function stopServer() {
   assert.equal((await api('/api/auth/sign-out','POST',{},adminCookie)).status,200);assert.equal(await(await api('/api/auth/get-session','GET',undefined,adminCookie)).json(),null);
   assert.equal(fs.existsSync(process.env.DCORHOME_DATA_DIR),false);
   pass('Server restart preserves records/sessions, disabling revokes access, logout works, no local data directory created under VERCEL=1');
-  stage='missing configuration'; const configured=process.env.MONGODB_URI;delete process.env.MONGODB_URI;assert.equal(repository.databaseReady(),false);await assert.rejects(()=>repository.row('content','x'),/MONGODB_URI/);
+  stage='missing configuration'; const configured=process.env.MONGODB_URI;delete process.env.MONGODB_URI;assert.equal(repository.databaseReady(),false);await assert.rejects(()=>repository.row('content','x'),error => error instanceof repository.DatabaseUnavailable && error.cause instanceof diagnostics.DatabaseConfigurationError);
   await stopServer(); process.env.MONGODB_URI=''; await startServer();
-  const unavailable=await api('/api/catalogue');assert.equal(unavailable.status,503);assert.match((await unavailable.json()).error,/MONGODB_URI/);
+  const unavailable=await api('/api/catalogue');assert.equal(unavailable.status,503);assert.match((await unavailable.json()).error,/database.*unavailable/i);
   assert.equal((await api('/login')).status,200);assert.equal((await api('/contact')).status,200);
   process.env.MONGODB_URI=configured;
+  const homeOutage = await api('/'); assert.equal(homeOutage.status, 200); const homeHtml = await homeOutage.text(); assert.ok(homeHtml.includes('Your room.')); assert.ok(!homeHtml.includes('Fabric categories are temporarily unavailable'));
+  const collectionsOutage = await api('/collections'); assert.ok(collectionsOutage.status >= 500, 'Database-dependent catalogue must not pretend success.');
   pass('Missing MongoDB fails explicitly rather than switching to SQLite or an empty success');
   fs.writeFileSync(path.join(fixtureRoot,'results.json'),JSON.stringify({passed:results,isolated:true,productionDatabaseModified:false},null,2));
   console.log('All targeted checks passed against ephemeral localhost MongoDB only.');

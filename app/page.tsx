@@ -1,4 +1,5 @@
-import ServerCatalogueProvider from '@/components/curtains/ServerCatalogueProvider';
+import FabricCatalogueProvider from '@/components/curtains/FabricCatalogueProvider';
+import { homepageCatalogue } from '@/lib/server/homepage-catalogue';
 import CurtainDesignComposer from "@/components/curtains/CurtainDesignComposer";
 import HomeBelowHero from "@/components/home/HomeBelowHero";
 import { pageMetadata } from "@/lib/seo";
@@ -46,4 +47,4 @@ async function HomePage() {
   );
 }
 
-export default function Page() {return <ServerCatalogueProvider><HomePage/></ServerCatalogueProvider>;}
+export default async function Page() {const { records } = await homepageCatalogue(); return <FabricCatalogueProvider records={records}><HomePage/></FabricCatalogueProvider>;}

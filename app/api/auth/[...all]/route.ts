@@ -1,3 +1,4 @@
+import { logDatabaseFailure } from '@/lib/server/database-diagnostics';
 import { NextRequest, NextResponse } from 'next/server';
 import { customerAuth, customerAuthReady, runMemberLogin, validatedCustomerSession } from '@/lib/server/customer-auth';
 import { loginLimit } from '@/lib/server/members';
@@ -41,6 +42,7 @@ async function handler(request: NextRequest) {
     result.headers.set('Cache-Control', 'private, no-store'); return result;
   } catch (error) {
     if (error instanceof HttpError) return failure(error);
+    logDatabaseFailure('authentication', error);
     return failure(new HttpError(503, 'Authentication is temporarily unavailable. Please try again later.'));
   }
 }

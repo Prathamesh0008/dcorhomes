@@ -1,3 +1,4 @@
+import { logDatabaseFailure } from './database-diagnostics';
 import 'server-only';
 import { betterAuth } from 'better-auth/minimal';
 import { mongodbAdapter } from '@better-auth/mongo-adapter';
@@ -73,5 +74,5 @@ export async function validatedCustomerSession(requestHeaders: Headers, allowPas
     mustChangePassword: Boolean(current!.mustChangePassword), sessionVersion: Number(current!.sessionVersion) } };
 }
 export async function customerSession(allowPasswordChange = false) {
-  try { return await validatedCustomerSession(await headers(), allowPasswordChange); } catch { return null; }
+  try { return await validatedCustomerSession(await headers(), allowPasswordChange); } catch (error) { logDatabaseFailure('customer_session', error); return null; }
 }
