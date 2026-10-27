@@ -1,5 +1,5 @@
 import 'server-only';
-export type DatabaseFailure = 'missing_configuration' | 'invalid_configuration' | 'authentication' | 'permission' | 'network_timeout' | 'query';
+export type DatabaseFailure = 'missing_configuration' | 'invalid_configuration' | 'authentication' | 'permission' | 'tls' | 'network_timeout' | 'query';
 export class DatabaseConfigurationError extends Error {
   constructor(readonly category: DatabaseFailure) { super('Database configuration is unavailable.'); }
 }
@@ -9,6 +9,9 @@ export function databaseFailure(error: unknown): DatabaseFailure {
   if (e?.name === 'MongoParseError' || e?.name === 'MongoInvalidArgumentError') return 'invalid_configuration';
   if (e?.code === 18) return 'authentication';
   if (e?.code === 13) return 'permission';
+  // Prefer an explicit nested TLS code over the driver's server-selection wrapper.
+  // A message merely mentioning TLS is not enough (e.g. a pre-handshake TCP reset).
+  if (databaseFailureCodes(error).some(code => /TLS|SSL|CERT|SELF_SIGNED|UNABLE_TO_VERIFY|UNABLE_TO_GET_ISSUER/.test(code))) return 'tls';
   if (e?.name && /Network|ServerSelection|Timeout/.test(e.name)) return 'network_timeout';
   if (e?.cause) return databaseFailure(e.cause);
   return 'query';

@@ -1,6 +1,6 @@
 # Dcorhome
 
-Next.js 15 / React 19 curtain website. Use Node.js 24.x. MongoDB is used only for invite-only accounts, authentication sessions, permissions and related security records.
+Next.js 15 / React 19 curtain website. This diagnostic branch uses Node.js 22.x for MongoDB TLS compatibility testing; a Production runtime change is not yet approved. MongoDB is used only for invite-only accounts, authentication sessions, permissions and related security records.
 
 Public catalogue, guides, metadata and the manual curtain studio work without MongoDB. Public data lives in `data/catalogue` and `data/site`; prepared imagery stays in `public/images/manual-visualizer`. No SQLite or persistent server filesystem is required.
 
