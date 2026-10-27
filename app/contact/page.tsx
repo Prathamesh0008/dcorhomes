@@ -24,9 +24,9 @@ export default function ContactPage() {
         enquiryType: "General Enquiry",
         color: "",
     });
-    const [extra, setExtra] = useState({ city: '', method: 'Email', measurements: '', designId: '', website: '', consent: false });
+    const [extra, setExtra] = useState({ city: '', method: 'Email', measurements: '', designId: '', visualizer: '', website: '', consent: false });
     const submitLock = useRef(false), submissionId = useRef('');
-    useEffect(() => { const q = new URLSearchParams(location.search); setForm(f => ({ ...f, interest: products.find(p => p.id === q.get('interest'))?.name || q.get('interest')?.slice(0, 100) || f.interest, room: q.get('room')?.slice(0, 60) || f.room, message: q.get('message')?.slice(0, 2000) || f.message })); setExtra(e => ({ ...e, measurements: q.get('measurements')?.slice(0, 1500) || '', designId: q.get('designId') || '' })); fetch('/api/session').catch(() => { }); }, []);
+    useEffect(() => { const q = new URLSearchParams(location.search); setForm(f => ({ ...f, interest: products.find(p => p.id === q.get('interest'))?.name || q.get('interest')?.slice(0, 100) || f.interest, room: q.get('room')?.slice(0, 60) || f.room, message: q.get('message')?.slice(0, 2000) || f.message })); setExtra(e => ({ ...e, measurements: q.get('measurements')?.slice(0, 1500) || '', designId: q.get('designId') || '', visualizer: q.get('visualizer') || '' }));  }, []);
     const [busy, setBusy] = useState(false), [status, setStatus] = useState<"idle" | "success" | "error">("idle"), [message, setMessage] = useState("");
     const summary = `Dcorhome consultation request\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || "Not given"}\nRoom: ${form.room}\nInterest: ${form.interest}\nNotes: ${form.message || "None"}\nCity: ${extra.city}\nContact method: ${extra.method}\nMeasurements: ${extra.measurements}\nPrivate design reference: ${extra.designId}`;
     const whatsapp = whatsappHref(whatsappNumber, summary);
@@ -44,14 +44,14 @@ export default function ContactPage() {
                 headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId.current },
                 body: JSON.stringify({ ...form, ...extra }),
             });
-            const json: { error?: string; stored?: boolean; notified?: boolean } = await response.json().catch(() => ({}));
+            const json: { error?: string; accepted?: boolean; notified?: boolean } = await response.json().catch(() => ({}));
             if (!response.ok)
                 throw new Error(json.error || "Could not submit your request.");
-            if (!json.stored)
-                throw new Error("Your request was not confirmed as saved.");
+            if (!json.accepted)
+                throw new Error("Email delivery was not accepted. Please contact sales@dcorhome.com.");
             submissionId.current = "";
             setStatus("success");
-            setMessage(json.notified ? "Your enquiry was saved. Our email provider accepted the notification for delivery." : "Your enquiry was saved. Email notification was not confirmed. You can also contact sales@dcorhome.com.");
+            setMessage("Our email provider accepted your enquiry for delivery. Inbox delivery is not guaranteed. Please keep a copy of your design.");
             setForm({
                 name: "",
                 email: "",
@@ -62,7 +62,7 @@ export default function ContactPage() {
                 enquiryType: "General Enquiry",
                 color: "",
             });
-            setExtra({ city: "", method: "Email", measurements: "", designId: "", website: "", consent: false });
+            setExtra({ city: "", method: "Email", measurements: "", designId: "", visualizer: "", website: "", consent: false });
         }
         catch (err) {
             setStatus("error");

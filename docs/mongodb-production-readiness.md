@@ -1,3 +1,5 @@
+> Historical report. Superseded by [the authentication-only architecture report](auth-only-mongodb-architecture.md). Earlier verification claims do not establish current production preservation or connectivity.
+
 # MongoDB runtime and production readiness
 
 Audit and verification: 2026-10-26. No deployment and no business-data migration were executed.

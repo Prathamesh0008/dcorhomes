@@ -1,0 +1,87 @@
+// Production-build HTTP and security checks. Never loads business credentials or sends real email.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const {spawn}=require('node:child_process');
+const {MongoMemoryReplSet}=require('mongodb-memory-server');
+process.env.MONGOMS_DOWNLOAD_DIR=path.resolve('.test-data/mongodb-binaries');
+const base='http://localhost:3351';let server,repl,client,logs='',stage='offline public routes';
+const shared={...process.env,SITE_URL:base,SESSION_SECRET:crypto.randomBytes(32).toString('hex'),BETTER_AUTH_SECRET:crypto.randomBytes(32).toString('hex'),MONGODB_DB:'dcorhome_architecture_check',VERCEL:'1',ALLOW_LOCAL_HTTP:'true',TRUST_PROXY:'false',DCORHOME_AI_ENABLED:'false',OPENAI_API_KEY:'',RESEND_API_KEY:'',RESEND_FROM_EMAIL:'',ENQUIRY_FROM_EMAIL:'',EMAIL_FROM:'',DCORHOME_DATA_DIR:path.resolve('.test-data/must-not-create-architecture')};
+const api=(route,method='GET',body,cookie)=>fetch(base+route,{method,redirect:'manual',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{cookie}:{}),origin:base},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(25000)});
+const cookieOf=response=>response.headers.getSetCookie().map(value=>value.split(';')[0]).join('; ');
+async function stop(){if(server&&server.exitCode===null){const done=new Promise(resolve=>server.once('exit',resolve));server.kill('SIGINT');await done;}server=undefined;}
+async function start(env){logs='';server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3351'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});server.stdout.on('data',bytes=>{logs+=bytes.toString();});server.stderr.on('data',bytes=>{logs+=bytes.toString();});for(let i=0;i<120;i++){if(server.exitCode!==null)throw Error('Server exited: '+logs.replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g,'[redacted]').slice(-1800));if(logs.includes('Ready in'))return;await new Promise(resolve=>setTimeout(resolve,250));}throw Error('Server readiness timeout.');}
+(async()=>{
+ await start({...shared,MONGODB_URI:'mongodb://127.0.0.1:1/dcorhome_architecture_check',DCORHOME_TEST_FORBID_MONGO:'true',NODE_OPTIONS:'--require=./scripts/forbid-mongodb-preload.cjs'});
+ const records=require('../data/catalogue/fabrics.json'),product=records.find(f=>f.active!==false);
+ const pages=['/','/collections','/collections/'+product.slug,'/studio','/measure','/inspiration','/about','/contact','/faq','/how-it-works','/designs','/collections/saved','/sitemap.xml','/robots.txt'];
+ for(const route of pages){stage='offline route '+route;const response=await api(route,'GET',undefined,'unrelated=1; better-auth.session_token=offline-test');assert.equal(response.status,200,'Offline public route failed: '+route);const body=await response.text();assert.ok(!body.includes('This page is temporarily unavailable.'),'Outage page rendered: '+route);if(route==='/'){assert.ok(body.includes('Your room.'));assert.ok(body.includes('/images/hero-room-before.webp'));}if(route==='/studio')assert.ok(body.includes('Where shall we begin?')||body.includes('Opening your fabric collection'));if(route==='/collections/'+product.slug)assert.ok(body.includes(product.name));if(route==='/sitemap.xml')assert.ok(body.includes('/collections/'+product.slug));}
+ const catalogue=await(await api('/api/catalogue')).json();assert.ok(catalogue.records.items.some(f=>f.id===product.id));
+ const fabrics=await api('/api/fabrics');assert.equal(fabrics.status,200);await fabrics.text();
+ assert.equal((await api('/api/options')).status,200);
+ for(const route of ['/api/manual-designs','/api/designs','/api/fabrics/saved','/api/visualize','/api/visualizer/upload','/api/admin/assets','/api/admin/retention'])assert.equal((await api(route,'POST',{})).status,410);
+ const enquiry=await api('/api/enquiries','POST',{name:'Offline architecture fixture',email:'fixture@example.invalid',message:'No email must be sent.',consent:true});assert.equal(enquiry.status,503);assert.ok((await enquiry.json()).error.includes('sales@dcorhome.com'));
+ stage='focused offline visualizer';
+ const browser=spawn(process.execPath,['scripts/architecture-visualizer-smoke.cjs'],{env:{...process.env,DCORHOME_TEST_BASE_URL:base},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ let browserOutput='';browser.stdout.on('data',b=>{browserOutput+=b.toString();});browser.stderr.on('data',b=>{browserOutput+=b.toString();});
+ const browserCode=await new Promise(resolve=>browser.once('exit',resolve));
+ if(browserCode!==0){console.error(browserOutput);process.exitCode=1;}else process.stdout.write(browserOutput);
+ assert.ok(!logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Public interaction attempted MongoDB.');
+ assert.ok(!logs.includes('database_failure'),'Public interaction triggered database diagnostics.');
+ console.log('PASS: Public routes, product metadata/sitemap, catalogue APIs and retired cloud endpoints work without any MongoDB connection, including with cookies. Missing email fails truthfully.');
+ const login=await api('/api/auth/sign-in/username','POST',{username:'offline-admin',password:'not-a-real-password'});assert.equal(login.status,503);
+ assert.ok(logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Offline probe must intercept the actual runtime driver.');
+ for(const route of ['/api/admin/users','/api/admin']){const response=await api(route,'GET',undefined,'better-auth.session_token=offline-test');assert.ok([401,403,503].includes(response.status),'Private data must fail closed.');}
+ console.log('PASS: Login and private administration fail securely when MongoDB is unavailable.');
+ await stop();stage='isolated authentication';
+ repl=await MongoMemoryReplSet.create({replSet:{count:1,storageEngine:'wiredTiger'},binary:{version:'7.0.24'}});
+ const uri=repl.getUri('dcorhome_architecture_check');assert.match(uri,/^mongodb:\/\/127\.0\.0\.1:/);
+ Object.assign(process.env,shared,{MONGODB_URI:uri});delete process.env.DCORHOME_TEST_FORBID_MONGO;
+ require('./auth-loader.cjs');
+ const connection=require('../lib/server/mongodb.ts');client=await connection.mongoClient();const db=await connection.mongoDatabase();
+ const {provisionMember}=require('../lib/server/members.ts');const password=crypto.randomBytes(24).toString('base64url');await provisionMember(null,{userId:'fixture-admin',fullName:'Isolated architecture administrator'},password);
+ await start({...shared,MONGODB_URI:uri});
+ const signIn=(username,password)=>api('/api/auth/sign-in/username','POST',{username,password});
+ const admin=await signIn('fixture-admin',password);assert.equal(admin.status,200);const adminCookie=cookieOf(admin);assert.ok(admin.headers.getSetCookie().some(value=>/HttpOnly/i.test(value)&&/Secure/i.test(value)));
+ assert.equal((await api('/api/auth/sign-up/email','POST',{})).status,403);
+ const creation=await api('/api/admin/users','POST',{userId:'fixture-member',fullName:'Isolated architecture member'},adminCookie);assert.equal(creation.status,201);const member=await creation.json();
+ const {ObjectId}=require('mongodb');const credential=await db.collection('accounts').findOne({userId:new ObjectId(member.id)});assert.notEqual(credential.password,member.temporaryPassword);
+ const first=await signIn('FIXTURE-MEMBER',member.temporaryPassword);assert.equal(first.status,200);const firstCookie=cookieOf(first);
+ assert.ok((await api('/account','GET',undefined,firstCookie)).headers.get('location').endsWith('/account/change-password'));
+ const memberPassword=crypto.randomBytes(24).toString('base64url');assert.equal((await api('/api/account/password','POST',{currentPassword:member.temporaryPassword,newPassword:memberPassword},firstCookie)).status,200);
+ assert.equal(await(await api('/api/auth/get-session','GET',undefined,firstCookie)).json(),null);
+ const signedIn=await signIn('fixture-member',memberPassword);assert.equal(signedIn.status,200);const memberCookie=cookieOf(signedIn);
+ assert.equal((await api('/account','GET',undefined,memberCookie)).status,200);
+ assert.equal((await api('/api/admin/users','GET',undefined,memberCookie)).status,403);
+ assert.equal((await api('/admin/users','GET',undefined,memberCookie)).status,404);
+ assert.equal((await signIn('fixture-member','incorrect')).status,401);
+ assert.equal((await api('/api/admin','PATCH',{kind:'content'},adminCookie)).status,405);
+ assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'disable'},adminCookie)).status,200);
+ assert.equal(await(await api('/api/auth/get-session','GET',undefined,memberCookie)).json(),null);
+ assert.equal((await signIn('fixture-member',memberPassword)).status,401);
+ assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'enable'},adminCookie)).status,200);
+ const reset=await api('/api/admin/users/'+member.id,'PATCH',{action:'reset-password'},adminCookie);assert.equal(reset.status,200);const resetPassword=(await reset.json()).temporaryPassword;
+ assert.equal((await signIn('fixture-member',memberPassword)).status,401);
+ const last=await signIn('fixture-member',resetPassword);assert.equal(last.status,200);const lastCookie=cookieOf(last);
+ assert.equal((await api('/api/auth/sign-out','POST',{},lastCookie)).status,200);assert.equal(await(await api('/api/auth/get-session','GET',undefined,lastCookie)).json(),null);
+ const allowed=['users','accounts','sessions','verification','rateLimit','member_login_limits','member_audit','member_control'];
+ for(const collection of await db.listCollections().toArray())assert.ok(allowed.includes(collection.name),'Non-auth collection was created: '+collection.name);
+ assert.equal(fs.existsSync(shared.DCORHOME_DATA_DIR),false);
+ console.log('PASS: Invite-only accounts, password hashes/change/reset, roles, status, session revocation/logout and disabled content editing. Only authentication collections created; no local persistence directory.');
+ stage='read-only export preservation';await stop();
+ const productFixture={...records[0],id:'fixture-export-preservation',slug:'fixture-export-preservation',name:'Isolated export fixture'};
+ await db.collection('fabric_products').insertOne({kind:'fabric-record',id:productFixture.id,owner:'fixture-owner',created:1000,payload:productFixture});
+ const design=require('../lib/manual-visualizer/model.ts').defaultDesign;
+ await db.collection('saved_designs').insertOne({kind:'manual-design',id:'fixture-manual-export',owner:'fixture-owner',created:1000,payload:{design}});
+ await db.collection('enquiries').insertOne({kind:'enquiry',id:'fixture-private-enquiry',owner:'fixture-owner',created:1000,payload:{message:'PRIVATE_EXPORT_SENTINEL'}});
+ const directory='.data/architecture-export-'+crypto.randomBytes(6).toString('hex');
+ const runScript=(file,args)=>new Promise(resolve=>{const child=spawn(process.execPath,[file,...args],{env:{...shared,MONGODB_URI:uri},windowsHide:true,stdio:['ignore','pipe','pipe']});let output='';child.stdout.on('data',b=>output+=b.toString());child.stderr.on('data',b=>output+=b.toString());child.once('exit',code=>resolve({code,output}));});
+ const exported=await runScript('scripts/export-legacy-content.cjs',['--env-only','--out',directory]);assert.equal(exported.code,0,exported.output);
+ const manifest=JSON.parse(fs.readFileSync(path.join(directory,'manifest.json'),'utf8'));assert.equal(manifest.sourceUnchanged,true);
+ const publicFiles=['candidate/catalogue/fabrics.json','candidate/catalogue/collections.json','candidate/site/editorial.json','candidate/site/design-options.json'];
+ assert.ok(JSON.parse(fs.readFileSync(path.join(directory,publicFiles[0]),'utf8')).some(f=>f.id===productFixture.id));
+ for(const file of publicFiles)assert.ok(!fs.readFileSync(path.join(directory,file),'utf8').includes('PRIVATE_EXPORT_SENTINEL'));
+ const raw=fs.readFileSync(path.join(directory,'PRIVATE-records.ejson'),'utf8');assert.ok(raw.includes('PRIVATE_EXPORT_SENTINEL'));assert.ok(!Object.keys(JSON.parse(raw)).includes('users'));
+ assert.equal((await db.collection('fabric_products').findOne({id:productFixture.id})).payload.name,productFixture.name);
+ const rejected=await runScript('scripts/verify-content-export.cjs',['--snapshot',directory]);assert.equal(rejected.code,1,'Gate must reject a unique DB product absent from repository content.');
+ console.log('PASS: Read-only export preserves unique products and private legacy metadata, excludes auth credentials/public leakage, and verification refuses an unpreserved catalogue cutover.');
+
+})().catch(error=>{console.error('FAIL at '+stage+': '+(String(error.message).replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g,'[redacted]')));process.exitCode=1;}).finally(async()=>{await stop();if(client)await client.close();if(repl)await repl.stop();});

@@ -1,14 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { customerSession } from "@/lib/server/customer-auth";
 import { business } from "@/lib/business";
-import { designExpired } from "@/lib/server/visualizer-retention";
 import { fabricRecords } from "@/lib/server/fabric-records";
 import { fabricEnquiry } from "@/lib/curtains/enquiry";
 import { siteUrl } from "@/lib/seo";
-import { databaseReady, put, row, transaction } from "@/lib/server/db";
 import { buildEnquiryEmail } from "@/lib/server/enquiry-email-template";
-import { failure, HttpError, jsonInput, session, throttle, privateHeaders } from "@/lib/server/security";
+import { failure, HttpError, jsonInput, privateHeaders } from "@/lib/server/http";
+import { throttlePublic } from '@/lib/server/public-rate-limit';
+import { validateDesign, designSummary } from '@/lib/manual-visualizer/model';
 export const runtime = "nodejs";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type NotificationStatus = "not-configured" | "sent" | "failed";
@@ -45,9 +44,7 @@ async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<No
     const fromEmail = envValue(process.env.RESEND_FROM_EMAIL ||
         process.env.ENQUIRY_FROM_EMAIL ||
         process.env.EMAIL_FROM);
-    const toEmail = envValue(process.env.CONTACT_EMAIL ||
-        process.env.DCORHOME_CONTACT_EMAIL ||
-        business.email);
+    const toEmail = 'sales@dcorhome.com';
     if (!apiKey || !fromEmail || !toEmail) {
         console.error("Resend notification not configured: missing API key, sender, or recipient.");
         return "not-configured";
@@ -80,10 +77,7 @@ async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<No
         });
         if (!response.ok) {
             // Log only the status and provider's error code, never credentials or enquiry details.
-            const responseBody: unknown = await response.json().catch(() => null);
-            const code = responseBody && typeof responseBody === "object" && "name" in responseBody &&
-                typeof responseBody.name === "string" ? responseBody.name : "unknown";
-            console.error(`Resend enquiry notification rejected: HTTP ${response.status}, code ${code}.`);
+            console.error(JSON.stringify({event:'enquiry_email_failure',status:response.status}));
             return "failed";
         }
         const result: unknown = await response.json().catch(() => null);
@@ -101,10 +95,6 @@ async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<No
 export async function POST(request: NextRequest) {
     try {
         const input = await jsonInput(request, 12000);
-        if (!databaseReady()) {
-            throw new HttpError(503, "Consultation requests are temporarily unavailable. Please keep a copy of your details and try again later.");
-        }
-        await throttle(request, "enquiry", 5);
         const text = (key: string, max: number) => typeof input[key] === "string"
             ? String(input[key]).trim().slice(0, max)
             : "";
@@ -127,39 +117,22 @@ export async function POST(request: NextRequest) {
         if (enquiryType && !business.enquiryTypes.includes(enquiryType)) {
             throw new HttpError(400, "Choose a valid enquiry type.");
         }
-        const customer = await customerSession();
-        const owner = await session("guest", true);
-        const designId = text("designId", 60);
+        const designId = text('designId', 60);
+        if(designId) throw new HttpError(400, 'Earlier cloud designs must be exported first. Include your design configuration or contact sales@dcorhome.com.');
         let designSelection: unknown;
-        if (designId) {
-            const design = await row("design", designId);
-            if (!design || designExpired(design) || design.owner !== owner) {
-                throw new HttpError(400, "The selected design is not available in your session.");
-            }
-            designSelection = JSON.parse(design.data).selection;
+        const records = await fabricRecords();
+        if(input.visualizer){
+            try { designSelection = validateDesign(typeof input.visualizer==='string'?JSON.parse(input.visualizer):input.visualizer,records); }
+            catch { throw new HttpError(400,'The design configuration could not be verified. Reopen your design and try again.'); }
         }
-        const requestId = request.headers.get("idempotency-key");
-        const id = requestId && /^[a-f0-9-]{36}$/.test(requestId)
-            ? requestId
-            : randomUUID();
-        const existing = await row("enquiry", id);
-        if (existing) {
-            if (existing.owner !== owner) {
-                throw new HttpError(409, "Submission conflict.");
-            }
-            return NextResponse.json({
-                ok: true,
-                id,
-                stored: true,
-                notified: JSON.parse(existing.data).notification === "sent",
-            }, { headers: privateHeaders });
-        }
+        const requestId = request.headers.get('idempotency-key');
+        const id = requestId && /^[a-f0-9-]{36}$/i.test(requestId) ? requestId : randomUUID();
         const fabricId = text("catalogueFabricId", 60);
         const variantId = text("variantId", 100);
         const quantity = text("quantityMetres", 30);
         let selectedFabric: Record<string, unknown> | undefined;
         if (fabricId) {
-            const fabric = (await fabricRecords()).find((f) => f.id === fabricId);
+            const fabric = records.find((f) => f.id === fabricId);
             const variant = fabric?.colors.find((v) => v.id === variantId && v.active !== false);
             if (!fabric || !variant) {
                 throw new HttpError(400, "The selected fabric or shade is no longer available.");
@@ -199,7 +172,7 @@ export async function POST(request: NextRequest) {
             city: text("city", 100),
             room: text("room", 60),
             interest: text("interest", 100),
-            message: text("message", 3000),
+            message: text("message", 3000) + (designSelection ? '\n\nVerified configuration:\n' + designSummary(designSelection as Parameters<typeof designSummary>[0], records) : ''),
             measurements: text("measurements", 1500),
             method: text("method", 60),
             designId,
@@ -207,37 +180,11 @@ export async function POST(request: NextRequest) {
             notification: "not-configured",
             consentAt: new Date().toISOString(),
         };
-        // Keep the existing database save and idempotency behavior.
-        const saved = await transaction(async () => {
-            const prior = await row("enquiry", id);
-            if (prior) {
-                if (prior.owner !== owner) {
-                    throw new HttpError(409, "Submission conflict.");
-                }
-                return false;
-            }
-            await put("enquiry", id, owner!, enquiry);
-            if (customer) {
-                await put("account-enquiry", id, customer.user.id, enquiry);
-            }
-            return true;
-        });
-        if (!saved) {
-            return NextResponse.json({ ok: true, id, stored: true, notified: false }, { headers: privateHeaders });
-        }
+        if (!request.headers.get('content-type')?.startsWith('application/json')) throw new HttpError(415,'Use a JSON enquiry request.');
+        await throttlePublic(request, 'enquiry', 5);
         enquiry.notification = await sendEnquiryNotification(id, enquiry);
-        if (enquiry.notification !== "not-configured") {
-            await put("enquiry", id, owner!, enquiry);
-            if (customer) {
-                await put("account-enquiry", id, customer.user.id, enquiry);
-            }
-        }
-        return NextResponse.json({
-            ok: true,
-            id,
-            stored: true,
-            notified: enquiry.notification === "sent",
-        }, { headers: privateHeaders });
+        if(enquiry.notification !== 'sent') throw new HttpError(503, 'Email delivery was not accepted. Keep a copy of your details and email sales@dcorhome.com directly.');
+        return NextResponse.json({ok:true,id,accepted:true,notified:true,stored:false}, {headers:privateHeaders});
     }
     catch (error) {
         return failure(error);

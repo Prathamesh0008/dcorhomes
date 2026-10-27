@@ -1,0 +1,52 @@
+[
+  {
+    "id": "silk",
+    "name": "Silk",
+    "description": "Explore silk curtain varieties when verified supplier records are available."
+  },
+  {
+    "id": "sheer",
+    "name": "Sheer",
+    "description": "A lighter layer for softly filtered daylight."
+  },
+  {
+    "id": "velvet",
+    "name": "Velvet",
+    "description": "Rich surface texture and a generous drape."
+  },
+  {
+    "id": "linen",
+    "name": "Linen",
+    "description": "Natural texture and a relaxed material direction."
+  },
+  {
+    "id": "cotton",
+    "name": "Cotton",
+    "description": "Cotton curtain varieties and blends."
+  },
+  {
+    "id": "jacquard",
+    "name": "Jacquard",
+    "description": "Woven patterns, from subtle geometry to decorative motifs."
+  },
+  {
+    "id": "chenille",
+    "name": "Chenille",
+    "description": "Soft, tactile curtain constructions."
+  },
+  {
+    "id": "polyester-blends",
+    "name": "Polyester and blends",
+    "description": "Synthetic and blended constructions, identified by supplier composition."
+  },
+  {
+    "id": "textured",
+    "name": "Textured",
+    "description": "Curtain fabrics with a tactile woven surface."
+  },
+  {
+    "id": "unclassified",
+    "name": "Other curtain fabrics",
+    "description": "Material classification awaiting supplier confirmation."
+  }
+]

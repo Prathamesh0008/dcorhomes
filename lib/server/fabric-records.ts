@@ -2,36 +2,20 @@ import 'server-only';
 import { cache } from 'react';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fabrics as seed } from '@/lib/curtains/manual-config';
+import { catalogueRecords, catalogueCategories } from '@/data/catalogue';
 import { fabricCategories, type FabricCategory } from '@/lib/curtains/categories';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import schema from '@/lib/curtains/supplier-catalogue.schema.json';
-import { databaseReady, rows, row, allRecords, put, transaction, type RecordRow } from './db';
-import { HttpError } from './security';
+import { HttpError } from './http';
 
-export async function allFabricRecords(): Promise<FabricRecord[]> {
- const records=new Map(seed.map(f=>[f.id,f]));
- {
-  for(const item of (await rows('fabric'))){const old=JSON.parse(item.data);if(records.has(old.id)){records.set(old.id,{...records.get(old.id)!,name:old.name,description:old.description,category:old.category,images:[old.image],active:!old.archived});}else records.set(old.id,{id:old.id,slug:old.id,name:old.name,category:old.category,description:old.description,source:'demo',usage:old.category==='Sheer'?['sheer']:['main'],images:[old.image],colors:[],compatibleHeadingStyles:[],active:!old.archived});}
-  for(const item of await allRecords('fabric-record'))records.set(item.id,JSON.parse(item.data));
- }
- return [...records.values()];
+// Public catalogue reads use repository content exclusively; no network or persistence.
+export async function allFabricRecords(): Promise<FabricRecord[]> { return structuredClone(catalogueRecords); }
+export const fabricRecords = cache(async () => (await allFabricRecords()).filter(f => f.active !== false));
+export async function categories(): Promise<FabricCategory[]> { return structuredClone(catalogueCategories); }
+export async function saveFabricRecords(_records: FabricRecord[], _operation: 'create' | 'update'): Promise<void> {
+ throw new HttpError(405, 'Catalogue edits require a repository content update and redeployment.');
 }
-// Public read sharing is request scoped; mutation validation still reads fresh records.
-export const fabricRecords = cache(async () => (await allFabricRecords()).filter(f=>f.active!==false));
-export async function saveFabricRecords(records:FabricRecord[],operation:'create'|'update'){
- await transaction(async()=>{
-  const existing=await allFabricRecords(),ids=new Set<string>();
-  for(const f of records){if(ids.has(f.id))throw new HttpError(409,'Duplicate fabric ID in batch: '+f.id);ids.add(f.id);const exists=existing.some(item=>item.id===f.id);if(operation==='create'&&exists)throw new HttpError(409,'Fabric ID already exists: '+f.id+'. No records saved.');if(operation==='update'&&!exists)throw new HttpError(404,'Fabric does not exist: '+f.id);}
-  const skus=new Set<string>();for(const f of [...existing.filter(f=>!ids.has(f.id)),...records]){if(f.source!=='supplier')continue;for(const sku of [f.sku,...f.colors.map(v=>v.variantSku)].filter((v):v is string=>Boolean(v))){const normalized=sku.trim().toLowerCase();if(skus.has(normalized))throw new HttpError(409,'Duplicate product or variant SKU: '+sku);skus.add(normalized);}}
-  for(const f of records)await put('fabric-record',f.id,'admin',f);
- });
-}
-export async function categories(): Promise<FabricCategory[]> {
- const records=new Map(fabricCategories.map(c=>[c.id,c]));
- for(const item of await allRecords('fabric-category'))records.set(item.id,JSON.parse(item.data));
- return [...records.values()];
-}
+
 type Rule={type?:string|string[];const?:unknown;enum?:unknown[];minLength?:number;minItems?:number;pattern?:string;minimum?:number;maximum?:number;exclusiveMinimum?:number;required?:string[];properties?:Record<string,Rule>;items?:Rule};
 function validate(value:unknown,rule:Rule,at:string):void {
  const bad=(message:string):never=>{throw new HttpError(400,`${at}: ${message}`);};
@@ -45,7 +29,6 @@ function validate(value:unknown,rule:Rule,at:string):void {
  else if(value&&typeof value==='object'){const object=value as Record<string,unknown>;for(const key of rule.required||[])if(object[key]===undefined)bad(`${key} is required`);for(const key of Object.keys(object))if(!rule.properties?.[key])bad(`unknown field ${key}`);for(const [key,sub]of Object.entries(rule.properties||{}))validate(object[key],sub,`${at}.${key}`);}
 }
 async function imageExists(src:string) {
- if(/^\/api\/catalogue\/images\/[a-f0-9-]{36}$/.test(src))return databaseReady()&&Boolean((await row('catalogue-image',src.split('/').pop()!)));
  if(!/^\/images\/[a-zA-Z0-9_./-]+\.(jpg|jpeg|png|webp|avif)$/.test(src))return false;
  const resolved=path.resolve('public','.'+src),root=path.resolve('public','images')+path.sep;
  return resolved.startsWith(root)&&existsSync(resolved);

@@ -1,9 +1,9 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { consume, databaseReady, DatabaseUnavailable } from "./db";
+import type { NextRequest } from "next/server";
 
-export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
+import { HttpError } from './http';
+export { HttpError, mutation, jsonInput, failure, privateHeaders } from './http';
 function secret() { const key = process.env.SESSION_SECRET; if (!key || key.length < 32) throw new HttpError(503, "Secure sessions are unavailable."); return key; }
 function sign(value: string) { return createHmac("sha256", secret()).update(value).digest("base64url"); }
 export function equal(a: string, b: string) { const x = createHash("sha256").update(a).digest(), y = createHash("sha256").update(b).digest(); return timingSafeEqual(x, y); }
@@ -28,22 +28,7 @@ export async function requireAdmin() {
   if (!account) throw new HttpError(401, 'Administrator sign-in required.');
   if (account.user.role !== 'admin') throw new HttpError(403, 'Administrator access required.');
 }
-export function mutation(request: NextRequest, maxBytes = 65536) {
-  const origin = request.headers.get("origin");
-  if ((origin && origin !== new URL(request.url).origin && origin !== process.env.SITE_URL) || request.headers.get("sec-fetch-site") === "cross-site") throw new HttpError(403, "Cross-site request rejected.");
-  if (Number(request.headers.get("content-length") || 0) > maxBytes) throw new HttpError(413, "Request is too large.");
-}
-export async function jsonInput(request: NextRequest, maxBytes = 65536) {
-  mutation(request, maxBytes);
-  const reader = request.body?.getReader(); let size = 0; const parts: Uint8Array[] = [];
-  if (!reader) throw new HttpError(400, "Missing request.");
-  while (true) { const item = await reader.read(); if (item.done) break; size += item.value.length; if (size > maxBytes) { await reader.cancel(); throw new HttpError(413, "Request is too large."); } parts.push(item.value); }
-  try { const value = JSON.parse(Buffer.concat(parts).toString()); if (!value || Array.isArray(value) || typeof value !== "object") throw Error(); return value as Record<string, unknown>; } catch { throw new HttpError(400, "Invalid JSON request."); }
-}
+// Legacy callers share the public, nonpersistent limiter; member login has its own MongoDB limiter.
 export async function throttle(request: NextRequest, kind: string, limit: number, ms = 3600000) {
-  if (!databaseReady()) throw new HttpError(503, "This service is temporarily unavailable.");
-  const identity = process.env.TRUST_PROXY === "true" ? (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim() : "shared";
-  try { (await consume(`${kind}:${createHash("sha256").update(identity).digest("hex")}`, limit, ms)); } catch { throw new HttpError(429, "Too many requests. Please try again later."); }
+ return (await import('./public-rate-limit')).throttlePublic(request,kind,limit,ms);
 }
-export function failure(error: unknown) { const status = error instanceof HttpError ? error.status : error instanceof DatabaseUnavailable ? 503 : 500; return NextResponse.json({ error: error instanceof HttpError || error instanceof DatabaseUnavailable ? error.message : "Unable to complete this operation." }, { status, headers: { "Cache-Control": "no-store" } }); }
-export const privateHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };

@@ -30,14 +30,7 @@ export function useDesignActions(design:VisualizerDesign,records:FabricRecord[])
    const timer=setTimeout(()=>{URL.revokeObjectURL(url);urls.current.delete(url);},10000);urls.current.set(url,timer);
    return 'Your curtain design has been downloaded.';
   }),
-  save:()=>perform(async()=>{
-   const clean=validateDesign(design,records),response=await fetch('/api/manual-designs');
-   if(!response.ok)throw Error('Account saving is unavailable. You can still save on this device.');
-   const state=await response.json();if(!state.account)return saveDevice(clean);
-   const saved=await fetch('/api/manual-designs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({design:clean})});
-   const data=await saved.json();if(!saved.ok)throw Error(data.error||'Your design could not be saved.');
-   return 'Your design is saved to your account.';
-  }),
+  save:()=>perform(()=>saveDevice()),
   saveDevice:()=>perform(()=>saveDevice()),
  };
 }

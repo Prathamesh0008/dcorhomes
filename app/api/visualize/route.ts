@@ -1,6 +1,5 @@
-import { NextRequest } from 'next/server';
-import { getReadiness,generatePreview } from '@/lib/server/visualizer-generation';
-export const runtime='nodejs';
-export const maxDuration=180;
-export const GET=getReadiness;
-export function POST(request:NextRequest){return generatePreview(request);}
+import { retiredService } from '@/lib/server/retired-service';
+export const GET = retiredService;
+export const POST = retiredService;
+export const PATCH = retiredService;
+export const DELETE = retiredService;

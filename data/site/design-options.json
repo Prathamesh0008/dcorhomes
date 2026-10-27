@@ -1,0 +1,54 @@
+{
+  "styles": [
+    "Modern",
+    "Classic",
+    "Minimalist",
+    "Luxury",
+    "Contemporary",
+    "Traditional",
+    "Bohemian",
+    "Industrial",
+    "Romantic"
+  ],
+  "patterns": [
+    "Solid",
+    "Striped",
+    "Floral",
+    "Geometric",
+    "Damask",
+    "Paisley",
+    "Chevron",
+    "Plaid",
+    "Ikat",
+    "Toile",
+    "Abstract",
+    "Textured"
+  ],
+  "rooms": [
+    "Living room",
+    "Bedroom",
+    "Dining room",
+    "Kitchen",
+    "Office",
+    "Bathroom",
+    "Kids room",
+    "Nursery",
+    "Guest room",
+    "Media room"
+  ],
+  "headings": [
+    "Wave fold",
+    "Pinch pleat",
+    "Eyelet",
+    "Relaxed linen"
+  ],
+  "lengths": [
+    "Floor length",
+    "Sill length",
+    "Below sill"
+  ],
+  "layers": [
+    "Single curtain",
+    "Layered sheer and drape"
+  ]
+}

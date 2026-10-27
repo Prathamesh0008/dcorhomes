@@ -1,3 +1,4 @@
+throw Error('Legacy application persistence is retired. Use check:architecture for isolated authentication checks and content:export for read-only preservation.');
 // All writes are restricted to an ephemeral localhost replica set, never .env.local.
 const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');

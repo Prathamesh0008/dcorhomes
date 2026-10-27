@@ -1,4 +1,3 @@
-import Container from "@/components/ui/Container";
-import { typography } from "@/lib/typography";
-export const metadata={title:"Shared curtain design",robots:{index:false,follow:false},referrer:"no-referrer" as const};
-export default async function Share({params}:{params:Promise<{token:string}>}){const {token}=await params;return <Container as="section" className="py-12"><h1 className={typography.page}>A shared design <em className="font-serif font-normal text-bronze">direction.</em></h1><p className="text-[15px] leading-relaxed text-muted">AI illustration. This link shows only the edited result, expires after seven days and can be revoked by its owner. Expired or revoked images are unavailable.</p><img src={`/api/shared/${encodeURIComponent(token)}`} alt="Shared AI curtain design; unavailable if expired or revoked" className="mt-8 max-h-[75vh] w-full object-contain"/></Container>;}
+import Container from '@/components/ui/Container';
+export const metadata={title:'Earlier shared curtain design',robots:{index:false,follow:false}};
+export default function Share(){return <Container as="section" className="py-12"><h1>Earlier shared design</h1><p>Cloud sharing has been retired. No private photograph is exposed here. Ask the design owner for a downloaded copy. Existing cloud records have not been deleted.</p></Container>;}

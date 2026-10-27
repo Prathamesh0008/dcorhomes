@@ -1,11 +1,5 @@
-export const designOptions = {
-  styles: ["Modern", "Classic", "Minimalist", "Luxury", "Contemporary", "Traditional", "Bohemian", "Industrial", "Romantic"],
-  patterns: ["Solid", "Striped", "Floral", "Geometric", "Damask", "Paisley", "Chevron", "Plaid", "Ikat", "Toile", "Abstract", "Textured"],
-  rooms: ["Living room", "Bedroom", "Dining room", "Kitchen", "Office", "Bathroom", "Kids room", "Nursery", "Guest room", "Media room"],
-  headings: ["Wave fold", "Pinch pleat", "Eyelet", "Relaxed linen"],
-  lengths: ["Floor length", "Sill length", "Below sill"],
-  layers: ["Single curtain", "Layered sheer and drape"],
-};
+import repositoryOptions from '../data/site/design-options.json';
+export const designOptions = repositoryOptions;
 export const sampleScenes = [
   { id: "modern", name: "Modern drapery", image: "/images/residential-room.jpg", fabric: "sienna", style: "Modern" },
   { id: "classic", name: "Classic sheers", image: "/images/curtain-room.jpg", fabric: "solstice", style: "Classic" },

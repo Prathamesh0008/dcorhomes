@@ -1,3 +1,3 @@
-import { designOptions } from "@/lib/design-options";
-import { databaseReady,row } from "./db";
-export async function availableOptions(){const setting=await row('settings','design-options');return setting?JSON.parse(setting.data) as typeof designOptions:designOptions;}
+import options from '@/data/site/design-options.json';
+import type { designOptions } from '@/lib/design-options';
+export async function availableOptions(){ return structuredClone(options) as typeof designOptions; }

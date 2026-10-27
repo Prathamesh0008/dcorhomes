@@ -1,49 +1,35 @@
 # Dcorhome
 
-Existing Next.js 15.5.28 / React 19 curtain-design application. Node 24 or newer is required for the built-in SQLite adapter. Fonts and colors are preserved; styling remains in Tailwind TSX classes.
+Next.js 15 / React 19 curtain website. Use Node.js 24.x. MongoDB is used only for invite-only accounts, authentication sessions, permissions and related security records.
 
-See [the manual curtain configurator and catalogue report](MANUAL_CURTAIN_CONFIGURATOR.md) for independent layer rendering, catalogue imports, Studio integration, asset provenance and verification limits. The earlier [prepared-look report](CURTAIN_CONFIGURATOR.md) documents the previous implementation.
+Public catalogue, guides, metadata and the manual curtain studio work without MongoDB. Public data lives in `data/catalogue` and `data/site`; prepared imagery stays in `public/images/manual-visualizer`. No SQLite or persistent server filesystem is required.
 
-## Run locally
+See [the architecture audit, production preservation procedure and verification report](docs/auth-only-mongodb-architecture.md). **Initial production cutover is blocked until unique production content is exported and verified.** The current repository baseline contains seven demonstration fabrics and no supplier records; it is not a production database export. Do not recreate/reset/delete the existing database or users.
 
-Use `npm.cmd run dev` on Windows, or `npm run dev` elsewhere. `npm run lint` checks TypeScript; `npm run build` validates comparison assets and builds production output. `npm start` serves the last build.
+## Development and checks
 
-Development uses `.next-dev` and `tsconfig.dev.json`; production uses `.next` and `tsconfig.build.json`. Stop the relevant server before rebuilding or clearing its generated output. Do not manually create generated manifests.
+```powershell
+npm.cmd run dev
+npm.cmd run lint
+npm.cmd run check:content
+npm.cmd run build
+npm.cmd run check:architecture
+npm.cmd run check:enquiries
+npm.cmd run check:visualizer
+```
 
-Only one Next.js process tree may own each output directory. `next.config.ts` enforces this before Next cleans or writes it, including direct CLI starts on different ports. Development and a production build can run together because their outputs are separate. A production server must stop before another production build. Duplicate launches fail with the owner's PID; stop that project's existing terminal rather than deleting build folders. Next's own child workers and Fast Refresh restarts share the original lease. A terminated owner's stale lock is recovered automatically; unknown or unreadable ownership files are left untouched. Lock files live beside the output directories and are ignored by Git.
+`check:architecture` uses an isolated localhost MongoDB replica set, a production Next server and one focused browser journey. It never uses business credentials as a write target. Chrome is required for that focused desktop smoke check. Email checks mock the provider and send no actual mail. No extensive browser suite is required.
 
-## Pages
+Development writes `.next-dev`; production build/start uses `.next`. Stop the matching server before rebuilding. The checkout output lock prevents unrelated processes from sharing an output directory. Vercel deployments bypass this local CLI lock.
 
-- `/`: automatic/manual comparison, distinct photographic sample composer, fabrics, process, inspiration, measurements, FAQ and consultation.
-- `/studio`: upload/drop a room, select style/material/pattern/color/heading/length/fullness/layers, generate when configured, compare, save, download, share and enquire.
-- `/designs`: browser-local and private guest-session history with reopen/delete.
-- `/collections` and `/collections/[id]`: illustrative reference catalogue with search/category/palette/surface filters, persistent favorites and detail pages.
-- `/measure`: cm/in planning estimator with panel count, roll width, fullness, repeat and allowances; passes measurements to consultation.
-- `/contact`: consent, validation, duplicate protection, persistent enquiry and optional email notification.
-- `/inspiration` and `/inspiration/[slug]`: original editorial guides.
-- `/how-it-works`, `/faq`, `/privacy`, `/terms`: supporting content; legal notices are explicitly drafts for owner approval.
-- `/admin`: server-authorized administration for enquiries, catalogue, public image uploads, design options, homepage pair, FAQ/articles and retention cleanup.
-- `/share/[token]`: explicit, expiring, revocable result-only sharing.
+## Content and customer flows
 
-## Configuration
+- Public fabrics, embedded shades and collections: update reviewed repository JSON and approved assets, validate, then redeploy. Runtime admin content/catalogue/SEO editing is disabled.
+- Manual Studio: select a supported room/material/shade, compare and download supported compositions. Existing room capability gates remain; unsupported previews are not fabricated.
+- Saved designs: localStorage for lightweight configurations; IndexedDB for existing private local image blobs. Saves belong to the current browser/device and can be lost when storage is cleared. My Saved Designs offers backup/import; no cross-device sync is advertised.
+- Enquiries: accepted only when the configured Resend provider accepts delivery to sales@dcorhome.com. No MongoDB enquiry storage. Failures provide a direct-contact fallback.
+- Login/accounts/admin users: existing invite-only Better Auth and MongoDB security remain. Do not bootstrap an existing database or rotate/reset accounts for this change.
 
-Copy `.env.example` to `.env.local` and configure only the services you intend to use. Never paste keys in chat or commit credentials.
+Copy `.env.example` for variable names; preserve real production secrets. `db:ping` is a read-only operator diagnostic. `content:export` and `content:verify-export` provide the explicit safe migration workflow documented in the architecture report. Private exports remain under ignored `.data`, never in public assets or Git. Legacy cloud storage/AI/retention endpoints return explicit 410 responses; existing records remain untouched.
 
-Browser-local saving remains available through IndexedDB. All server application records and invite-only authentication now use the existing MongoDB database, via `MONGODB_URI` and `MONGODB_DB` (or the database selected by the URI). Runtime code no longer reads `DCORHOME_DATA_DIR` or `DCORHOME_DATABASE_URL` and never creates SQLite files. Keep `SESSION_SECRET`, `BETTER_AUTH_SECRET` and `SITE_URL` configured privately.
-
-Private customer photographs require private S3-compatible object storage; local files and Vercel `/tmp` are not persistent storage. Missing storage configuration disables dependent upload/generation operations. Static catalogue/visualizer assets remain bundled in `public/`. AI remains off unless explicitly enabled later.
-
-See [MongoDB architecture, data audit, migration and Vercel setup](docs/mongodb-production-readiness.md). Source SQLite files are preserved; migration is an explicit backed-up dry-run/insert-only procedure, never startup/build behavior. Existing MongoDB users and credential hashes are not migrated or reset.
-
-For targeted verification after building, use `npm.cmd run check:mongodb`. It starts an ephemeral localhost replica set and tests only isolated data; the configured business database is never its write target. Old SQLite-only fixture harnesses stop with an explanatory error rather than risking writes against MongoDB.
-
-## Verification commands
-
-- `node scripts/validate-assets.cjs`: rejects identical paths/content and mismatched comparison dimensions.
-- `node scripts/logic-check.cjs`: measurement formulas, units, repeats, panels and invalid inputs.
-- `npm.cmd run check:mongodb`: targeted isolated MongoDB repository, migration, route, authentication and restart checks. Run after a production build; no real AI/email requests.
-- `node scripts/browser-check.cjs`: Chrome on Windows, against a production preview on 3100; responsive screenshots, interactions and browser-local saving.
-
-See `docs/mongodb-production-readiness.md` for the current database verification and remaining production configuration. `lib/assets.ts` centralizes photography provenance; `PHOTOGRAPHY.md` documents original licenses. Historical phase documents describe earlier states and are superseded by the implementation report.
-
-Nothing is deployed by these commands.
+No push or deployment is performed automatically. The earlier configurator and MongoDB reports are historical references; the linked architecture report describes the current runtime.

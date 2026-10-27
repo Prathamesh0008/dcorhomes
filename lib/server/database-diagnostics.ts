@@ -35,3 +35,8 @@ export function databaseFailureDetail(error: unknown): 'dns' | 'tls' | 'connecti
   }
   return inspect(error);
 }
+
+export class DatabaseUnavailable extends Error {
+ readonly cause:unknown;
+ constructor(cause?:unknown){super('Application record storage is retired. Authentication uses its dedicated MongoDB repository.');this.cause=cause;}
+}

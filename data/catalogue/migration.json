@@ -1,0 +1,5 @@
+{
+  "status": "pending-production-export",
+  "productionSourceConfirmed": false,
+  "reason": "Repository baseline preserved. Unique production MongoDB content has not been exported or verified."
+}

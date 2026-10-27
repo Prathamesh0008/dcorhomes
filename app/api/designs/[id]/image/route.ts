@@ -1,6 +1,5 @@
-import { designExpired } from '@/lib/server/visualizer-retention';
-import { NextRequest, NextResponse } from "next/server";
-import { row } from "@/lib/server/db";
-import { getAsset } from "@/lib/server/assets";
-import { failure,HttpError,session,privateHeaders } from "@/lib/server/security";
-export async function GET(request:NextRequest,{params}:{params:Promise<{id:string}>}){try{const {id}=await params;const item=(await row("design",id)),owner=await session();if(!item||designExpired(item)||(!await session("admin")&&(!owner||item.owner!==owner)))throw new HttpError(404,"Image not found.");const type=request.nextUrl.searchParams.get("type")==="original"?"original":"result";const bytes=await getAsset(`${id}/${type}.webp`);return new NextResponse(new Uint8Array(bytes),{headers:{...privateHeaders,"Content-Type":"image/webp","Content-Disposition":`inline; filename="dcorhome-${type}.webp"`}});}catch(e){return failure(e);}}
+import { retiredService } from '@/lib/server/retired-service';
+export const GET = retiredService;
+export const POST = retiredService;
+export const PATCH = retiredService;
+export const DELETE = retiredService;

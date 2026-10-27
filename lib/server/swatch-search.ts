@@ -13,7 +13,7 @@ function matches(row:Indexed,q:SwatchQuery,exclude?:FacetKey){
  for(const key of facetKeys)if(key!==exclude&&q.filters[key].length&&!q.filters[key].some(v=>row.facets[key].includes(v)))return false;
  for(const [field,min,max]of [['width',q.widthMin,q.widthMax],['gsm',q.gsmMin,q.gsmMax],['rub',q.rubMin,q.rubMax]] as const){const value=row[field];if((min!==undefined||max!==undefined)&&(value===null||(min!==undefined&&value<min)||(max!==undefined&&value>max)))return false;}return true;
 }
-// Safe fallback when durable storage is not configured; filtering/paging still occurs on the server.
+// Pure catalogue projection: filtering, faceting, sorting and paging need no persistence.
 export function memorySwatchSearch(records:FabricRecord[],q:SwatchQuery):SwatchResult{
  const rows=indexSwatches(records),facets={} as SwatchResult['facets'];
  for(const key of facetKeys){const counts=new Map<string,number>();for(const row of rows.filter(r=>matches(r,q,key)))for(const value of row.facets[key])counts.set(value,(counts.get(value)||0)+1);facets[key]=[...counts].map(([value,count])=>({value,count})).sort((a,b)=>a.value.localeCompare(b.value));}
@@ -21,9 +21,9 @@ export function memorySwatchSearch(records:FabricRecord[],q:SwatchQuery):SwatchR
  const total=selected.length,pages=Math.max(1,Math.ceil(total/q.pageSize)),page=Math.min(q.page,pages);
  return {items:selected.slice((page-1)*q.pageSize,page*q.pageSize).map(r=>r.item),total,pages,page,pageSize:q.pageSize,facets,hasDates:rows.some(r=>r.published!==null),hasRubData:records.some(f=>f.source==='supplier'&&f.abrasionRubCount!==undefined),demo:records.some(f=>f.source==='demo'),storage:'memory'};
 }
-// Products and their embedded variants are the sole source of truth in MongoDB.
+// Version-controlled products and embedded variants are the source of truth.
 // Faceting is a pure request-local projection; no second mutable SQL index exists.
 export async function searchSwatches(q:SwatchQuery):Promise<SwatchResult>{
  const result=memorySwatchSearch(await fabricRecords(),q);
- return {...result,storage:'database'};
+ return {...result,storage:'repository'};
 }

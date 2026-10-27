@@ -1,21 +1,20 @@
 import { ShowroomContactProvider } from '@/components/curtains/FabricCatalogueProvider';
 import { siteUrl } from "@/lib/seo";
+import seo from "@/data/site/seo.json";
 import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
-import { SessionHeader, SessionFooter } from "@/components/SessionChrome";
-import { Suspense } from "react";
 // Catalogue queries are scoped to the routes that consume them.
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
 export const metadata: Metadata = {
   title: {
-    default: "Dcorhome | Curtains, beautifully considered",
+    default: seo.defaultTitle,
     template: "%s | Dcorhome",
   },
   description:
-    "Discover beautifully considered curtains. Explore custom drapery, experiment in our curtain design studio, and find the perfect fit for your home.",
+    seo.description,
   metadataBase: new URL(siteUrl),
   robots: process.env.SITE_URL ? {index:true,follow:true} : {index:false,follow:false},
   openGraph:{siteName:"Dcorhome",type:"website",title:"Dcorhome curtain design studio",description:"Explore fabrics and visualize a curtain direction in your own room."},
@@ -27,9 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-pt-[100px]">
       <body>
-        <ShowroomContactProvider whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><Suspense fallback={<SiteHeader />}><SessionHeader /></Suspense>
+        <ShowroomContactProvider whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader />
         <main>{children}</main>
-        <Suspense fallback={<SiteFooter />}><SessionFooter /></Suspense></ShowroomContactProvider>
+        <SiteFooter /></ShowroomContactProvider>
       </body>
     </html>
   );

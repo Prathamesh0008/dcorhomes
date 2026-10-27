@@ -1,0 +1,597 @@
+[
+  {
+    "id": "sienna",
+    "slug": "sienna",
+    "name": "Linen",
+    "category": "Linen",
+    "usage": [
+      "main"
+    ],
+    "images": [
+      "/images/fabrics/sienna/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Warm Ivory",
+        "name": "Warm Ivory",
+        "colorCode": "DEMO-LIN-1",
+        "hexPreview": "#e9dfca",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-WARM-IVORY",
+        "digitalPreviewImage": "/images/fabrics/sienna/warm-ivory-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/warm-ivory-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/warm-ivory-swatch-digital.webp"
+      },
+      {
+        "id": "Soft Beige",
+        "name": "Soft Beige",
+        "colorCode": "DEMO-LIN-2",
+        "hexPreview": "#cbb99f",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-SOFT-BEIGE",
+        "digitalPreviewImage": "/images/fabrics/sienna/soft-beige-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/soft-beige-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/soft-beige-swatch-digital.webp"
+      },
+      {
+        "id": "Taupe",
+        "name": "Taupe",
+        "colorCode": "DEMO-LIN-3",
+        "hexPreview": "#9d8b7a",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-TAUPE",
+        "digitalPreviewImage": "/images/fabrics/sienna/taupe-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/taupe-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/taupe-swatch-digital.webp"
+      },
+      {
+        "id": "Sand",
+        "name": "Sand",
+        "colorCode": "DEMO-LIN-4",
+        "hexPreview": "#ccb58c",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-SAND",
+        "digitalPreviewImage": "/images/fabrics/sienna/sand-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/sand-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/sand-swatch-digital.webp"
+      },
+      {
+        "id": "Off White",
+        "name": "Off White",
+        "colorCode": "DEMO-LIN-5",
+        "hexPreview": "#f1eee4",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-OFF-WHITE",
+        "digitalPreviewImage": "/images/fabrics/sienna/off-white-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/off-white-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/off-white-swatch-digital.webp"
+      },
+      {
+        "id": "Champagne",
+        "name": "Champagne",
+        "colorCode": "PREVIEW-CHAMPAGNE",
+        "hexPreview": "#dfc99f",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-CHAMPAGNE",
+        "digitalPreviewImage": "/images/fabrics/sienna/champagne-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/champagne-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/champagne-swatch-digital.webp"
+      },
+      {
+        "id": "Emerald Green",
+        "name": "Emerald Green",
+        "colorCode": "PREVIEW-EMERALD",
+        "hexPreview": "#146b4b",
+        "family": "Green",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-EMERALD-GREEN",
+        "digitalPreviewImage": "/images/fabrics/sienna/emerald-green-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/emerald-green-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/emerald-green-swatch-digital.webp"
+      },
+      {
+        "id": "Burgundy",
+        "name": "Burgundy",
+        "colorCode": "PREVIEW-BURGUNDY",
+        "hexPreview": "#79263c",
+        "family": "Red",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SIENNA-BURGUNDY",
+        "digitalPreviewImage": "/images/fabrics/sienna/burgundy-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/sienna/burgundy-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/sienna/burgundy-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A tactile linen texture with softly gathered folds. Explore the palette and inspect the weave up close.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pinch Pleat",
+      "Eyelet",
+      "Pencil Pleat",
+      "Goblet Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "clay",
+    "slug": "clay",
+    "name": "Velvet",
+    "category": "Velvet",
+    "usage": [
+      "main"
+    ],
+    "images": [
+      "/images/fabrics/clay/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Soft Beige",
+        "name": "Soft Beige",
+        "colorCode": "DEMO-VEL-1",
+        "hexPreview": "#cbb99f",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-CLAY-SOFT-BEIGE",
+        "digitalPreviewImage": "/images/fabrics/clay/soft-beige-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/clay/soft-beige-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/clay/soft-beige-swatch-digital.webp"
+      },
+      {
+        "id": "Olive",
+        "name": "Olive",
+        "colorCode": "DEMO-VEL-2",
+        "hexPreview": "#747a50",
+        "family": "Green",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-CLAY-OLIVE",
+        "digitalPreviewImage": "/images/fabrics/clay/olive-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/clay/olive-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/clay/olive-swatch-digital.webp"
+      },
+      {
+        "id": "Dusty Rose",
+        "name": "Dusty Rose",
+        "colorCode": "DEMO-VEL-3",
+        "hexPreview": "#bc9292",
+        "family": "Rose",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-CLAY-DUSTY-ROSE",
+        "digitalPreviewImage": "/images/fabrics/clay/dusty-rose-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/clay/dusty-rose-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/clay/dusty-rose-swatch-digital.webp"
+      },
+      {
+        "id": "Charcoal",
+        "name": "Charcoal",
+        "colorCode": "DEMO-VEL-4",
+        "hexPreview": "#454743",
+        "family": "Grey",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-CLAY-CHARCOAL",
+        "digitalPreviewImage": "/images/fabrics/clay/charcoal-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/clay/charcoal-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/clay/charcoal-swatch-digital.webp"
+      },
+      {
+        "id": "Mocha",
+        "name": "Mocha",
+        "colorCode": "DEMO-VEL-5",
+        "hexPreview": "#806654",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-CLAY-MOCHA",
+        "digitalPreviewImage": "/images/fabrics/clay/mocha-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/clay/mocha-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/clay/mocha-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "Rich velvet folds with a soft pile and contrasting highlights.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pinch Pleat",
+      "Eyelet",
+      "Pencil Pleat",
+      "Goblet Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "noir",
+    "slug": "noir",
+    "name": "Blackout",
+    "category": "Blackout",
+    "usage": [
+      "main"
+    ],
+    "images": [
+      "/images/fabrics/noir/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Warm Ivory",
+        "name": "Warm Ivory",
+        "colorCode": "DEMO-BLK-1",
+        "hexPreview": "#e9dfca",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-NOIR-WARM-IVORY",
+        "digitalPreviewImage": "/images/fabrics/noir/warm-ivory-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/noir/warm-ivory-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/noir/warm-ivory-swatch-digital.webp"
+      },
+      {
+        "id": "Soft Beige",
+        "name": "Soft Beige",
+        "colorCode": "DEMO-BLK-2",
+        "hexPreview": "#cbb99f",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-NOIR-SOFT-BEIGE",
+        "digitalPreviewImage": "/images/fabrics/noir/soft-beige-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/noir/soft-beige-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/noir/soft-beige-swatch-digital.webp"
+      },
+      {
+        "id": "Charcoal",
+        "name": "Charcoal",
+        "colorCode": "DEMO-BLK-3",
+        "hexPreview": "#454743",
+        "family": "Grey",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-NOIR-CHARCOAL",
+        "digitalPreviewImage": "/images/fabrics/noir/charcoal-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/noir/charcoal-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/noir/charcoal-swatch-digital.webp"
+      },
+      {
+        "id": "Slate Grey",
+        "name": "Slate Grey",
+        "colorCode": "DEMO-BLK-4",
+        "hexPreview": "#78838b",
+        "family": "Grey",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-NOIR-SLATE-GREY",
+        "digitalPreviewImage": "/images/fabrics/noir/slate-grey-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/noir/slate-grey-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/noir/slate-grey-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A dense textile study for a quieter curtain palette.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pinch Pleat",
+      "Eyelet",
+      "Pencil Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "olive",
+    "slug": "olive",
+    "name": "Textured Weave",
+    "category": "Textured",
+    "usage": [
+      "main"
+    ],
+    "images": [
+      "/images/fabrics/olive/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Taupe",
+        "name": "Taupe",
+        "colorCode": "DEMO-TEX-1",
+        "hexPreview": "#9d8b7a",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-OLIVE-TAUPE",
+        "digitalPreviewImage": "/images/fabrics/olive/taupe-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/olive/taupe-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/olive/taupe-swatch-digital.webp"
+      },
+      {
+        "id": "Olive",
+        "name": "Olive",
+        "colorCode": "DEMO-TEX-2",
+        "hexPreview": "#747a50",
+        "family": "Green",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-OLIVE-OLIVE",
+        "digitalPreviewImage": "/images/fabrics/olive/olive-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/olive/olive-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/olive/olive-swatch-digital.webp"
+      },
+      {
+        "id": "Sand",
+        "name": "Sand",
+        "colorCode": "DEMO-TEX-3",
+        "hexPreview": "#ccb58c",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-OLIVE-SAND",
+        "digitalPreviewImage": "/images/fabrics/olive/sand-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/olive/sand-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/olive/sand-swatch-digital.webp"
+      },
+      {
+        "id": "Mocha",
+        "name": "Mocha",
+        "colorCode": "DEMO-TEX-4",
+        "hexPreview": "#806654",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-OLIVE-MOCHA",
+        "digitalPreviewImage": "/images/fabrics/olive/mocha-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/olive/mocha-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/olive/mocha-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A woven grid and softly textured surface.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pinch Pleat",
+      "Eyelet",
+      "Pencil Pleat",
+      "Goblet Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "solstice",
+    "slug": "solstice",
+    "name": "Sheer Weave",
+    "category": "Sheer",
+    "usage": [
+      "sheer"
+    ],
+    "images": [
+      "/images/fabrics/solstice/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Pure White",
+        "name": "Pure White",
+        "colorCode": "DEMO-VOI-1",
+        "hexPreview": "#ffffff",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SOLSTICE-PURE-WHITE",
+        "digitalPreviewImage": "/images/fabrics/solstice/pure-white-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/solstice/pure-white-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/solstice/pure-white-swatch-digital.webp"
+      },
+      {
+        "id": "Soft Ivory",
+        "name": "Soft Ivory",
+        "colorCode": "DEMO-VOI-2",
+        "hexPreview": "#f3efdf",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SOLSTICE-SOFT-IVORY",
+        "digitalPreviewImage": "/images/fabrics/solstice/soft-ivory-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/solstice/soft-ivory-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/solstice/soft-ivory-swatch-digital.webp"
+      },
+      {
+        "id": "Cream",
+        "name": "Cream",
+        "colorCode": "DEMO-VOI-3",
+        "hexPreview": "#eee3c9",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SOLSTICE-CREAM",
+        "digitalPreviewImage": "/images/fabrics/solstice/cream-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/solstice/cream-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/solstice/cream-swatch-digital.webp"
+      },
+      {
+        "id": "Pale Grey",
+        "name": "Pale Grey",
+        "colorCode": "DEMO-VOI-4",
+        "hexPreview": "#d9dddf",
+        "family": "Grey",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SOLSTICE-PALE-GREY",
+        "digitalPreviewImage": "/images/fabrics/solstice/pale-grey-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/solstice/pale-grey-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/solstice/pale-grey-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A light sheer texture study for layered curtains.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pencil Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "pearl",
+    "slug": "pearl",
+    "name": "Fine Voile",
+    "category": "Sheer",
+    "usage": [
+      "sheer"
+    ],
+    "images": [
+      "/images/fabrics/pearl/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Soft Ivory",
+        "name": "Soft Ivory",
+        "colorCode": "DEMO-FVO-1",
+        "hexPreview": "#f3efdf",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-PEARL-SOFT-IVORY",
+        "digitalPreviewImage": "/images/fabrics/pearl/soft-ivory-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/pearl/soft-ivory-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/pearl/soft-ivory-swatch-digital.webp"
+      },
+      {
+        "id": "Warm Beige",
+        "name": "Warm Beige",
+        "colorCode": "DEMO-FVO-2",
+        "hexPreview": "#d5c5aa",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-PEARL-WARM-BEIGE",
+        "digitalPreviewImage": "/images/fabrics/pearl/warm-beige-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/pearl/warm-beige-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/pearl/warm-beige-swatch-digital.webp"
+      },
+      {
+        "id": "Blush White",
+        "name": "Blush White",
+        "colorCode": "DEMO-FVO-3",
+        "hexPreview": "#f1e5e3",
+        "family": "Rose",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-PEARL-BLUSH-WHITE",
+        "digitalPreviewImage": "/images/fabrics/pearl/blush-white-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/pearl/blush-white-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/pearl/blush-white-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A delicate sheer texture and soft color palette.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pencil Pleat",
+      "Rod Pocket"
+    ]
+  },
+  {
+    "id": "silk-satin-study",
+    "slug": "silk-satin-study",
+    "name": "Silk Satin Study",
+    "category": "Silk",
+    "usage": [
+      "main"
+    ],
+    "images": [
+      "/images/fabrics/silk-satin-study/texture-reference.webp"
+    ],
+    "colors": [
+      {
+        "id": "Champagne",
+        "name": "Champagne",
+        "colorCode": "PREVIEW-CHAMPAGNE",
+        "hexPreview": "#dfc99f",
+        "family": "Neutral",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SILK-SATIN-STUDY-CHAMPAGNE",
+        "digitalPreviewImage": "/images/fabrics/silk-satin-study/champagne-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/silk-satin-study/champagne-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/silk-satin-study/champagne-swatch-digital.webp"
+      },
+      {
+        "id": "Emerald Green",
+        "name": "Emerald Green",
+        "colorCode": "PREVIEW-EMERALD",
+        "hexPreview": "#146b4b",
+        "family": "Green",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SILK-SATIN-STUDY-EMERALD-GREEN",
+        "digitalPreviewImage": "/images/fabrics/silk-satin-study/emerald-green-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/silk-satin-study/emerald-green-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/silk-satin-study/emerald-green-swatch-digital.webp"
+      },
+      {
+        "id": "Burgundy",
+        "name": "Burgundy",
+        "colorCode": "PREVIEW-BURGUNDY",
+        "hexPreview": "#79263c",
+        "family": "Red",
+        "available": null,
+        "variantSku": "DEMO-PREVIEW-SILK-SATIN-STUDY-BURGUNDY",
+        "digitalPreviewImage": "/images/fabrics/silk-satin-study/burgundy-digital.webp",
+        "digitalPreviewImages": [
+          "/images/fabrics/silk-satin-study/burgundy-detail-digital.webp"
+        ],
+        "digitalSwatchImage": "/images/fabrics/silk-satin-study/burgundy-swatch-digital.webp"
+      }
+    ],
+    "source": "demo",
+    "description": "A lustrous satin texture study with fluid folds. Explore Champagne, Emerald Green and Burgundy.",
+    "compatibleHeadingStyles": [
+      "Wave Pleat",
+      "Pinch Pleat",
+      "Eyelet",
+      "Pencil Pleat",
+      "Goblet Pleat",
+      "Rod Pocket"
+    ]
+  }
+]

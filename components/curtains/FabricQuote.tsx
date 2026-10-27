@@ -12,11 +12,11 @@ export default function FabricQuote({fabric,variant,primary=false,purpose='quote
   try{
    const fields=Object.fromEntries(new FormData(form));id.current ||=crypto.randomUUID();
    const response=await fetch('/api/enquiries',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':id.current},body:JSON.stringify({...fields,consent:fields.consent==='on',catalogueFabricId:fabric.id,variantId:variant?.id||'',interest:fabric.name,requestPurpose:purpose,enquiryType:swatch?'Curtain Fabric Enquiry':'Request a Quotation'})});
-   const result=await response.json();if(!response.ok||!result.stored)throw Error(result.error||'Your request was not confirmed as saved.');
-   setDone(true);id.current='';setStatus(result.notified?'Your enquiry has been saved and the team notified.':'Your enquiry has been saved. Email notification is not confirmed.');
+   const result=await response.json();if(!response.ok||!result.accepted)throw Error(result.error||'Email delivery was not accepted. Please contact sales@dcorhome.com.');
+   setDone(true);id.current='';setStatus('Our email provider accepted your enquiry for delivery. Inbox delivery is not guaranteed.');
   }catch(error){setStatus(error instanceof Error?error.message:'Unable to save your request. Please try again.');}finally{lock.current=false;setBusy(false);}
  }
- return <><button type="button" disabled={!variant} onClick={()=>{dialog.current?.showModal();fetch('/api/session').catch(()=>{});}} className={`min-h-12 w-full border border-solid border-ink px-5 text-[14px] disabled:opacity-40 ${primary?'bg-ink text-paper':'bg-transparent text-ink'}`}>{swatch?'Request a Swatch':'Request a Quote'}</button>
+ return <><button type="button" disabled={!variant} onClick={()=>{dialog.current?.showModal();}} className={`min-h-12 w-full border border-solid border-ink px-5 text-[14px] disabled:opacity-40 ${primary?'bg-ink text-paper':'bg-transparent text-ink'}`}>{swatch?'Request a Swatch':'Request a Quote'}</button>
  <dialog ref={dialog} aria-labelledby={titleId} className="fixed inset-0 m-auto max-h-[90dvh] w-[min(94vw,640px)] overflow-y-auto border-0 bg-paper p-6 text-ink backdrop:bg-black/50 md:p-8"><div className="flex items-center justify-between gap-4"><h2 id={titleId} className="text-[25px] font-medium">{swatch?'Swatch enquiry':'Request a quotation'}</h2><button type="button" onClick={()=>dialog.current?.close()} className="min-h-11 px-3 text-[13px]">Close {swatch?'swatch enquiry':'quote'}</button></div>
  {swatch&&<p className="text-[13px] leading-6 text-muted">Ask about physical samples for this exact shade. Sample availability, cost and delivery will be confirmed by our team.</p>}
  {status&&<p role={done?'status':'alert'} className="text-[13px] leading-6">{status}</p>}

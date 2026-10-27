@@ -1,3 +1,5 @@
+> Historical report. Superseded by [the authentication-only architecture report](auth-only-mongodb-architecture.md). Earlier verification claims do not establish current production preservation or connectivity.
+
 # MongoDB connectivity repair — 27 October 2026
 
 Production connectivity has **not** been verified. No deployment, cloud settings change, account reset, database recreation or production write was performed.

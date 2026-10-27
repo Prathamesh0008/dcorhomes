@@ -1,4 +1,4 @@
-// Supplier records belong in supplier-catalogue.json. Demo records are intentionally
+// Public records belong in data/catalogue/fabrics.json. Demo records are intentionally
 // separate: none of their palettes or compatibility rules assert real availability.
 export type FabricVariant = { id: string; name: string; colorCode: string; hexPreview?: string; family: string; swatchImage?: string; variantSku?: string; available: boolean | null; mainImage?: string; textureImage?: string; drapedImage?: string; digitalPreviewImage?: string; digitalPreviewImages?: string[]; digitalSwatchImage?: string; images?: string[]; availability?: string; active?: boolean };
 export type FabricRecord = {

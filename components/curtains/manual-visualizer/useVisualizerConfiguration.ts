@@ -27,16 +27,8 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
      urls.push(original,...(result?[result]:[]));
      if(!controller.signal.aborted)setLegacy({original,result,name:saved.selection.fabric});
     }
-   }else if(search.get('saved')){
-    const response=await fetch('/api/manual-designs',{signal:controller.signal});
-    if(!response.ok)throw Error('Your saved account design could not be opened.');
-    const data=await response.json(),saved=data.designs.find((item:{id:string})=>item.id===search.get('saved'));
-    if(!saved)throw Error('This saved design is not available in your account.');restored=saved.design;
-   }else if(search.get('design')){
-    const response=await fetch('/api/designs/'+encodeURIComponent(search.get('design')!),{signal:controller.signal});
-    if(!response.ok)throw Error('This earlier saved preview is unavailable.');
-    const saved=await response.json();
-    if(!controller.signal.aborted)setLegacy({original:'/api/designs/'+saved.id+'/image?type=original',result:'/api/designs/'+saved.id+'/image',name:saved.selection.fabric});
+   }else if(search.get('saved')||search.get('design')){
+    throw Error('This is an earlier cloud design. Ask Dcorhome for a private export, then import it in My Saved Designs. The cloud record has not been deleted.');
    }else if(search.get('visualizer'))restored=JSON.parse(search.get('visualizer')!);
    else if(search.get('manual')||search.get('fabric')){
     const config=readManual(Object.fromEntries(search.entries()),records);

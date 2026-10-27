@@ -1,8 +1,7 @@
 import type { DesignSelection } from '@/lib/design-options';
-import { demoFabrics } from './demo-catalogue';
-import supplierData from './supplier-catalogue.json';
+import { catalogueRecords } from '../../data/catalogue';
 import type { FabricRecord } from './catalogue';
-export const fabrics: FabricRecord[] = supplierData.length ? supplierData as FabricRecord[] : demoFabrics;
+export const fabrics: FabricRecord[] = catalogueRecords;
 export type ManualConfig = { mainFabric: string; mainColor: string; sheerFabric: string; sheerColor: string; mainEnabled: boolean; sheerEnabled: boolean; heading: string; sheerHeading: string; pattern: string; room: string; panels: 'Single' | 'Pair'; curtainLength: string; fullness: string };
 export const manualDefault: ManualConfig={ mainFabric:'sienna',mainColor:'Warm Ivory',sheerFabric:'solstice',sheerColor:'Soft Ivory',mainEnabled:true,sheerEnabled:true,heading:'Wave Pleat',sheerHeading:'Wave Pleat',pattern:'Solid',room:'Living Room',panels:'Pair',curtainLength:'Floor length',fullness:'2' };
 export const storageKey='dcorhome-manual-v1';

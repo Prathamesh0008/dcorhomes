@@ -1,3 +1,4 @@
+throw Error('Legacy application persistence is retired. Use check:architecture for isolated authentication checks and content:export for read-only preservation.');
 // Explicit CLI only. SQLite is never imported by deployed application code.
 require('@next/env').loadEnvConfig(process.cwd());
 require('./auth-loader.cjs');
