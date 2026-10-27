@@ -1,10 +1,9 @@
-import FabricCatalogueProvider from '@/components/curtains/FabricCatalogueProvider';
-import { homepageCatalogue } from '@/lib/server/homepage-catalogue';
+import { Suspense } from 'react';
 import CurtainDesignComposer from "@/components/curtains/CurtainDesignComposer";
 import HomeBelowHero from "@/components/home/HomeBelowHero";
 import { pageMetadata } from "@/lib/seo";
 export const metadata=pageMetadata("Curtains, beautifully reimagined","Explore curtain fabrics, compose a design direction and visualize your own room.","/");
-import { homepagePair } from "@/lib/server/showcase";
+import { comparisonPairs } from '@/lib/assets';
 export const dynamic="force-dynamic";
 import { typography } from "@/lib/typography";
 import Container from "@/components/ui/Container";
@@ -14,7 +13,7 @@ import HeroComparisonSlider from "@/components/home/HeroComparisonSlider";
 import { heroComparisonSlides } from "@/lib/hero-comparisons";
 import heroStyles from "@/components/interactive/HeroEntrance.module.css";
 async function HomePage() {
-  const pair=(await homepagePair());
+  const pair=comparisonPairs[0];
   return (
     <>
       <section className="bg-[#f3efe6]">
@@ -42,9 +41,9 @@ async function HomePage() {
       </section>
 
       {/* <CurtainDesignComposer /> */}
-      <HomeBelowHero />
+      <Suspense fallback={<p role="status" className="px-6 py-8">Loading fabric catalogue…</p>}><HomeBelowHero /></Suspense>
     </>
   );
 }
 
-export default async function Page() {const { records } = await homepageCatalogue(); return <FabricCatalogueProvider records={records}><HomePage/></FabricCatalogueProvider>;}
+export default HomePage;

@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
-import { customerSession } from "@/lib/server/customer-auth";
+import { SessionHeader, SessionFooter } from "@/components/SessionChrome";
+import { Suspense } from "react";
 // Catalogue queries are scoped to the routes that consume them.
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
@@ -20,16 +21,15 @@ export const metadata: Metadata = {
   openGraph:{siteName:"Dcorhome",type:"website",title:"Dcorhome curtain design studio",description:"Explore fabrics and visualize a curtain direction in your own room."},
   icons: { icon: "/dcorhome-mark.svg" },
 };
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const customer = await customerSession(true);
   return (
     <html lang="en" className="scroll-pt-[100px]">
       <body>
-        <ShowroomContactProvider whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><SiteHeader signedIn={Boolean(customer)} isAdmin={customer?.user.role === "admin" && !customer.user.mustChangePassword} />
+        <ShowroomContactProvider whatsappNumber={process.env.DCORHOME_WHATSAPP_NUMBER}><Suspense fallback={<SiteHeader />}><SessionHeader /></Suspense>
         <main>{children}</main>
-        <SiteFooter signedIn={Boolean(customer)} /></ShowroomContactProvider>
+        <Suspense fallback={<SiteFooter />}><SessionFooter /></Suspense></ShowroomContactProvider>
       </body>
     </html>
   );

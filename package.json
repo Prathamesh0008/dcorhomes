@@ -18,6 +18,7 @@
     "auth:bootstrap": "node scripts/bootstrap-admin.cjs",
     "auth:check": "node scripts/customer-auth-check.cjs",
     "check:mongodb": "node scripts/mongodb-runtime-check.cjs",
+    "db:ping": "node scripts/mongodb-ping.cjs",
     "db:migrate:sqlite": "node scripts/migrate-sqlite-to-mongodb.cjs"
   },
   "dependencies": {

@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fabrics as seed } from '@/lib/curtains/manual-config';
@@ -16,7 +17,8 @@ export async function allFabricRecords(): Promise<FabricRecord[]> {
  }
  return [...records.values()];
 }
-export async function fabricRecords() { return (await allFabricRecords()).filter(f=>f.active!==false); }
+// Public read sharing is request scoped; mutation validation still reads fresh records.
+export const fabricRecords = cache(async () => (await allFabricRecords()).filter(f=>f.active!==false));
 export async function saveFabricRecords(records:FabricRecord[],operation:'create'|'update'){
  await transaction(async()=>{
   const existing=await allFabricRecords(),ids=new Set<string>();
