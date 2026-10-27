@@ -1,4 +1,5 @@
 import { logDatabaseFailure } from '@/lib/server/database-diagnostics';
+import { authProvider } from '@/lib/auth-provider';
 import { NextRequest, NextResponse } from 'next/server';
 import { customerAuth, customerAuthReady, runMemberLogin, validatedCustomerSession } from '@/lib/server/customer-auth';
 import { loginLimit } from '@/lib/server/members';
@@ -6,6 +7,7 @@ import { failure, HttpError, jsonInput, mutation, privateHeaders } from '@/lib/s
 import { normalizeUserId, validUserId } from '@/lib/server/member-policy';
 export const runtime = 'nodejs';
 async function handler(request: NextRequest) {
+  if (authProvider() === 'clerk') return NextResponse.json({ message: 'This authentication endpoint is retired. Use /login.' }, { status: 410, headers: privateHeaders });
   const endpoint = request.nextUrl.pathname.slice('/api/auth'.length);
   // Explicit allowlist also closes old signup, email-login, reset and account-linking endpoints.
   if (!['/sign-in/username', '/get-session', '/sign-out'].includes(endpoint)) return NextResponse.json({ message: 'Public registration is unavailable. Contact sales@dcorhome.com for account assistance.' }, { status: 403, headers: privateHeaders });

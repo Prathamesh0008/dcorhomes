@@ -1,11 +1,12 @@
 import { ShowroomContactProvider } from '@/components/curtains/FabricCatalogueProvider';
-import { siteUrl } from "@/lib/seo";
+import { siteUrl, indexingAllowed } from "@/lib/seo";
 import seo from "@/data/site/seo.json";
 import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 // Catalogue queries are scoped to the routes that consume them.
+// Preserve the in-progress authentication work's request-time rendering boundary.
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
 export const metadata: Metadata = {
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
   description:
     seo.description,
   metadataBase: new URL(siteUrl),
-  robots: process.env.SITE_URL ? {index:true,follow:true} : {index:false,follow:false},
+  robots: {index:indexingAllowed(),follow:indexingAllowed()},
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
+  twitter: {card:'summary_large_image',title:seo.defaultTitle,description:seo.description,images:[seo.socialImage]},
   openGraph:{siteName:"Dcorhome",type:"website",title:"Dcorhome curtain design studio",description:"Explore fabrics and visualize a curtain direction in your own room."},
   icons: { icon: "/dcorhome-mark.svg" },
 };

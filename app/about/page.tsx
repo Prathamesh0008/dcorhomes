@@ -12,11 +12,7 @@ import { pageMetadata } from "@/lib/seo";
 
 const title = "About Dcorhome | 20 Years of Curtain Experience";
 const description = "Discover Dcorhome's 20-year journey in curtains and window dressing. Now explore our curtain fabrics, colors and personalized service online.";
-export const metadata: Metadata = {
-  ...pageMetadata(title, description, "/about"),
-  title: { absolute: title },
-  openGraph: { title, description, url: "/about", type: "website", images: [{ url: "/images/atelier-interior-1920.webp", width: 1920, alt: "Warm curtain folds in an architectural interior" }] },
-};
+export const metadata: Metadata = pageMetadata(title, description, '/about', {image:'/images/atelier-interior-1920.webp',imageAlt:'Warm curtain folds in an architectural interior'});
 const heading = "text-[34px] font-medium leading-[1.12] tracking-[-1px] sm:text-[44px] lg:text-[52px]";
 const prose = "text-[16px] leading-8 text-muted";
 const textLink = "inline-flex min-h-12 items-center gap-5 border-b border-solid border-[#b5a084] text-[14px] font-medium transition-colors hover:text-bronze";

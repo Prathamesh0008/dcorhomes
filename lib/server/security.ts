@@ -9,7 +9,7 @@ function sign(value: string) { return createHmac("sha256", secret()).update(valu
 export function equal(a: string, b: string) { const x = createHash("sha256").update(a).digest(), y = createHash("sha256").update(b).digest(); return timingSafeEqual(x, y); }
 export async function session(role: "guest" | "admin" = "guest", create = false) {
   if (role === 'admin') {
-    const account = await (await import('./customer-auth')).customerSession();
+    const account = await (await import('./account-session')).accountSession();
     return account?.user.role === 'admin' ? account.user.id : null;
   }
   const jar = await cookies(); const key = `dcorhome_${role}`;
@@ -24,7 +24,7 @@ export async function session(role: "guest" | "admin" = "guest", create = false)
   return id;
 }
 export async function requireAdmin() {
-  const account = await (await import('./customer-auth')).customerSession();
+  const account = await (await import('./account-session')).accountSession();
   if (!account) throw new HttpError(401, 'Administrator sign-in required.');
   if (account.user.role !== 'admin') throw new HttpError(403, 'Administrator access required.');
 }

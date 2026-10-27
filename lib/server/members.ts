@@ -1,4 +1,5 @@
 import 'server-only';
+import { authProvider } from '@/lib/auth-provider';
 import { createHash, randomBytes } from 'node:crypto';
 import { ObjectId, type ClientSession, type Document } from 'mongodb';
 import { hashPassword, verifyPassword } from 'better-auth/crypto';
@@ -15,7 +16,9 @@ export async function memberJson(request: NextRequest, maxBytes: number) {
 }
 
 let indexes: Promise<unknown> | undefined;
+function legacyOnly() { if (authProvider() !== 'legacy') throw new HttpError(410, 'Legacy account management is retired. Use the Clerk Dashboard.'); }
 export async function memberIndexes() {
+  legacyOnly();
   if (!indexes) indexes = (async () => {
     const db = await mongoDatabase();
     await db.collection('users').createIndex({ normalizedUserId: 1 }, { unique: true, partialFilterExpression: { normalizedUserId: { $type: 'string' } } });
@@ -69,6 +72,7 @@ function memberInput(input: Record<string, unknown>) {
   return { userId, name, email, role: input.role === 'admin' ? 'admin' : 'user' };
 }
 export async function provisionMember(actor: Actor | null, input: Record<string, unknown>, bootstrapPassword?: string) {
+  legacyOnly();
   const data = memberInput(input), password = bootstrapPassword ?? randomBytes(24).toString('base64url');
   if (!actor && !bootstrapPassword) throw new HttpError(403, 'Local bootstrap password required.');
   const problem = passwordProblem(password); if (problem) throw new HttpError(400, problem);
@@ -89,6 +93,7 @@ export async function provisionMember(actor: Actor | null, input: Record<string,
   return { id: id.toHexString(), temporaryPassword: actor ? password : undefined };
 }
 export async function manageMember(actor: Actor, id: string, action: unknown) {
+  legacyOnly();
   if (!ObjectId.isValid(id)) throw new HttpError(404, 'User not found.');
   if (!['disable', 'enable', 'reset-password'].includes(String(action))) throw new HttpError(400, 'Invalid administrative action.');
   const db = await mongoDatabase(), userId = new ObjectId(id), temporaryPassword = action === 'reset-password' ? randomBytes(24).toString('base64url') : undefined;
@@ -108,6 +113,7 @@ export async function manageMember(actor: Actor, id: string, action: unknown) {
   return { temporaryPassword };
 }
 export async function changeMemberPassword(actor: Actor, currentPassword: unknown, newPassword: unknown) {
+  legacyOnly();
   const problem = passwordProblem(newPassword); if (problem) throw new HttpError(400, problem);
   if (typeof currentPassword !== 'string' || currentPassword.length > 128 || currentPassword === newPassword) throw new HttpError(400, 'Confirm your current password and choose a different new password.');
   const db = await mongoDatabase(), userId = new ObjectId(actor.id);
@@ -124,6 +130,7 @@ export async function changeMemberPassword(actor: Actor, currentPassword: unknow
   }); } finally { await session.endSession(); }
 }
 export async function loginLimit(userId: string, source: string) {
+  legacyOnly();
   await memberIndexes(); const db = await mongoDatabase(), now = new Date();
   for (const [kind, identity, max] of [['user', normalizeUserId(userId), 8], ['ip', source, 30]] as const) {
     const key = `${kind}:${createHash('sha256').update(identity).digest('hex')}`;

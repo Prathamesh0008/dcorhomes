@@ -11,6 +11,7 @@ import HomeFabricShowcase from './HomeFabricShowcase';
 import HomeLayering from './HomeLayering';
 import HomeEnquiryLink from './HomeEnquiryLink';
 import {HomeHeading,homeEyebrow,homeAccent} from './HomeHeading';
+import {business} from '@/lib/business';
 const steps=[{name:'Discover',number:'01',icon:Compass,copy:'Meet the textures. Explore the palette. Find a fabric that speaks to your room.',href:'/collections',action:'Discover the fabric library'},{name:'Customize',number:'02',icon:Layers3,copy:'Choose your main curtains, add an optional sheer and see your fabric combination.',href:'/#curtain-customizer',action:'Create your combination'},{name:'Enquire',number:'03',icon:MessageSquare,copy:'Share your choices with us. We will help with samples, measurements and the details.',href:'/contact',action:'Talk to Dcorhome'}];
 const questions=[
  ['Can I combine sheer and main curtains?','Yes. Choose a main fabric, then add a sheer in the customizer. Each layer keeps its own fabric and shade, so you can explore them independently.'],
@@ -20,6 +21,7 @@ const questions=[
 ];
 export default async function HomeBelowHero(){const {available,records,categories}=await homepageCatalogue(),discovery=homeCategories(records,categories),featured=homeFeaturedFabrics(records);return <FabricCatalogueProvider records={records}>
  {available ? <>
+ <Container as="section" className="py-8 md:py-10"><h2 className="text-[24px] font-medium">Curtain ideas, grounded in experience.</h2><p className="max-w-3xl text-[15px] leading-8 text-muted">From our office in Nerul, Navi Mumbai, Dcorhome brings around {business.experienceYears} years of curtain-market experience to a newer online design journey. Explore textures and colour directions, then confirm real fabrics and samples with our team.</p><div className="flex flex-wrap gap-6 text-sm"><Link href="/inspiration/choosing-living-room-curtains" className="inline-flex min-h-11 items-center underline">Choose curtains for a living room</Link><Link href="/measure" className="inline-flex min-h-11 items-center underline">Plan your window measurements</Link><Link href="/about" className="inline-flex min-h-11 items-center underline">Meet Dcorhome</Link></div></Container>
  <HomeCategoryDiscovery items={discovery}/>
  <DesignComposer/>
  <HomeFabricShowcase fabrics={featured}/>

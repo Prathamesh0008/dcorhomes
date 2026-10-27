@@ -1,4 +1,5 @@
 import { logDatabaseFailure } from './database-diagnostics';
+import { authProvider } from '@/lib/auth-provider';
 import 'server-only';
 import { betterAuth } from 'better-auth/minimal';
 import { mongodbAdapter } from '@better-auth/mongo-adapter';
@@ -11,12 +12,13 @@ import { activeSession, normalizeUserId, validUserId } from './member-policy';
 import { AsyncLocalStorage } from 'node:async_hooks';
 const credentialAttempt = new AsyncLocalStorage<{ id: string; version: number } | null>();
 export async function runMemberLogin<T>(userId: string, action: () => Promise<T>) {
+  if (authProvider() !== 'legacy') throw Error('Legacy authentication is retired.');
   const user = await (await mongoDatabase()).collection('users').findOne({ normalizedUserId: normalizeUserId(userId) });
   return credentialAttempt.run(user ? { id: String(user._id), version: user.sessionVersion } : null, action);
 }
 
 export function customerAuthReady() {
-  return Boolean(mongoConfigured() && process.env.BETTER_AUTH_SECRET && process.env.BETTER_AUTH_SECRET.length >= 32 && process.env.SITE_URL);
+  return authProvider() === 'legacy' && Boolean(mongoConfigured() && process.env.BETTER_AUTH_SECRET && process.env.BETTER_AUTH_SECRET.length >= 32 && process.env.SITE_URL);
 }
 let instance: ReturnType<typeof createCustomerAuth> | undefined;
 export async function customerAuth() {
@@ -74,5 +76,6 @@ export async function validatedCustomerSession(requestHeaders: Headers, allowPas
     mustChangePassword: Boolean(current!.mustChangePassword), sessionVersion: Number(current!.sessionVersion) } };
 }
 export async function customerSession(allowPasswordChange = false) {
+  if (authProvider() !== 'legacy') return null;
   try { return await validatedCustomerSession(await headers(), allowPasswordChange); } catch (error) { logDatabaseFailure('customer_session', error); return null; }
 }

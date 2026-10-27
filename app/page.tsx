@@ -2,9 +2,10 @@ import { Suspense } from 'react';
 import CurtainDesignComposer from "@/components/curtains/CurtainDesignComposer";
 import HomeBelowHero from "@/components/home/HomeBelowHero";
 import { pageMetadata } from "@/lib/seo";
+import JsonLd from '@/components/seo/JsonLd';
+import { siteIdentity } from '@/lib/structured-data';
 export const metadata=pageMetadata("Curtains, beautifully reimagined","Explore curtain fabrics, compose a design direction and visualize your own room.","/");
 import { comparisonPairs } from '@/lib/assets';
-export const dynamic="force-dynamic";
 import { typography } from "@/lib/typography";
 import Container from "@/components/ui/Container";
 import Eyebrow from "@/components/ui/Eyebrow";
@@ -16,6 +17,7 @@ async function HomePage() {
   const pair=comparisonPairs[0];
   return (
     <>
+      <JsonLd data={siteIdentity()}/>
       <section className="bg-[#f3efe6]">
         <Container className="grid items-center gap-8 py-8 md:gap-10 md:py-12 lg:grid-cols-[.94fr_1.06fr] lg:gap-12 lg:py-14">
           <div className={`order-2 min-w-0 lg:order-1 ${heroStyles.entrance}`}>

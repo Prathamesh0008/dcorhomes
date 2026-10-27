@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "check:seo": "node scripts/seo-check.cjs",
+    "check:clerk": "node scripts/clerk-auth-check.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "predev": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs && node scripts/repository-content-check.cjs",
-    "prebuild": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs && node scripts/repository-content-check.cjs",
+    "prebuild": "node scripts/validate-assets.cjs && node scripts/configurator-check.cjs && node scripts/validate-supplier-catalogue.cjs && node scripts/manual-config-check.cjs && node scripts/repository-content-check.cjs && node scripts/seo-check.cjs",
     "check:catalogue": "node scripts/catalogue-logic-check.cjs",
     "test:catalogue": "node scripts/architecture-runtime-check.cjs",
     "import:supplier-csv": "node scripts/import-supplier-csv.cjs",
@@ -32,6 +34,7 @@
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.7.12",
+    "@clerk/nextjs": "7.9.21",
     "better-auth": "^1.7.12",
     "lucide-react": "^0.468.0",
     "mongodb": "^6.21.0",

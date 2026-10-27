@@ -1,6 +1,22 @@
 {
   "siteName": "Dcorhome",
-  "defaultTitle": "Dcorhome | Curtains, beautifully considered",
-  "description": "Discover beautifully considered curtains. Explore custom drapery, experiment in our curtain design studio, and find the perfect fit for your home.",
-  "pages": {}
+  "canonicalOrigin": "https://dcorhomes.vercel.app",
+  "indexingEnabled": true,
+  "defaultTitle": "Curtain Fabrics & Design Inspiration in Navi Mumbai | Dcorhome",
+  "description": "Explore curtain textures, colour ideas and practical guides with Dcorhome in Nerul, Navi Mumbai. Try the curtain design studio and enquire about your room.",
+  "socialImage": "/images/hero-room-after.webp",
+  "socialImageAlt": "Illustrative living room with full-length curtains",
+  "pages": {
+    "/": {"title":"Curtain Fabrics & Design Inspiration in Navi Mumbai","description":"Explore curtain textures, colour ideas and practical guides with Dcorhome in Nerul, Navi Mumbai. Try the curtain design studio and enquire about your room."},
+    "/collections": {"title":"Curtain Fabric Library & Colour References","description":"Browse Dcorhome's illustrative curtain fabric references and shades. Compare design directions, then enquire for confirmed materials, samples and availability."},
+    "/studio": {"title":"Curtain Visualizer & Online Design Studio","description":"Explore main and sheer curtain colours in Dcorhome's manual design studio. Preview supported combinations, compare before and after, and save a design on your device."},
+    "/measure": {"title":"How to Measure Windows for Curtains","description":"Plan curtain track width, drop, fullness and fabric allowances with a preliminary measurement guide. Confirm final dimensions and fabric details before ordering."},
+    "/inspiration": {"title":"Curtain Ideas, Fabric Choices & Measuring Guides","description":"Read practical guides to living room curtains, bedroom colours, sheer layers and fabric selection. Explore ideas before confirming physical fabric samples."},
+    "/about": {"title":"About Dcorhome: Curtain Experience in Navi Mumbai","description":"Meet Dcorhome, with approximately 20 years in the curtain market and an office in Nerul, Navi Mumbai. Discover our newer online fabric and design experience."},
+    "/contact": {"title":"Contact Dcorhome in Nerul, Navi Mumbai","description":"Contact sales@dcorhome.com for curtain fabric enquiries and measurement questions. Find Dcorhome's office address in Nerul West, Navi Mumbai."},
+    "/faq": {"title":"Curtain Fabric, Visualizer & Enquiry Questions","description":"Find answers about illustrative fabric shades, physical samples, curtain design previews, browser-local saved designs and contacting Dcorhome."},
+    "/how-it-works": {"title":"How to Explore Fabrics & Plan a Curtain Design","description":"Discover Dcorhome's fabric references, explore supported curtain combinations in the Studio, plan measurements and send an enquiry with your design choices."}
+  },
+  "categories": {},
+  "products": {}
 }
