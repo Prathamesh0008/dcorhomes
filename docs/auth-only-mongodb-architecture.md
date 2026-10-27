@@ -1,5 +1,7 @@
 # Authentication-only MongoDB architecture — 27 October 2026
 
+> Current release status: production-source preservation and the Production build gate now pass. See [the completed release evidence](production-release-readiness.md). Earlier pending-export statements below are historical implementation notes, not the current migration status.
+
 This report supersedes the earlier MongoDB-all-records readiness and connectivity reports. The code is implemented locally. Nothing was deployed or pushed. Production preservation and connectivity are not verified.
 
 ## Result and release blocker

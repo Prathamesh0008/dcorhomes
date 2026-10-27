@@ -1,5 +1,21 @@
 {
-  "status": "pending-production-export",
-  "productionSourceConfirmed": false,
-  "reason": "Repository baseline preserved. Unique production MongoDB content has not been exported or verified."
+  "status": "production-preserved",
+  "productionSourceConfirmed": true,
+  "evidenceVersion": 2,
+  "sourceIdentity": {
+    "sha256": "09cc8791858126a34ab5dc2a73e33974cc16c7ca83b44784b8d1ec644263b495",
+    "hostSha256": "1f1e2645f4d9fddf6d2efcefe8aaf11c9ae3af3f17058bcba28c3bee7eac2ab2",
+    "databaseSha256": "d37e761759d5078a259e407c00daf52c6f33f7d72ca013249b16f2581c555851",
+    "isLocal": false,
+    "productionScopeInjected": true,
+    "productionSourceConfirmed": true
+  },
+  "verifiedAt": "2026-10-27T07:46:18.165Z",
+  "snapshotManifestSha256": "f60d2f61be731b5c54410decc89f8fa3b0528608a4cbca6b504fa688d0785862",
+  "initialRepositoryHashes": {
+    "data/catalogue/fabrics.json": "314d31a1debb16c7fbea0e960911463d2028393c55dea70d7f82a3b89291ac86",
+    "data/catalogue/collections.json": "cd21caaa97bb37b337a7cdc6650d12ed7300903363f8cafac1ef0370924d2ae8",
+    "data/site/editorial.json": "d125caaa18000d54f4909dae49e24798dd2cfcd82705379e386e0100ac26ba70",
+    "data/site/design-options.json": "1d59de9e2ea30c9812baf0f3b1ce49723545ff14b4a63d16d629c878f18b3454"
+  }
 }

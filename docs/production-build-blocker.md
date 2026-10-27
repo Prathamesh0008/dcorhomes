@@ -1,5 +1,7 @@
 # Deployment edf26be — production preservation blocker
 
+> Resolved by the real source-bound export and verification on 27 October 2026. See [the production release evidence](production-release-readiness.md). The investigation below records the earlier blocked state; `migration.json` now contains legitimate `production-preserved` evidence.
+
 The failing command is the `prebuild` repository-content check. With `VERCEL_ENV=production`, it rejects `data/catalogue/migration.json` because its status is `pending-production-export` and `productionSourceConfirmed` is false. This is an unmet data-preservation requirement, not a Next.js compilation failure. The protection has not been disabled and the migration state has not been changed.
 
 ## Evidence inspected
