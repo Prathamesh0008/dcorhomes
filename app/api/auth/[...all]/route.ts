@@ -1,17 +1,16 @@
 import { logDatabaseFailure } from '@/lib/server/database-diagnostics';
-import { authProvider } from '@/lib/auth-provider';
 import { NextRequest, NextResponse } from 'next/server';
-import { customerAuth, customerAuthReady, runMemberLogin, validatedCustomerSession } from '@/lib/server/customer-auth';
+import { customerAuth, customerAuthReady, runMemberLogin, hasCustomerSessionCookie, validatedCustomerSession } from '@/lib/server/customer-auth';
 import { loginLimit } from '@/lib/server/members';
 import { failure, HttpError, jsonInput, mutation, privateHeaders } from '@/lib/server/security';
 import { normalizeUserId, validUserId } from '@/lib/server/member-policy';
 export const runtime = 'nodejs';
 async function handler(request: NextRequest) {
-  if (authProvider() === 'clerk') return NextResponse.json({ message: 'This authentication endpoint is retired. Use /login.' }, { status: 410, headers: privateHeaders });
   const endpoint = request.nextUrl.pathname.slice('/api/auth'.length);
   // Explicit allowlist also closes old signup, email-login, reset and account-linking endpoints.
   if (!['/sign-in/username', '/get-session', '/sign-out'].includes(endpoint)) return NextResponse.json({ message: 'Public registration is unavailable. Contact sales@dcorhome.com for account assistance.' }, { status: 403, headers: privateHeaders });
   try {
+    if (endpoint === '/get-session' && request.method === 'GET' && !hasCustomerSessionCookie(request.headers)) return NextResponse.json(null, { headers: privateHeaders });
     if (!customerAuthReady()) throw new HttpError(503, 'Member accounts are awaiting configuration. Please contact sales@dcorhome.com.');
     if (endpoint === '/get-session') {
       if (request.method !== 'GET') throw new HttpError(405, 'Method not allowed.');

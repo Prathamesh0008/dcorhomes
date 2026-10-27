@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "check:seo": "node scripts/seo-check.cjs",
-    "check:clerk": "node scripts/clerk-auth-check.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -34,7 +33,6 @@
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.7.12",
-    "@clerk/nextjs": "7.9.21",
     "better-auth": "^1.7.12",
     "lucide-react": "^0.468.0",
     "mongodb": "^6.21.0",

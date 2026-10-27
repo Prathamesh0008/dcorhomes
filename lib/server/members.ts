@@ -1,10 +1,9 @@
 import 'server-only';
-import { authProvider } from '@/lib/auth-provider';
 import { createHash, randomBytes } from 'node:crypto';
 import { ObjectId, type ClientSession, type Document } from 'mongodb';
 import { hashPassword, verifyPassword } from 'better-auth/crypto';
 import { mongoClient, mongoDatabase } from './mongodb';
-import { customerSession } from './customer-auth';
+import { accountSession } from './account-session';
 import { activeSession, normalizeUserId, passwordProblem, validUserId } from './member-policy';
 import { HttpError } from './security';
 import { jsonInput } from './security';
@@ -16,9 +15,7 @@ export async function memberJson(request: NextRequest, maxBytes: number) {
 }
 
 let indexes: Promise<unknown> | undefined;
-function legacyOnly() { if (authProvider() !== 'legacy') throw new HttpError(410, 'Legacy account management is retired. Use the Clerk Dashboard.'); }
 export async function memberIndexes() {
-  legacyOnly();
   if (!indexes) indexes = (async () => {
     const db = await mongoDatabase();
     await db.collection('users').createIndex({ normalizedUserId: 1 }, { unique: true, partialFilterExpression: { normalizedUserId: { $type: 'string' } } });
@@ -36,7 +33,7 @@ export async function memberIndexes() {
   await indexes;
 }
 export async function requireMemberAdmin() {
-  const account = await customerSession();
+  const account = await accountSession();
   if (!account) throw new HttpError(401, 'Sign in with an authorized administrator account.');
   if (account.user.role !== 'admin') throw new HttpError(403, 'Administrator access required.');
   return { id: account.user.id, version: account.user.sessionVersion };
@@ -67,12 +64,11 @@ function memberInput(input: Record<string, unknown>) {
   const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
   if (!validUserId(userId)) throw new HttpError(400, 'User ID must be 3–30 letters, numbers, dots, underscores or hyphens, starting with a letter or number.');
   if (name.length < 2 || name.length > 100) throw new HttpError(400, 'Enter a full name between 2 and 100 characters.');
-  if (email && (email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith('@members.invalid'))) throw new HttpError(400, 'Enter a valid email address.');
+  if (!email || (email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith('@members.invalid'))) throw new HttpError(400, 'Enter a valid email address.');
   if (input.role !== undefined && input.role !== 'user' && input.role !== 'admin') throw new HttpError(400, 'Invalid role.');
   return { userId, name, email, role: input.role === 'admin' ? 'admin' : 'user' };
 }
 export async function provisionMember(actor: Actor | null, input: Record<string, unknown>, bootstrapPassword?: string) {
-  legacyOnly();
   const data = memberInput(input), password = bootstrapPassword ?? randomBytes(24).toString('base64url');
   if (!actor && !bootstrapPassword) throw new HttpError(403, 'Local bootstrap password required.');
   const problem = passwordProblem(password); if (problem) throw new HttpError(400, problem);
@@ -81,8 +77,8 @@ export async function provisionMember(actor: Actor | null, input: Record<string,
     await administrative(actor, async session => {
       if (!actor && await db.collection('users').findOne({ role: 'admin' }, { session })) throw new HttpError(409, 'An administrator already exists. Bootstrap refused.');
       const user = { _id: id, userId: data.userId, normalizedUserId: normalizeUserId(data.userId), name: data.name,
-        // Better Auth requires email. An unrouteable unique internal address is never displayed as contact email.
-        email: data.email || `${id.toHexString()}@members.invalid`, emailVerified: false,
+        // Better Auth requires a real internal contact email; it is not the login identifier.
+        email: data.email, emailVerified: false,
         role: actor ? data.role : 'admin', status: 'active', mustChangePassword: Boolean(actor), sessionVersion: 1,
         createdAt: now, updatedAt: now, createdBy: actor?.id || 'local-bootstrap' };
       await db.collection('users').insertOne(user, { session });
@@ -93,9 +89,8 @@ export async function provisionMember(actor: Actor | null, input: Record<string,
   return { id: id.toHexString(), temporaryPassword: actor ? password : undefined };
 }
 export async function manageMember(actor: Actor, id: string, action: unknown) {
-  legacyOnly();
   if (!ObjectId.isValid(id)) throw new HttpError(404, 'User not found.');
-  if (!['disable', 'enable', 'reset-password'].includes(String(action))) throw new HttpError(400, 'Invalid administrative action.');
+  if (!['disable', 'enable', 'reset-password', 'revoke-sessions'].includes(String(action))) throw new HttpError(400, 'Invalid administrative action.');
   const db = await mongoDatabase(), userId = new ObjectId(id), temporaryPassword = action === 'reset-password' ? randomBytes(24).toString('base64url') : undefined;
   const password = temporaryPassword ? await hashPassword(temporaryPassword) : undefined;
   await administrative(actor, async session => {
@@ -106,14 +101,13 @@ export async function manageMember(actor: Actor, id: string, action: unknown) {
       const result = await db.collection('accounts').updateOne({ userId, providerId: 'credential' }, { $set: { password, updatedAt: new Date() } }, { session });
       if (!result.matchedCount) throw new HttpError(409, 'Credential account is missing; no password was reset.');
     }
-    await db.collection('users').updateOne({ _id: userId }, { $set: { updatedAt: new Date(), ...(password ? { mustChangePassword: true } : { status: action === 'disable' ? 'disabled' : 'active' }) }, $inc: { sessionVersion: 1 } }, { session });
+    await db.collection('users').updateOne({ _id: userId }, { $set: { updatedAt: new Date(), ...(password ? { mustChangePassword: true } : action === 'revoke-sessions' ? {} : { status: action === 'disable' ? 'disabled' : 'active' }) }, $inc: { sessionVersion: 1 } }, { session });
     await db.collection('sessions').deleteMany({ userId }, { session });
     await db.collection('member_audit').insertOne({ action, actor: actor.id, target: id, at: new Date() }, { session });
   });
   return { temporaryPassword };
 }
 export async function changeMemberPassword(actor: Actor, currentPassword: unknown, newPassword: unknown) {
-  legacyOnly();
   const problem = passwordProblem(newPassword); if (problem) throw new HttpError(400, problem);
   if (typeof currentPassword !== 'string' || currentPassword.length > 128 || currentPassword === newPassword) throw new HttpError(400, 'Confirm your current password and choose a different new password.');
   const db = await mongoDatabase(), userId = new ObjectId(actor.id);
@@ -130,7 +124,6 @@ export async function changeMemberPassword(actor: Actor, currentPassword: unknow
   }); } finally { await session.endSession(); }
 }
 export async function loginLimit(userId: string, source: string) {
-  legacyOnly();
   await memberIndexes(); const db = await mongoDatabase(), now = new Date();
   for (const [kind, identity, max] of [['user', normalizeUserId(userId), 8], ['ip', source, 30]] as const) {
     const key = `${kind}:${createHash('sha256').update(identity).digest('hex')}`;

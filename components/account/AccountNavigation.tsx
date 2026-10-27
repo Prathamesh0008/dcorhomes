@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { Logout } from "./AccountActions";
 import NavigationDropdown, { dropdownLink, navigationLink } from "@/components/navigation/NavigationDropdown";
-export default function AccountNavigation({ signedIn, isAdmin = false }: { signedIn: boolean; isAdmin?: boolean }) {
+export default function AccountNavigation({ signedIn, isAdmin = false, resolved = true }: { signedIn: boolean; isAdmin?: boolean; resolved?: boolean }) {
+  if (!resolved) return <Link href="/account" className={navigationLink}>Account</Link>;
   return <div className="shrink-0">
     {!signedIn && <div className="hidden items-center gap-4 min-[1440px]:flex"><Link href="/login" className={`${navigationLink} inline-flex`}>Login</Link></div>}
     <div className={signedIn ? "" : "min-[1440px]:hidden"}><NavigationDropdown label={signedIn ? "My Account" : "Account"} align="right">

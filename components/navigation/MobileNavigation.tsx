@@ -8,7 +8,7 @@ import { Brand } from "./Brand";
 import { mainLinks, aboutLinks, exploreLinks, routeActive } from "./DesktopNavigation";
 import StudioLink from "./StudioLink";
 import { Logout } from "@/components/account/AccountActions";
-export default function MobileNavigation({ open, signedIn, isAdmin = false, onClose }: { open: boolean; signedIn: boolean; isAdmin?: boolean; onClose: () => void }) {
+export default function MobileNavigation({ open, signedIn, isAdmin = false, resolved = true, onClose }: { open: boolean; signedIn: boolean; isAdmin?: boolean; resolved?: boolean; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null), close = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function MobileNavigation({ open, signedIn, isAdmin = false, onCl
       <p className="mb-3 mt-7 text-[10px] uppercase tracking-[2.7px] text-[#9c896e]">The curtain atelier</p>
       <nav aria-label="Mobile navigation" className="grid">{[...mainLinks, ...aboutLinks].map(item => <Link key={item.href} href={item.href} aria-current={routeActive(pathname, item.href) ? "page" : undefined} className="flex min-h-12 items-center text-[21px] font-medium tracking-[-.3px] text-[#667064] transition-colors hover:text-ink aria-[current=page]:text-ink">{item.label}<span aria-hidden="true" className={`ml-auto h-px w-6 bg-[#b29a79] ${routeActive(pathname, item.href) ? "" : "invisible"}`}/></Link>)}</nav>
       <nav aria-label="Explore" className="my-5 grid grid-cols-2 gap-x-5 border-y border-solid border-[#e5e0d5] py-3">{exploreLinks.map(item => <Link key={item.href} href={item.href} aria-current={routeActive(pathname, item.href) ? "page" : undefined} className="flex min-h-11 items-center text-[14px] text-muted aria-[current=page]:text-ink">{item.label}</Link>)}</nav>
-      <nav aria-label="Customer account" className="mb-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-[14px]">{(signedIn ? [{ href: "/account", label: "My Account" }, { href: isAdmin ? "/admin/users" : "/account#saved-designs", label: isAdmin ? "Manage Users" : "Saved Designs" }] : [{ href: "/login", label: "Login" }]).map(item => <Link key={item.href} href={item.href} className="flex min-h-11 items-center">{item.label}</Link>)}{signedIn && <Logout/>}</nav>
+      <nav aria-label="Customer account" className="mb-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-[14px]">{(!resolved ? [{ href: "/account", label: "Account" }] : signedIn ? [{ href: "/account", label: "My Account" }, { href: isAdmin ? "/admin/users" : "/account#saved-designs", label: isAdmin ? "Manage Users" : "Saved Designs" }] : [{ href: "/login", label: "Login" }]).map(item => <Link key={item.href} href={item.href} className="flex min-h-11 items-center">{item.label}</Link>)}{signedIn && <Logout/>}</nav>
       <StudioLink className="w-full min-h-12"/>
       <p className="mb-0 mt-6 text-[13px] font-serif italic text-muted">Curtains, considered. A home, beautifully yours.</p>
     </div>

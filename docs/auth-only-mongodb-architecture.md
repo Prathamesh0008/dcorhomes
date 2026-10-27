@@ -16,7 +16,7 @@ Public page rendering, catalogue APIs and manual Studio interactions no longer o
 
 | Former dependency / records | Former consumers | Current source / behavior |
 | --- | --- | --- |
-| Root `customerSession`, header/footer session checks | Every public page, including visitors with account cookies | Public navigation performs no account lookup. Account/admin pages and explicitly invoked auth endpoints validate sessions. |
+| Root `customerSession`, header/footer session checks | Every public page, including visitors with account cookies | Public rendering performs no account lookup. The navbar makes a nonblocking sanitized GET /api/auth/get-session request; anonymous or unrelated cookies return null without MongoDB. Account/admin pages and authenticated session requests validate sessions against MongoDB. |
 | `rows('fabric')`, `allRecords('fabric-record')`, `allRecords('fabric-category')` in `legacy_fabrics`, `fabric_products`, `fabric_collections` | Homepage, footer, collection filters/search/sorting, product details, Studio provider, saved-fabric page, sitemap/product SEO, `/api/catalogue`, `/api/fabrics` | `data/catalogue/fabrics.json`, `collections.json`; shades embedded in each fabric. Pure in-memory projections preserve existing filtering/sorting/pagination/specification handling. |
 | `row('settings','hero')` in `site_settings` | Homepage comparison and admin comparison editor | Approved unchanged `lib/assets.ts` / `lib/hero-comparisons.ts` assets. Runtime editing disabled. Earlier overrides retained in private export for review. |
 | `row('settings','design-options')` | Configurators and `/api/options` | `data/site/design-options.json`, re-exported by `lib/design-options.ts`. |

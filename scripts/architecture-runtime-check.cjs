@@ -13,7 +13,7 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  await start({...shared,MONGODB_URI:'mongodb://127.0.0.1:1/dcorhome_architecture_check',DCORHOME_TEST_FORBID_MONGO:'true',NODE_OPTIONS:'--require=./scripts/forbid-mongodb-preload.cjs'});
  const records=require('../data/catalogue/fabrics.json'),product=records.find(f=>f.active!==false);
  const pages=['/','/collections','/collections/'+product.slug,'/studio','/measure','/inspiration','/about','/contact','/faq','/how-it-works','/designs','/collections/saved','/sitemap.xml','/robots.txt'];
- for(const route of pages){stage='offline route '+route;const response=await api(route,'GET',undefined,'unrelated=1; better-auth.session_token=offline-test');assert.equal(response.status,200,'Offline public route failed: '+route);const body=await response.text();assert.ok(!body.includes('This page is temporarily unavailable.'),'Outage page rendered: '+route);if(route==='/'){assert.ok(body.includes('Your room.'));assert.ok(body.includes('/images/hero-room-before.webp'));assert.ok(body.includes('<footer')&&body.includes('Curtain collections'),'Public footer content missing.');}if(route==='/studio')assert.ok(body.includes('Where shall we begin?')||body.includes('Opening your fabric collection'));if(route==='/collections/'+product.slug)assert.ok(body.includes(product.name));if(route==='/sitemap.xml')assert.ok(body.includes('/collections/'+product.slug));}
+ for(const route of pages){stage='offline route '+route;const response=await api(route,'GET',undefined,'unrelated=1; better-auth.session_token=offline-test');assert.equal(response.status,200,'Offline public route failed: '+route);const body=await response.text();assert.ok(!body.includes('This page is temporarily unavailable.'),'Outage page rendered: '+route);if(route==='/'){assert.ok(body.includes('Your room.'));assert.ok(body.includes('/images/hero-room-before.webp'));assert.ok(body.includes('<footer')&&body.includes('Curtain collections'),'Public footer content missing.');}if(route==='/studio')assert.ok(body.includes('Where shall we begin?')||body.includes('Opening your fabric collection'));if(route==='/collections/'+product.slug)assert.ok(body.includes(product.name));if(route==='/sitemap.xml')assert.ok(body.includes('/collections') && !body.includes('/collections/'+product.slug));}
  const catalogue=await(await api('/api/catalogue')).json();assert.ok(catalogue.records.items.some(f=>f.id===product.id));
  const fabrics=await api('/api/fabrics');assert.equal(fabrics.status,200);await fabrics.text();
  assert.equal((await api('/api/options')).status,200);
@@ -27,6 +27,7 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  assert.ok(!logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Public interaction attempted MongoDB.');
  assert.ok(!logs.includes('database_failure'),'Public interaction triggered database diagnostics.');
  console.log('PASS: Public routes, product metadata/sitemap, catalogue APIs and retired cloud endpoints work without any MongoDB connection, including with cookies. Missing email fails truthfully.');
+ assert.equal(await (await api('/api/auth/get-session','GET',undefined,'unrelated=1')).json(),null);
  const login=await api('/api/auth/sign-in/username','POST',{username:'offline-admin',password:'not-a-real-password'});assert.equal(login.status,503);
  assert.ok(logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Offline probe must intercept the actual runtime driver.');
  for(const route of ['/api/admin/users','/api/admin']){const response=await api(route,'GET',undefined,'better-auth.session_token=offline-test');assert.ok([401,403,503].includes(response.status),'Private data must fail closed.');}
@@ -37,12 +38,18 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  Object.assign(process.env,shared,{MONGODB_URI:uri});delete process.env.DCORHOME_TEST_FORBID_MONGO;
  require('./auth-loader.cjs');
  const connection=require('../lib/server/mongodb.ts');client=await connection.mongoClient();const db=await connection.mongoDatabase();
- const {provisionMember}=require('../lib/server/members.ts');const password=crypto.randomBytes(24).toString('base64url');await provisionMember(null,{userId:'fixture-admin',fullName:'Isolated architecture administrator'},password);
+ const {provisionMember}=require('../lib/server/members.ts');const password=crypto.randomBytes(24).toString('base64url');await provisionMember(null,{userId:'fixture-admin',fullName:'Isolated architecture administrator',email:'admin@example.invalid'},password);
  await start({...shared,MONGODB_URI:uri});
  const signIn=(username,password)=>api('/api/auth/sign-in/username','POST',{username,password});
  const admin=await signIn('fixture-admin',password);assert.equal(admin.status,200);const adminCookie=cookieOf(admin);assert.ok(admin.headers.getSetCookie().some(value=>/HttpOnly/i.test(value)&&/Secure/i.test(value)));
- assert.equal((await api('/api/auth/sign-up/email','POST',{})).status,403);
- const creation=await api('/api/admin/users','POST',{userId:'fixture-member',fullName:'Isolated architecture member'},adminCookie);assert.equal(creation.status,201);const member=await creation.json();
+ for(const route of ['/api/auth/sign-up/email','/api/auth/sign-up/username','/api/auth/sign-in/email','/api/auth/request-password-reset','/api/auth/update-user'])assert.equal((await api(route,'POST',{})).status,403);
+ const adminState=await (await api('/api/auth/get-session','GET',undefined,adminCookie)).json();assert.equal(adminState.user.role,'admin');assert.equal(adminState.session.token,undefined);
+ assert.equal((await api('/admin/users','GET',undefined,adminCookie)).status,200);
+ assert.equal((await api('/login')).status,200);
+ assert.equal((await api('/api/admin/users','POST',{userId:'missing-email',fullName:'Missing email'},adminCookie)).status,400);
+ assert.equal((await signIn('unknown-fixture','incorrect')).status,401);
+ assert.equal((await api('/account')).headers.get('location'),'/login');
+ const creation=await api('/api/admin/users','POST',{userId:'fixture-member',fullName:'Isolated architecture member',email:'member@example.invalid'},adminCookie);assert.equal(creation.status,201);const member=await creation.json();
  const {ObjectId}=require('mongodb');const credential=await db.collection('accounts').findOne({userId:new ObjectId(member.id)});assert.notEqual(credential.password,member.temporaryPassword);
  const first=await signIn('FIXTURE-MEMBER',member.temporaryPassword);assert.equal(first.status,200);const firstCookie=cookieOf(first);
  assert.ok((await api('/account','GET',undefined,firstCookie)).headers.get('location').endsWith('/account/change-password'));
@@ -50,11 +57,17 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  assert.equal(await(await api('/api/auth/get-session','GET',undefined,firstCookie)).json(),null);
  const signedIn=await signIn('fixture-member',memberPassword);assert.equal(signedIn.status,200);const memberCookie=cookieOf(signedIn);
  assert.equal((await api('/account','GET',undefined,memberCookie)).status,200);
+ assert.equal((await api('/login','GET',undefined,memberCookie)).headers.get('location'),'/account');
+ assert.equal((await api('/account','GET',undefined,memberCookie)).status,200);
  assert.equal((await api('/api/admin/users','GET',undefined,memberCookie)).status,403);
  assert.equal((await api('/admin/users','GET',undefined,memberCookie)).status,404);
  assert.equal((await signIn('fixture-member','incorrect')).status,401);
  assert.equal((await api('/api/admin','PATCH',{kind:'content'},adminCookie)).status,405);
+ assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'revoke-sessions'},adminCookie)).status,200);
+ assert.equal(await(await api('/api/auth/get-session','GET',undefined,memberCookie)).json(),null);
+ const again=await signIn('fixture-member',memberPassword);assert.equal(again.status,200);
  assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'disable'},adminCookie)).status,200);
+ assert.equal(await(await api('/api/auth/get-session','GET',undefined,cookieOf(again))).json(),null);
  assert.equal(await(await api('/api/auth/get-session','GET',undefined,memberCookie)).json(),null);
  assert.equal((await signIn('fixture-member',memberPassword)).status,401);
  assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'enable'},adminCookie)).status,200);
