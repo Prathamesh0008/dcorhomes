@@ -15,7 +15,23 @@ export function databaseFailure(error: unknown): DatabaseFailure {
 }
 export function logDatabaseFailure(operation: string, error: unknown) {
   // Deliberately omit driver messages, stacks, URIs, database names and query values.
-  console.error(JSON.stringify({ event: 'database_failure', operation, category: databaseFailure(error), detail: databaseFailureDetail(error) }));
+  console.error(JSON.stringify({ event: 'database_failure', operation, category: databaseFailure(error), detail: databaseFailureDetail(error), codes: databaseFailureCodes(error), node: process.version, openssl: process.versions.openssl }));
+}
+
+// Fixed allowlist only: arbitrary driver codes/messages can contain application data.
+const diagnosticCodes = new Set(['ENOTFOUND', 'EAI_AGAIN', 'ENODATA', 'ESERVFAIL', 'ETIMEOUT', 'ETIMEDOUT', 'ECONNREFUSED', 'ECONNRESET', 'ENETUNREACH', 'EHOSTUNREACH', 'EPIPE', 'ERR_TLS_CERT_ALTNAME_INVALID', 'CERT_HAS_EXPIRED', 'CERT_NOT_YET_VALID', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'SELF_SIGNED_CERT_IN_CHAIN', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY', 'ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR', 'ERR_SSL_SSLV3_ALERT_HANDSHAKE_FAILURE', 'ERR_SSL_WRONG_VERSION_NUMBER', 'ERR_SSL_UNSUPPORTED_PROTOCOL']);
+export function databaseFailureCodes(error: unknown): string[] {
+  const seen = new Set<unknown>(), codes = new Set<string>();
+  function inspect(value: unknown, depth = 0) {
+    if (!value || typeof value !== 'object' || seen.has(value) || depth > 12 || seen.size >= 64) return;
+    seen.add(value);
+    const e = value as { code?: unknown; cause?: unknown; errors?: unknown[]; reason?: { error?: unknown; servers?: Map<unknown, { error?: unknown }> } };
+    if (typeof e.code === 'string' && diagnosticCodes.has(e.code)) codes.add(e.code);
+    inspect(e.cause, depth + 1); inspect(e.reason?.error, depth + 1);
+    if (e.reason?.servers instanceof Map) for (const server of e.reason.servers.values()) inspect(server.error, depth + 1);
+    if (Array.isArray(e.errors)) for (const nested of e.errors) inspect(nested, depth + 1);
+  }
+  inspect(error); return [...codes].sort();
 }
 
 export function databaseFailureDetail(error: unknown): 'dns' | 'tls' | 'connection_refused' | 'timeout' | undefined {
