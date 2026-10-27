@@ -26,7 +26,9 @@
     "content:verify-export": "node scripts/verify-content-export.cjs",
     "check:visualizer": "node scripts/visualizer-library-check.cjs",
     "check:enquiries": "node scripts/enquiry-and-storage-check.cjs",
-    "check:build-boundaries": "node scripts/build-boundary-check.cjs"
+    "check:build-boundaries": "node scripts/build-boundary-check.cjs",
+    "check": "npm run check:content && node scripts/preservation-workflow-check.cjs && npm run check:visualizer && npm run check:enquiries",
+    "content:identity": "node scripts/content-source-identity.cjs"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.7.12",

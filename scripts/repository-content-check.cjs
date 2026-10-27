@@ -6,6 +6,7 @@ const records=require('../data/catalogue/fabrics.json'),categories=require('../d
  if(process.env.VERCEL_ENV==='production'){
   const migration=require('../data/catalogue/migration.json');
   assert.ok(migration.status==='production-preserved'&&migration.productionSourceConfirmed===true&&/^[a-f0-9]{64}$/.test(migration.snapshotManifestSha256||''),'Production cutover blocked: export and verify the existing production content first. See docs/auth-only-mongodb-architecture.md.');
+  require('./preservation-policy.cjs').productionEvidence(migration);
  }
  assert.equal(new Set(records.map(f=>f.id)).size,records.length,'Duplicate fabric IDs');
  assert.equal(new Set(records.map(f=>f.slug)).size,records.length,'Duplicate fabric slugs');

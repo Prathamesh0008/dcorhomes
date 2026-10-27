@@ -10,12 +10,19 @@ const {getAsset}=require('../lib/server/assets.ts');
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const canonical=value=>EJSON.stringify(value,{relaxed:false});
 const args=process.argv.slice(2),outIndex=args.indexOf('--out');
+const {sourceIdentity,assertProductionSource}=require('./content-source-identity.cjs');
 let client,stage='configuration';
 const deadline=setTimeout(()=>{console.error(JSON.stringify({event:'legacy_export',status:'failed',stage,category:'network_timeout'}));process.exit(1);},120000);
 async function main(){
  if(outIndex<0||!args[outIndex+1])throw Error('Output argument required.');
  const root=path.resolve('.data'),out=path.resolve(args[outIndex+1]);
  if(!out.startsWith(root+path.sep)||fs.existsSync(out))throw Error('Use a new directory inside ignored .data.');
+ const identity=sourceIdentity();
+ const production=args.includes('--production-source');
+ if(production){
+  if(!args.includes('--env-only'))throw Error('Use trusted injected Production settings with --env-only.');
+  assertProductionSource(identity,args[args.indexOf('--expected-source-sha256')+1]);
+ }
  stage='connect';client=await mongoClient();const db=await mongoDatabase();
  await db.command({ping:1},{maxTimeMS:5000});
  const snapshot=async()=>{
@@ -74,7 +81,7 @@ async function main(){
  write('PRIVATE-assets-inventory.json',JSON.stringify(privateAssetInventory,null,2)+'\n');
  stage='verify_source_unchanged';const after=await snapshot();
  const unchanged=hash(canonical(after))===hash(canonical(source));
- const manifest={version:1,readOnly:true,sourceUnchanged:unchanged,exportedAt:new Date().toISOString(),counts:Object.fromEntries(Object.entries(source).map(([name,items])=>[name,items.length])),fabricCount:fabrics.length,shadeCount:fabrics.reduce((sum,f)=>sum+f.colors.length,0),publicImages:images.size,privateAssetsRequested:args.includes('--include-private-assets'),privateAssetInventory,files,productionMigrationVerified:false};
+ const manifest={version:2,sourceIdentity:{...identity,productionSourceConfirmed:production},readOnly:true,sourceUnchanged:unchanged,exportedAt:new Date().toISOString(),counts:Object.fromEntries(Object.entries(source).map(([name,items])=>[name,items.length])),fabricCount:fabrics.length,shadeCount:fabrics.reduce((sum,f)=>sum+f.colors.length,0),publicImages:images.size,privateAssetsRequested:args.includes('--include-private-assets'),privateAssetInventory,files,productionMigrationVerified:false};
  fs.writeFileSync(path.join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{flag:'wx'});
  if(!unchanged)throw Error('Source changed during export.');
  console.log(JSON.stringify({event:'legacy_export',status:'snapshot_exported',reviewRequired:true}));

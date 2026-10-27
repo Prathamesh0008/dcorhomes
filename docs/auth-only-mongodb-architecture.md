@@ -45,10 +45,10 @@ Content changes are reviewed repository changes followed by redeployment. `npm r
 Run from a trusted workstation with access to the **existing intended production database**. Restore Atlas/network access first if necessary; see the previous connectivity runbook for networking checks. Do not bootstrap, recreate, reset or delete anything.
 
 1. Inject production `MONGODB_URI`, `MONGODB_DB` and, if exporting earlier image objects, existing S3 settings into a trusted shell. Do not put values in commands, logs, chat or public variables. `--env-only` prevents local `.env` files from changing the selected source. Use a database user with read-only access for export where available; the exporter itself issues only read operations and a ping.
-2. Run:
+2. Before connecting, compare the selected cluster/database privately with the correct Vercel project's **Production-scoped** settings. A local `.env.local`, an old count report or an environment scope label alone does not prove database identity. In the trusted export shell, inject the verified settings and a local `VERCEL_ENV=production` scope marker; this does not require changing any Vercel variable. Run `npm.cmd run content:identity -- --env-only` (no connection) and retain its source fingerprint in `$verifiedSourceSha256`. Compare it against a fingerprint obtained from the independently verified production configuration. Never use an isolated/local test source. Then run:
 
    ```powershell
-   npm.cmd run content:export -- --env-only --out .data/production-content-export --include-private-assets
+   npm.cmd run content:export -- --env-only --production-source --expected-source-sha256 $verifiedSourceSha256 --out .data/production-content-export --include-private-assets
    ```
 
    The output directory must be new and inside ignored `.data`. The tool never writes source records/indexes. It reads a transaction snapshot of known non-auth collections, preserves raw Extended JSON privately, and rereads the source to detect changes during export. It never reads `users`, `accounts`, `sessions` or password hashes. A failed/changed snapshot cannot verify a release.
@@ -72,7 +72,7 @@ Run from a trusted workstation with access to the **existing intended production
    npm.cmd run content:verify-export -- --snapshot .data/production-content-export --confirm-production-source
    ```
 
-   This explicit operator attestation updates the versioned migration gate only after preservation verification. Missing earlier private image exports must be resolved if those records reference images. This step does not claim Vercel connectivity or email delivery. Archive private snapshots/backups securely and preserve the original database/object storage. Later reviewed content edits continue through the repository workflow.
+   This explicit operator attestation updates the versioned migration gate only after preservation verification. New production approvals require a version-2 export with the confirmed nonlocal source fingerprint and injected Production scope. Historical or isolated fixture exports cannot approve a production cutover. Missing earlier private image exports must be resolved if those records reference images. This step does not claim Vercel connectivity or email delivery. Archive private snapshots/backups securely and preserve the original database/object storage. Later reviewed content edits continue through the repository workflow.
 
 Earlier manual configurations are exported under hashed owner directories as `manual-designs.json`. Verify ownership outside the public website, give each owner only their own file through a private channel, then use **My Saved Designs → Import or back up manual designs**. Import validates asset versions, materials, shades, IDs, dates and conflicts. A storage/quota failure reports any partial import count. Old cloud photograph originals/results are separate private files; download them to their owners, never move them to public assets. Earlier local IndexedDB designs remain readable. No account-wide synchronization is advertised.
 
@@ -107,3 +107,5 @@ Complete the production preservation gate first. Set Vercel Node.js to 24.x, kee
 Review the full diff and ensure private exports/credentials are ignored. Create a review branch, stage only reviewed source/assets/data, commit and push it. If Git integration would automatically deploy, disable that trigger or keep the branch outside its deployment rules until approval. After review, manually deploy/redeploy the approved commit in Vercel. This task did neither. Environment changes apply to new deployments.
 
 After manual deployment, verify public routes while auth is unavailable using an isolated Preview environment, then verify production login/user administration against the existing database and perform one explicitly approved real enquiry. Do not intentionally break production MongoDB credentials to run outage tests. Mark live behavior verified only after those checks.
+
+Current deployment-blocker investigation: see [the edf26be audit and remaining operator actions](production-build-blocker.md).
