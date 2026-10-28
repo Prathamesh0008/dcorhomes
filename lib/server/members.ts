@@ -1,5 +1,5 @@
 import 'server-only';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { ObjectId, type ClientSession, type Document } from 'mongodb';
 import { hashPassword, verifyPassword } from 'better-auth/crypto';
 import { mongoClient, mongoDatabase } from './mongodb';
@@ -8,6 +8,8 @@ import { activeSession, normalizeUserId, passwordProblem, validUserId } from './
 import { HttpError } from './security';
 import { jsonInput } from './security';
 import type { NextRequest } from 'next/server';
+import { generatePassword, type PasswordContext } from '../password-policy';
+const passwordContext = (user: Document): PasswordContext => ({ userId: user.userId, name: user.name, email: user.email });
 
 export async function memberJson(request: NextRequest, maxBytes: number) {
   if (!process.env.SITE_URL || request.headers.get('origin') !== new URL(process.env.SITE_URL).origin || !request.headers.get('content-type')?.startsWith('application/json')) throw new HttpError(403, 'Same-origin JSON request required.');
@@ -69,9 +71,9 @@ function memberInput(input: Record<string, unknown>) {
   return { userId, name, email, role: input.role === 'admin' ? 'admin' : 'user' };
 }
 export async function provisionMember(actor: Actor | null, input: Record<string, unknown>, bootstrapPassword?: string) {
-  const data = memberInput(input), password = bootstrapPassword ?? randomBytes(24).toString('base64url');
+  const data = memberInput(input), password = bootstrapPassword ?? generatePassword(data);
   if (!actor && !bootstrapPassword) throw new HttpError(403, 'Local bootstrap password required.');
-  const problem = passwordProblem(password); if (problem) throw new HttpError(400, problem);
+  const problem = passwordProblem(password, data); if (problem) throw new HttpError(400, problem);
   const hash = await hashPassword(password), id = new ObjectId(), now = new Date(), db = await mongoDatabase();
   try {
     await administrative(actor, async session => {
@@ -88,14 +90,20 @@ export async function provisionMember(actor: Actor | null, input: Record<string,
   } catch (error) { if ((error as { code?: number }).code === 11000) throw new HttpError(409, 'That User ID or email is already in use.'); throw error; }
   return { id: id.toHexString(), temporaryPassword: actor ? password : undefined };
 }
-export async function manageMember(actor: Actor, id: string, action: unknown) {
+export async function manageMember(actor: Actor, id: string, action: unknown, newPassword?: unknown) {
   if (!ObjectId.isValid(id)) throw new HttpError(404, 'User not found.');
   if (!['disable', 'enable', 'reset-password', 'revoke-sessions'].includes(String(action))) throw new HttpError(400, 'Invalid administrative action.');
-  const db = await mongoDatabase(), userId = new ObjectId(id), temporaryPassword = action === 'reset-password' ? randomBytes(24).toString('base64url') : undefined;
-  const password = temporaryPassword ? await hashPassword(temporaryPassword) : undefined;
+  if (action === 'reset-password' && new ObjectId(id).toHexString() === actor.id) throw new HttpError(409, 'To change your own password, use Change Password in My Account.');
+  const db = await mongoDatabase(), userId = new ObjectId(id);
+  const target = action === 'reset-password' ? await db.collection('users').findOne({ _id: userId }, { projection: { userId: 1, name: 1, email: 1 } }) : null;
+  if (action === 'reset-password' && !target) throw new HttpError(404, 'User not found.');
+  const temporaryPassword = action === 'reset-password' ? newPassword === undefined ? generatePassword(passwordContext(target!)) : newPassword : undefined;
+  if (action === 'reset-password') { const problem = passwordProblem(temporaryPassword, passwordContext(target!)); if (problem) throw new HttpError(400, problem); }
+  const password = typeof temporaryPassword === 'string' ? await hashPassword(temporaryPassword) : undefined;
   await administrative(actor, async session => {
     const user = await db.collection('users').findOne({ _id: userId }, { session });
     if (!user) throw new HttpError(404, 'User not found.');
+    if (password) { const problem = passwordProblem(temporaryPassword, passwordContext(user)); if (problem) throw new HttpError(400, problem); }
     if (action === 'disable' && user.role === 'admin' && user.status === 'active' && await db.collection('users').countDocuments({ role: 'admin', status: 'active' }, { session }) <= 1) throw new HttpError(409, 'The final active administrator cannot be disabled.');
     if (password) {
       const result = await db.collection('accounts').updateOne({ userId, providerId: 'credential' }, { $set: { password, updatedAt: new Date() } }, { session });
@@ -105,23 +113,56 @@ export async function manageMember(actor: Actor, id: string, action: unknown) {
     await db.collection('sessions').deleteMany({ userId }, { session });
     await db.collection('member_audit').insertOne({ action, actor: actor.id, target: id, at: new Date() }, { session });
   });
-  return { temporaryPassword };
+  return { temporaryPassword: newPassword === undefined ? temporaryPassword : undefined };
+}
+export async function editMember(actor: Actor, id: string, input: Record<string, unknown>) {
+  if (!ObjectId.isValid(id)) throw new HttpError(404, 'User not found.');
+  const db = await mongoDatabase(), userId = new ObjectId(id);
+  try { await administrative(actor, async session => {
+    const user = await db.collection('users').findOne({ _id: userId }, { session });
+    if (!user) throw new HttpError(404, 'User not found.');
+    const data = memberInput({ userId: user.userId, fullName: input.fullName, email: input.email, role: user.role });
+    await db.collection('users').updateOne({ _id: userId }, { $set: { name: data.name, email: data.email, ...(data.email !== user.email ? { emailVerified: false } : {}), updatedAt: new Date() } }, { session });
+    await db.collection('member_audit').insertOne({ action: 'edit-user', actor: actor.id, target: id, at: new Date() }, { session });
+  }); } catch (error) { if ((error as { code?: number }).code === 11000) throw new HttpError(409, 'That email is already in use.'); throw error; }
+  return { success: true };
 }
 export async function changeMemberPassword(actor: Actor, currentPassword: unknown, newPassword: unknown) {
   const problem = passwordProblem(newPassword); if (problem) throw new HttpError(400, problem);
   if (typeof currentPassword !== 'string' || currentPassword.length > 128 || currentPassword === newPassword) throw new HttpError(400, 'Confirm your current password and choose a different new password.');
   const db = await mongoDatabase(), userId = new ObjectId(actor.id);
+  const user = await db.collection('users').findOne({ _id: userId });
+  if (!user) throw new HttpError(404, 'User not found.');
+  const contextualProblem = passwordProblem(newPassword, passwordContext(user)); if (contextualProblem) throw new HttpError(400, contextualProblem);
   const account = await db.collection('accounts').findOne({ userId, providerId: 'credential' });
   if (!account?.password || !await verifyPassword({ hash: account.password, password: currentPassword })) throw new HttpError(400, 'Your current password could not be verified.');
   const password = await hashPassword(newPassword as string), session = (await mongoClient()).startSession();
   try { await session.withTransaction(async () => {
-    const result = await db.collection('users').updateOne({ _id: userId, status: 'active', sessionVersion: actor.version }, { $set: { mustChangePassword: false, updatedAt: new Date() }, $inc: { sessionVersion: 1 } }, { session });
+    await replaceMemberPassword(db, session, userId, account, password, actor.version);
+  }); } finally { await session.endSession(); }
+}
+async function replaceMemberPassword(db: Awaited<ReturnType<typeof mongoDatabase>>, session: ClientSession, userId: ObjectId, account: Document, password: string, version: number, localRecovery = false) {
+    const result = await db.collection('users').updateOne({ _id: userId, status: 'active', sessionVersion: version }, { $set: { mustChangePassword: false, updatedAt: new Date() }, $inc: { sessionVersion: 1 } }, { session });
     if (!result.matchedCount) throw new HttpError(401, 'Session changed. Please sign in again.');
     const changed = await db.collection('accounts').updateOne({ _id: account._id, password: account.password }, { $set: { password, updatedAt: new Date() } }, { session });
     if (!changed.matchedCount) throw new HttpError(409, 'Password changed. Please sign in again.');
     await db.collection('sessions').deleteMany({ userId }, { session });
-    await db.collection('member_audit').insertOne({ action: 'change-password', actor: actor.id, target: actor.id, at: new Date() }, { session });
-  }); } finally { await session.endSession(); }
+    await db.collection('member_audit').insertOne({ action: localRecovery ? 'local-reset-admin-password' : 'change-password', actor: localRecovery ? 'local-recovery' : userId.toHexString(), target: userId.toHexString(), at: new Date() }, { session });
+}
+// Trusted local recovery CLI only; deliberately not exposed through any HTTP route.
+export async function resetLocalAdminPassword(id: string, version: number, newPassword: string) {
+  const problem = passwordProblem(newPassword); if (problem) throw new HttpError(400, problem);
+  const db = await mongoDatabase(), userId = new ObjectId(id);
+  const password = await hashPassword(newPassword);
+  await administrative(null, async session => {
+    const user = await db.collection('users').findOne({ _id: userId, role: 'admin', status: 'active', sessionVersion: version }, { session });
+    if (!user) throw Error('Administrator changed; inspect again before resetting.');
+    const contextualProblem = passwordProblem(newPassword, passwordContext(user)); if (contextualProblem) throw new HttpError(400, contextualProblem);
+    const accounts = await db.collection('accounts').find({ userId: { $in: [userId, id] }, providerId: 'credential' }, { session }).toArray();
+    if (accounts.length !== 1 || !accounts[0].userId?.equals?.(userId) || accounts[0].accountId !== id) throw Error('Reset refused: credential records need investigation.');
+    // Reuse the existing password-change transaction and session-revocation path.
+    await replaceMemberPassword(db, session, userId, accounts[0], password, version, true);
+  });
 }
 export async function loginLimit(userId: string, source: string) {
   await memberIndexes(); const db = await mongoDatabase(), now = new Date();

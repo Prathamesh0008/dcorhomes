@@ -3,7 +3,7 @@ import { useEffect, useReducer, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { localDesigns } from '@/lib/local-designs';
-import { readManual, manualSummary } from '@/lib/curtains/manual-config';
+import { readManual } from '@/lib/curtains/manual-config';
 import { defaultDesign, fromManual, validateDesign, type VisualizerDesign, type LayerSelection } from '@/lib/manual-visualizer/model';
 import { configurationReducer, type ConfigurationAction } from '@/lib/manual-visualizer/configuration';
 
@@ -33,7 +33,7 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
    else if(search.get('manual')||search.get('fabric')){
     const config=readManual(Object.fromEntries(search.entries()),records);
     const inspiration={style:(search.get('style')||'').slice(0,100),pattern:(search.get('inspirationPattern')||config.pattern).slice(0,100),room:config.room};
-    if(!controller.signal.aborted)setOriginalContact('/contact?'+new URLSearchParams({interest:'Curtain design consultation',message:manualSummary(config,records)}).toString());
+    if(!controller.signal.aborted)setOriginalContact('/contact?'+new URLSearchParams({interest:'Curtain design consultation',designUnavailable:'1'}).toString());
     restored=fromManual(config,records,inspiration);
    }else{
     // Disabled browser storage must not prevent an otherwise working studio.

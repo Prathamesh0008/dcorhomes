@@ -33,17 +33,8 @@ $ok.Text = 'Continue'
 $ok.Location = New-Object System.Drawing.Point(325, 130)
 $ok.DialogResult = [System.Windows.Forms.DialogResult]::None
 $ok.Add_Click({
-  if ($box.Text.Length -lt 12) {
-    [void][System.Windows.Forms.MessageBox]::Show($form, 'Use at least 12 characters. Choose a unique longer passphrase.', 'Password requirements')
-    return
-  }
-  $lower = $box.Text.ToLowerInvariant()
-  foreach ($term in @('password', 'qwerty', 'letmein', 'welcome', '123456', 'dcorhome', 'changeme')) {
-    if ($lower.Contains($term)) {
-      [void][System.Windows.Forms.MessageBox]::Show($form, 'Choose a less predictable passphrase without common passwords or the brand name.', 'Password requirements')
-      return
-    }
-  }
+  # The calling Node CLI applies the shared policy for new passwords.
+  # This dialog also accepts existing credentials for verification; do not add a second policy here.
   $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
   $form.Close()
 })

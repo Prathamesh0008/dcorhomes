@@ -8,5 +8,5 @@ export default async function Page() {
   const account = await accountSession(true); if (!account) redirect('/login');
   if (account.user.mustChangePassword) redirect('/account/change-password');
   if (account.user.role !== 'admin') notFound();
-  return <Container className="py-14 md:py-20"><p className="text-[12px] uppercase tracking-[3px] text-muted">Private administration</p><h1 className="mb-8 mt-4 text-[38px] font-medium">Authorized members</h1><UserManagement/></Container>;
+  return <Container className="py-8 md:py-12"><UserManagement currentUserId={account.user.id}/></Container>;
 }

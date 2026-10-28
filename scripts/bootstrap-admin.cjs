@@ -14,7 +14,7 @@ const { hiddenPassword } = require('./member-prompt.cjs');
   let password;
   while (true) {
     password = await hiddenPassword('Choose administrator password (not displayed): ');
-    const problem = passwordProblem(password);
+    const problem = passwordProblem(password, { userId, name: fullName, email });
     if (problem) { console.error(problem); continue; }
     if (password !== await hiddenPassword('Confirm password (not displayed): ')) { console.error('Passwords do not match. Please try again.'); continue; }
     break;

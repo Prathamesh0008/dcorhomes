@@ -1,5 +1,8 @@
 "use client";
-import { useShowroomWhatsApp } from "@/components/curtains/FabricCatalogueProvider";
+import { useShowroomWhatsApp, useFabricRecords } from "@/components/curtains/FabricCatalogueProvider";
+import { useSearchParams } from 'next/navigation';
+import { designEnquiryDetails, recoverEnquiryDesign } from '@/lib/manual-visualizer/enquiry';
+import type { VisualizerDesign } from '@/lib/manual-visualizer/model';
 import { whatsappHref } from "@/lib/curtains/enquiry";
 import OfficeDetails from "@/components/editorial/OfficeDetails";
 import { business } from "@/lib/business";
@@ -9,10 +12,16 @@ import { products } from "@/lib/catalog";
 import PageIntro from "@/components/editorial/PageIntro";
 import Container from "@/components/ui/Container";
 import Eyebrow from "@/components/ui/Eyebrow";
-import { FormEvent, useState, useEffect, useRef } from "react";
+import { FormEvent, Suspense, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Check, ChevronDown, Copy, Mail, MessageCircle, Phone, Sparkles, } from "lucide-react";
 export default function ContactPage() {
+    return <Suspense fallback={<Container className="py-16">Opening your enquiry…</Container>}><ContactContent/></Suspense>;
+}
+function ContactContent() {
+    const records = useFabricRecords(), search = useSearchParams(), query = search.toString();
+    const [design, setDesign] = useState<VisualizerDesign | null>(null), [designWarning, setDesignWarning] = useState('');
+    const selectedDesign = design ? designEnquiryDetails(design, records) : null;
     const whatsappNumber = useShowroomWhatsApp();
     const [form, setForm] = useState({
         name: "",
@@ -24,12 +33,21 @@ export default function ContactPage() {
         enquiryType: "General Enquiry",
         color: "",
     });
-    const [extra, setExtra] = useState({ city: '', method: 'Email', measurements: '', designId: '', visualizer: '', website: '', consent: false });
+    const [extra, setExtra] = useState({ city: '', method: 'Email', measurements: '', website: '', consent: false });
     const submitLock = useRef(false), submissionId = useRef('');
-    useEffect(() => { const q = new URLSearchParams(location.search); setForm(f => ({ ...f, interest: products.find(p => p.id === q.get('interest'))?.name || q.get('interest')?.slice(0, 100) || f.interest, room: q.get('room')?.slice(0, 60) || f.room, message: q.get('message')?.slice(0, 2000) || f.message })); setExtra(e => ({ ...e, measurements: q.get('measurements')?.slice(0, 1500) || '', designId: q.get('designId') || '', visualizer: q.get('visualizer') || '' }));  }, []);
+    useEffect(() => {
+        const q = new URLSearchParams(query); let recovered: VisualizerDesign | null = null, warning = '';
+        try { recovered = recoverEnquiryDesign(q, records); } catch { warning = 'Your selected design could not be recovered. Reopen it in Design Studio in this browser, or send a general enquiry below.'; }
+        if (q.has('designUnavailable') || q.has('designId')) warning ||= 'This design is unavailable here. Reopen it in Design Studio, or send a general enquiry below.';
+        setDesign(recovered); setDesignWarning(warning);
+        const details = recovered ? designEnquiryDetails(recovered, records) : null;
+        setForm(f => ({ ...f, message: '', enquiryType: recovered ? 'Design Enquiry' : q.has('measurements') ? 'Measurement Assistance' : q.has('interest') && !warning ? 'Curtain Fabric Enquiry' : 'General Enquiry', interest: recovered || warning ? '' : products.find(p => p.id === q.get('interest'))?.name || q.get('interest')?.slice(0, 100) || '', room: details?.rows[0].value || q.get('room')?.slice(0, 60) || 'Living room' }));
+        setExtra(e => ({ ...e, measurements: q.get('measurements')?.slice(0, 1500) || '' }));
+        submissionId.current = '';
+    }, [query, records]);
     const [busy, setBusy] = useState(false), [status, setStatus] = useState<"idle" | "success" | "error">("idle"), [message, setMessage] = useState("");
-    const summary = `Dcorhome consultation request\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || "Not given"}\nRoom: ${form.room}\nInterest: ${form.interest}\nNotes: ${form.message || "None"}\nCity: ${extra.city}\nContact method: ${extra.method}\nMeasurements: ${extra.measurements}\nPrivate design reference: ${extra.designId}`;
-    const whatsapp = whatsappHref(whatsappNumber, summary);
+    const summary = `Dcorhome consultation request\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || "Not given"}\n${selectedDesign ? selectedDesign.rows.map(row => row.label + ': ' + row.value).join('\n') + '\n' + selectedDesign.disclaimer : 'Room: ' + form.room + '\nInterest: ' + form.interest}\nNotes: ${form.message || "None"}\nCity: ${extra.city}\nContact method: ${extra.method}\nMeasurements: ${extra.measurements}`;
+    const whatsapp = whatsappHref(whatsappNumber, selectedDesign ? 'I would like help with this curtain design.\n' + selectedDesign.rows.map(row => row.label + ': ' + row.value).join('\n') : 'I would like help with a curtain enquiry.');
     async function submit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (submitLock.current)
@@ -42,7 +60,7 @@ export default function ContactPage() {
             const response = await fetch("/api/enquiries", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId.current },
-                body: JSON.stringify({ ...form, ...extra }),
+                body: JSON.stringify({ ...form, ...extra, ...(design ? { visualizer: design } : {}) }),
             });
             const json: { error?: string; accepted?: boolean; notified?: boolean } = await response.json().catch(() => ({}));
             if (!response.ok)
@@ -62,7 +80,8 @@ export default function ContactPage() {
                 enquiryType: "General Enquiry",
                 color: "",
             });
-            setExtra({ city: "", method: "Email", measurements: "", designId: "", visualizer: "", website: "", consent: false });
+            setExtra({ city: "", method: "Email", measurements: "", website: "", consent: false });
+            setDesign(null); setDesignWarning('');
         }
         catch (err) {
             setStatus("error");
@@ -152,21 +171,23 @@ export default function ContactPage() {
             Leave a few details and we&apos;ll take it from there.
           </p>
           {whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="mb-6 inline-flex min-h-12 items-center gap-3 border-b border-solid border-ink text-[15px]"><MessageCircle size={18}/> Enquire on WhatsApp</a>}<form onSubmit={submit}>
-            <label className="mb-6 block text-[14px] text-ink">Enquiry type *<select required value={form.enquiryType} onChange={e => setForm({...form, enquiryType:e.target.value})} className="mt-2 min-h-12 w-full border border-solid border-[#d8dcd3] bg-paper px-3 text-base">{business.enquiryTypes.map(type => <option key={type}>{type}</option>)}</select></label>
-            <div className="grid grid-cols-[1fr_1fr] gap-y-6 gap-x-[17px] mb-[29px] max-[681px]:gap-y-[18px] max-[681px]:gap-x-3 max-[381px]:grid-cols-[1fr]">
+            {designWarning && <p role="status" className="mb-6 border-l-2 border-[#a28d75] bg-[#fffaf0] p-4 text-sm leading-6 text-ink">{designWarning}</p>}
+            {selectedDesign && <section aria-label="Your Selected Design" className="mb-6 rounded-lg border border-[#d8dcd3] bg-[#fffcf7] p-5"><p className="text-[10px] uppercase tracking-[2px] text-muted">From Design Studio</p><h3 className="mb-4 mt-2 text-xl font-medium text-ink">Your Selected Design</h3><dl className="space-y-3">{selectedDesign.rows.map(row => <div key={row.label} className="grid gap-1 text-sm sm:grid-cols-[1fr_1.3fr] sm:gap-4"><dt className="text-muted">{row.label}</dt><dd className="m-0 break-words text-ink">{row.value}</dd></div>)}</dl><p className="mb-0 mt-4 border-t border-[#e1e3d9] pt-3 text-xs leading-5 text-muted">{selectedDesign.disclaimer}</p></section>}
+            <label className="mb-6 block text-[14px] text-ink">Enquiry type *<select required value={form.enquiryType} onChange={e => setForm({...form, enquiryType:e.target.value})} className="mt-2 min-h-12 w-full border border-solid border-[#d8dcd3] bg-paper px-3 text-base">{[...(design ? ['Design Enquiry'] : []), ...business.enquiryTypes].map(type => <option key={type}>{type}</option>)}</select></label>
+            <div className="grid grid-cols-[1fr_1fr] gap-y-6 gap-x-[17px] mb-[29px] max-[681px]:gap-y-[18px] max-[681px]:gap-x-3 max-[681px]:grid-cols-[1fr]">
               <label className="block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
-                Your name <span className="text-[#b97967]">*</span>
+                Full Name <span className="text-[#b97967]">*</span>
                 <input className="w-full block mt-2.5 h-[46px] rounded-[0] bg-[#fffcf7] text-[#344235] [outline-color:#899988] text-[16px] py-0 px-3.5 border border-solid border-[#d8dcd3] max-[681px]:text-[16px] max-[681px]:px-2.5" required maxLength={100} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your full name"/>
               </label>
               <label className="block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
-                Email address (or enter phone below)
+                Email Address (or phone below)
                 <input className="w-full block mt-2.5 h-[46px] rounded-[0] bg-[#fffcf7] text-[#344235] [outline-color:#899988] text-[16px] py-0 px-3.5 border border-solid border-[#d8dcd3] max-[681px]:text-[16px] max-[681px]:px-2.5" required={!form.phone.trim()} maxLength={200} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com"/>
               </label>
               <label className="block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
-                Phone number (or email above){" "}
+                Phone Number (or email above){" "}
                 <input className="w-full block mt-2.5 h-[46px] rounded-[0] bg-[#fffcf7] text-[#344235] [outline-color:#899988] text-[16px] py-0 px-3.5 border border-solid border-[#d8dcd3] max-[681px]:text-[16px] max-[681px]:px-2.5" required={!form.email.trim()} minLength={7} maxLength={30} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} type="tel" placeholder="+91 ..."/>
               </label>
-              <label className="block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
+              {!selectedDesign && <><label className="block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
                 Space you're designing
                 <div className="relative mt-2">
                   <select className="appearance-none w-full h-[46px] bg-[#fffefa] text-[#25342f] pr-8 pl-[13px] [outline-color:#899988] text-[14px] mt-2.5 py-0 border border-solid border-[#d8dcd3] max-[681px]:pl-2 max-[681px]:text-[16px]" value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })}>
@@ -181,8 +202,9 @@ export default function ContactPage() {
                   <input className="mt-2 min-h-12 w-full border border-solid border-[#d8dcd3] bg-paper px-3 text-base" maxLength={100} value={form.interest} onChange={e => setForm({...form, interest:e.target.value})}/>
                 </div>
               </label>
+              </>}
               <label className="[grid-column:1/-1] block text-[14px] text-[#647163] font-bold max-[681px]:text-[13px]">
-                Tell us more{" "}
+                Additional Message{" "}
                 <small className="text-[14px] tracking-[1px] text-[#a0a59b]">
                   OPTIONAL
                 </small>

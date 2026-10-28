@@ -7,12 +7,13 @@ import { siteUrl } from "@/lib/seo";
 import { buildEnquiryEmail } from "@/lib/server/enquiry-email-template";
 import { failure, HttpError, jsonInput, privateHeaders } from "@/lib/server/http";
 import { throttlePublic } from '@/lib/server/public-rate-limit';
-import { validateDesign, designSummary } from '@/lib/manual-visualizer/model';
+import { validateDesign, type VisualizerDesign } from '@/lib/manual-visualizer/model';
+import { designEnquiryDetails, type DesignEnquiryDetails } from '@/lib/manual-visualizer/enquiry';
 export const runtime = "nodejs";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type NotificationStatus = "not-configured" | "sent" | "failed";
 type Enquiry = {
-    designSelection: unknown;
+    designDetails: DesignEnquiryDetails | undefined;
     selectedFabric: Record<string, unknown> | undefined;
     requestPurpose: string;
     name: string;
@@ -57,7 +58,7 @@ async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<No
     }
     try {
         // Branded HTML message plus an accessible plain-text fallback.
-        const { html, text } = buildEnquiryEmail(id, enquiry);
+        const { html, text, subject } = buildEnquiryEmail(id, enquiry);
         const response = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -69,7 +70,7 @@ async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<No
                 from: fromEmail.includes("<") ? fromEmail : `Dcorhome <${fromEmail}>`,
                 to: [toEmail],
                 ...(enquiry.email ? { reply_to: enquiry.email } : {}),
-                subject: `Dcorhome enquiry: ${enquiry.name.replace(/[\r\n]/g, " ")}`,
+                subject,
                 html,
                 text,
             }),
@@ -107,19 +108,18 @@ export async function POST(request: NextRequest) {
             throw new HttpError(400, "Choose a valid fabric enquiry purpose.");
         }
         if (name.length < 2 ||
-            (email
-                ? !EMAIL_PATTERN.test(email)
-                : !/^[+()\d\s-]{7,40}$/.test(phone)) ||
+            (!email && !phone) || (email && !EMAIL_PATTERN.test(email)) ||
+            (phone && (!/^[+()\d\s-]{7,40}$/.test(phone) || phone.replace(/\D/g, '').length < 7)) ||
             input.consent !== true ||
             text("website", 200)) {
             throw new HttpError(400, "Enter your full name, a valid email or phone number, and privacy consent.");
         }
-        if (enquiryType && !business.enquiryTypes.includes(enquiryType)) {
+        if (enquiryType && ![...business.enquiryTypes, 'Design Enquiry'].includes(enquiryType)) {
             throw new HttpError(400, "Choose a valid enquiry type.");
         }
         const designId = text('designId', 60);
         if(designId) throw new HttpError(400, 'Earlier cloud designs must be exported first. Include your design configuration or contact sales@dcorhome.com.');
-        let designSelection: unknown;
+        let designSelection: VisualizerDesign | undefined;
         const records = await fabricRecords();
         if(input.visualizer){
             try { designSelection = validateDesign(typeof input.visualizer==='string'?JSON.parse(input.visualizer):input.visualizer,records); }
@@ -161,18 +161,18 @@ export async function POST(request: NextRequest) {
             };
         }
         const enquiry: Enquiry = {
-            designSelection,
+            designDetails: designSelection ? designEnquiryDetails(designSelection, records) : undefined,
             selectedFabric,
             requestPurpose,
             name,
             email,
-            enquiryType,
+            enquiryType: designSelection ? 'Design Enquiry' : enquiryType,
             color: text("color", 100),
             phone,
             city: text("city", 100),
             room: text("room", 60),
             interest: text("interest", 100),
-            message: text("message", 3000) + (designSelection ? '\n\nVerified configuration:\n' + designSummary(designSelection as Parameters<typeof designSummary>[0], records) : ''),
+            message: text("message", 3000),
             measurements: text("measurements", 1500),
             method: text("method", 60),
             designId,

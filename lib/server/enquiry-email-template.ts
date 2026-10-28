@@ -1,189 +1,60 @@
-
-/**
- * Dcorhome enquiry notification: responsive HTML and plain-text fallback.
- * Edit THIS file to change the look of the email; don't edit the contact page.
- * The hosted brand mark is loaded from the site's public assets.
- */
-import { siteUrl } from "@/lib/seo";
-
+﻿/** Readable, escaped enquiry notifications; configuration objects never enter email markup. */
+import { siteUrl } from '@/lib/seo';
+import type { DesignEnquiryDetails } from '@/lib/manual-visualizer/enquiry';
 export type EnquiryEmailData = {
-  name: string;
-  email: string;
-  phone: string;
-  enquiryType: string;
-  requestPurpose: string;
-  room: string;
-  interest: string;
-  color: string;
-  city: string;
-  method: string;
-  measurements: string;
-  message: string;
-  designId: string;
-  consentAt: string;
+  name: string; email: string; phone: string; enquiryType: string; requestPurpose: string;
+  room: string; interest: string; color: string; city: string; method: string; measurements: string;
+  message: string; designId: string; consentAt: string;
   selectedFabric: Record<string, unknown> | undefined;
-  designSelection: unknown;
+  designDetails: DesignEnquiryDetails | undefined;
 };
+const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const multiline = (value: string) => escapeHtml(value).replace(/\r\n|\r|\n/g, '<br />');
+type Row = { label: string; value: string };
+const field = ({ label, value }: Row) => `<tr><td width="38%" style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e7df;vertical-align:top;font:12px/1.6 Arial,sans-serif;color:#778174;">${escapeHtml(label)}</td><td style="padding:11px 0;border-bottom:1px solid #e6e7df;vertical-align:top;font:500 14px/1.6 Arial,sans-serif;color:#26392e;word-break:break-word;">${multiline(value)}</td></tr>`;
+const rowsHtml = (rows: Row[]) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows.map(field).join('')}</table>`;
+const heading = (title: string) => `<h2 style="margin:0 0 14px;font:600 11px/1.5 Arial,sans-serif;letter-spacing:1.8px;color:#8b765f;">${title}</h2>`;
+const section = (title: string, content: string) => `<tr><td class="padding" style="padding:0 36px 28px;">${heading(title)}${content}</td></tr>`;
+const rowsText = (rows: Row[]) => rows.map(row => row.label + ': ' + row.value).join('\n');
 
-const display = (value: string | undefined, fallback = "Not provided"): string =>
-  value?.trim() || fallback;
-
-// Escape customer-supplied text before placing it inside HTML.
-const escapeHtml = (value: string): string =>
-  value.replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
-const multiline = (value: string): string =>
-  escapeHtml(value).replace(/\r\n|\r|\n/g, "<br />");
-
-const jsonBlock = (value: unknown): string =>
-  multiline(JSON.stringify(value, null, 2) ?? "Not available");
-
-const field = (label: string, value: string, last = false): string => `
-  <tr>
-    <td class="label" style="width:39%;padding:14px 16px 14px 0;border-bottom:${last ? 'none' : '1px solid #e6e5df'};font:12px Arial,Helvetica,sans-serif;letter-spacing:.3px;color:#7c857d;vertical-align:top;">
-      ${escapeHtml(label)}
-    </td>
-    <td class="value" style="padding:14px 0;border-bottom:${last ? 'none' : '1px solid #e6e5df'};font:600 14px/1.55 Arial,Helvetica,sans-serif;color:#26392e;vertical-align:top;word-break:break-word;">
-      ${multiline(value)}
-    </td>
-  </tr>`;
-
-export function buildEnquiryEmail(_id: string, enquiry: EnquiryEmailData): {
-  html: string;
-  text: string;
-} {
-  const logoUrl = `${siteUrl.replace(/\/+$/, "")}/branding/green.png`;
-  const type = display(enquiry.enquiryType, "General Enquiry");
-  const name = display(enquiry.name);
-  const email = display(enquiry.email);
-  const phone = display(enquiry.phone);
-  const subjectInfo = display(enquiry.interest, "Curtain consultation");
-  const table = [
-    field("Enquiry type", type),
-    field("Request purpose", display(enquiry.requestPurpose, "Not specified")),
-    field("Room / space", display(enquiry.room, "Not specified")),
-    field("Fabric / interest", subjectInfo),
-    field("Preferred colour", display(enquiry.color, "Not specified")),
-    field("City", display(enquiry.city, "Not specified")),
-    field("Preferred contact", display(enquiry.method, "Not specified")),
-    field("Measurements", display(enquiry.measurements)),
-    field("Design reference", display(enquiry.designId, "None"), true),
-  ].join("");
-
-  const emailAction = enquiry.email
-    ? `<td style="padding:0 9px 10px 0;vertical-align:top;"><a href="mailto:${escapeHtml(enquiry.email)}" style="display:inline-block;padding:12px 20px;background:#253a30;color:#ffffff;text-decoration:none;font:600 13px Arial,Helvetica,sans-serif;border-radius:3px;">Reply to customer &rarr;</a></td>`
-    : "";
-  const phoneAction = enquiry.phone
-    ? `<td style="padding:0 0 10px;vertical-align:top;"><a href="tel:${escapeHtml(enquiry.phone.replace(/[^+\d]/g, ""))}" style="display:inline-block;padding:11px 18px;border:1px solid #c8cbbf;color:#253a30;text-decoration:none;font:600 13px Arial,Helvetica,sans-serif;border-radius:3px;">Call customer</a></td>`
-    : "";
-  const actionButtons = emailAction || phoneAction
-    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>${emailAction}${phoneAction}</tr></table>`
-    : "";
-
-  const extras = [
-    enquiry.selectedFabric
-      ? `<div style="margin-top:20px;"><h3 style="margin:0 0 9px;font:600 13px Arial,Helvetica,sans-serif;color:#26392e;">Selected catalogue fabric</h3><div style="background:#f5f5f0;padding:14px;border:1px solid #e6e5df;border-radius:4px;font:12px/1.6 Consolas,monospace;color:#34483d;word-break:break-word;">${jsonBlock(enquiry.selectedFabric)}</div></div>`
-      : "",
-    enquiry.designSelection
-      ? `<div style="margin-top:20px;"><h3 style="margin:0 0 9px;font:600 13px Arial,Helvetica,sans-serif;color:#26392e;">Private design selection</h3><div style="background:#f5f5f0;padding:14px;border:1px solid #e6e5df;border-radius:4px;font:12px/1.6 Consolas,monospace;color:#34483d;word-break:break-word;">${jsonBlock(enquiry.designSelection)}</div></div>`
-      : "",
-  ].join("");
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>New Dcorhome enquiry</title>
-  <style>
-    @media only screen and (max-width: 620px) {
-      .email-shell { width: 100% !important; }
-      .email-padding { padding-left: 22px !important; padding-right: 22px !important; }
-      .label { width: 35% !important; }
-      .value { width: auto !important; }
-      .brand-name { font-size: 30px !important; }
-    }
-  </style>
-</head>
-<body style="margin:0;padding:0;background:#f4f3ee;color:#26392e;">
-  <div style="display:none;font-size:1px;color:#f4f3ee;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-    New ${escapeHtml(type)} from ${escapeHtml(name)} — Dcorhome website
-  </div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f3ee;">
-    <tr><td align="center" style="padding:38px 12px 48px;">
-      <table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#fffdf9;border:1px solid #e5e6dc;">
-        <tr><td class="email-padding" style="background:#fffdf9;padding:28px 42px;border-bottom:1px solid #e5e6dc;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-            <tr>
-              <td style="padding-right:12px;vertical-align:middle;">
-                <img src="https://res.cloudinary.com/livzpsfv/image/upload/v1793018530/image_11.webp " alt="Dcorhome" width="36" height="36" style="display:block;width:36px;height:36px;object-fit:contain;border:0;" />
-              </td>
-              <td style="vertical-align:middle;">
-                <div class="brand-name" style="font:600 34px/1 Arial,Helvetica,sans-serif;letter-spacing:-1px;color:#26392e;white-space:nowrap;"><span style="font-size:1.13em;line-height:0;">D</span>COR <span style="font-weight:400;">HOME</span></div>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" style="padding-top:8px;font:500 10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:2.7px;text-transform:uppercase;color:#8a8e7f;">CURTAIN ATELIER</td>
-            </tr>
-          </table>
-        </td></tr>
-        <tr><td class="email-padding" style="padding:37px 42px 28px;">
-          <div style="font:700 10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:2px;color:#9a856c;text-transform:uppercase;">NEW WEBSITE ENQUIRY</div>
-          <h1 style="margin:13px 0 7px;font:normal 32px/1.18 Georgia,'Times New Roman',serif;color:#26392e;">A new conversation<br />starts here.</h1>
-          <p style="margin:14px 0 20px;font:14px/1.75 Arial,Helvetica,sans-serif;color:#717e73;">Someone reached out through your Dcorhome contact form. Here are the details to help your team respond.</p>
-          <div style="display:inline-block;background:#eef1e9;border:1px solid #dbe2d5;padding:7px 12px;font:600 11px/1.5 Arial,Helvetica,sans-serif;color:#365443;letter-spacing:.5px;">${escapeHtml(type)}</div>
-        </td></tr>
-        <tr><td class="email-padding" style="padding:0 42px 28px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f4ef;border:1px solid #e8e7df;">
-            <tr><td style="padding:24px 24px 20px;">
-              <p style="margin:0 0 5px;font:700 10px Arial,Helvetica,sans-serif;letter-spacing:1.7px;color:#99836c;">CUSTOMER DETAILS</p>
-              <p style="margin:7px 0 8px;font:normal 25px/1.25 Georgia,serif;color:#24372d;">${escapeHtml(name)}</p>
-              <p style="margin:0 0 5px;font:14px/1.6 Arial,Helvetica,sans-serif;color:#3b4a40;word-break:break-word;">${escapeHtml(email)}</p>
-              <p style="margin:0 0 19px;font:14px/1.6 Arial,Helvetica,sans-serif;color:#3b4a40;">${escapeHtml(phone)}</p>
-              ${actionButtons}
-            </td></tr>
-          </table>
-        </td></tr>
-        <tr><td class="email-padding" style="padding:2px 42px 26px;">
-          <h2 style="margin:0 0 10px;font:normal 23px Georgia,serif;color:#26392e;">Project details</h2>
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">${table}</table>
-        </td></tr>
-        <tr><td class="email-padding" style="padding:0 42px 35px;">
-          <h2 style="margin:0 0 13px;font:normal 23px Georgia,serif;color:#26392e;">Customer's message</h2>
-          <div style="background:#f5f4ef;border-left:3px solid #ae9980;padding:20px 22px;font:14px/1.85 Arial,Helvetica,sans-serif;color:#435448;word-break:break-word;">${multiline(display(enquiry.message, "No additional message provided."))}</div>
-          ${extras}
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-
-  const lines = [
-    "New Dcorhome website enquiry",
-    "",
-    `Name: ${enquiry.name}`,
-    `Email: ${email}`,
-    `Phone: ${phone}`,
-    `Enquiry type: ${type}`,
-    `Request purpose: ${display(enquiry.requestPurpose, "Not specified")}`,
-    `Room: ${display(enquiry.room, "Not specified")}`,
-    `Interested fabric: ${subjectInfo}`,
-    `Colour: ${display(enquiry.color, "Not specified")}`,
-    `City: ${display(enquiry.city, "Not specified")}`,
-    `Preferred contact method: ${display(enquiry.method, "Not specified")}`,
-    `Measurements: ${display(enquiry.measurements)}`,
-    `Design reference: ${display(enquiry.designId, "None")}`,
-    "",
-    "Customer message:",
-    display(enquiry.message, "No additional message provided."),
-  ];
-  if (enquiry.selectedFabric) lines.push("", "Selected catalogue fabric:", JSON.stringify(enquiry.selectedFabric, null, 2));
-  if (enquiry.designSelection) lines.push("", "Private design selection:", JSON.stringify(enquiry.designSelection, null, 2));
-
-  return { html, text: lines.join("\n") };
+export function buildEnquiryEmail(_id: string, enquiry: EnquiryEmailData): { subject: string; html: string; text: string } {
+  const design = enquiry.designDetails;
+  const type = design ? 'Curtain Design Enquiry' : enquiry.enquiryType || 'General Enquiry';
+  const subject = `New ${type} | ${enquiry.name.replace(/[\r\n\u0000-\u001f\u007f]/g, ' ')} | Dcorhome`;
+  const customer: Row[] = [{ label: 'Name', value: enquiry.name }, { label: 'Phone', value: enquiry.phone || 'Not provided' }, { label: 'Email', value: enquiry.email || 'Not provided' }];
+  const project: Row[] = [];
+  const add = (label: string, value: string) => { if (value) project.push({ label, value }); };
+  add('Enquiry type', design ? 'Design Enquiry' : type);
+  if (!design && !enquiry.selectedFabric) { add('Room', enquiry.room); add('Fabric / interest', enquiry.interest); add('Color', enquiry.color); }
+  add('Request', enquiry.requestPurpose === 'swatch' ? 'Fabric swatch' : enquiry.requestPurpose === 'quote' ? 'Quotation' : '');
+  add('City', enquiry.city); add('Preferred contact', enquiry.method); add('Measurements', enquiry.measurements);
+  const fabric: Row[] = [];
+  const selected = enquiry.selectedFabric;
+  if (selected) {
+    const read = (key: string) => typeof selected[key] === 'string' ? String(selected[key]) : '';
+    for (const [key, label] of [['name', 'Fabric'], ['collection', 'Collection'], ['color', 'Color']] as const) if (read(key)) fabric.push({ label, value: read(key) });
+    if (selected.source === 'supplier') for (const [key, label] of [['fabricSku', 'Fabric SKU'], ['variantSku', 'Shade SKU'], ['shadeCode', 'Shade code']] as const) if (read(key)) fabric.push({ label, value: read(key) });
+    if (typeof selected.quantityMetres === 'number') fabric.push({ label: 'Approximate quantity', value: selected.quantityMetres + ' metres' });
+  }
+  const disclaimer = design?.disclaimer || (selected && selected.source !== 'supplier' ? 'Illustrative fabric selection. Availability and the final shade must be confirmed with Dcorhome.' : '');
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enquiry.email);
+  const phoneValid = /^[+()\d\s-]{7,40}$/.test(enquiry.phone) && enquiry.phone.replace(/\D/g, '').length >= 7;
+  const emailLink = emailValid ? 'mailto:' + encodeURIComponent(enquiry.email) : '';
+  const phoneLink = phoneValid ? 'tel:' + enquiry.phone.replace(/[^+\d]/g, '') : '';
+  const action = (href: string, label: string, primary = false) => `<a href="${escapeHtml(href)}" style="display:inline-block;margin:0 10px 10px 0;padding:13px 18px;border:1px solid #253a30;background:${primary ? '#253a30' : '#fffdf9'};color:${primary ? '#ffffff' : '#253a30'};text-decoration:none;font:600 13px Arial,sans-serif;border-radius:4px;">${label}</a>`;
+  const message = enquiry.message || 'No additional message provided.';
+  const logoUrl = `${siteUrl.replace(/\/+$/, '')}/branding/green.png`;
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(subject)}</title><style>@media only screen and (max-width:620px){.shell{width:100%!important}.padding{padding-left:22px!important;padding-right:22px!important}}</style></head>
+<body style="margin:0;padding:0;background:#f3f2eb;color:#26392e;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" class="shell" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:#fffdf9;border:1px solid #e1e3d9;">
+<tr><td class="padding" style="padding:28px 36px;border-bottom:1px solid #e1e3d9;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right:12px;vertical-align:middle;"><img src="${escapeHtml(logoUrl)}" alt="" width="36" height="36" style="display:block;width:36px;height:36px;border:0;"/></td><td style="vertical-align:middle;font:600 25px/1.2 Arial,sans-serif;letter-spacing:-.5px;color:#26392e;white-space:nowrap;">DCOR <span style="font-weight:400;">HOME</span></td></tr></table><p style="margin:12px 0 0;font:10px Arial,sans-serif;letter-spacing:2px;color:#8a8e7f;">CURTAIN ATELIER</p></td></tr>
+<tr><td class="padding" style="padding:30px 36px 26px;"><p style="margin:0 0 10px;font:600 10px Arial,sans-serif;letter-spacing:2px;color:#8b765f;">${design ? 'NEW DESIGN ENQUIRY' : 'NEW WEBSITE ENQUIRY'}</p><h1 style="margin:0;font:normal 29px/1.3 Georgia,serif;color:#26392e;">A new conversation starts here.</h1><p style="margin:12px 0 0;font:14px/1.7 Arial,sans-serif;color:#717e73;">${escapeHtml(type)} from ${escapeHtml(enquiry.name)}.</p></td></tr>
+${section('CUSTOMER DETAILS', rowsHtml(customer))}
+${design ? section('SELECTED DESIGN', rowsHtml(design.rows) + `<p style="margin:14px 0 0;font:12px/1.7 Arial,sans-serif;color:#778174;">${escapeHtml(disclaimer)}</p>`) : ''}
+${!design && fabric.length ? section('SELECTED FABRIC', rowsHtml(fabric) + (disclaimer ? `<p style="font:12px/1.7 Arial,sans-serif;color:#778174;">${escapeHtml(disclaimer)}</p>` : '')) : ''}
+${section('PROJECT DETAILS', rowsHtml(project))}
+${section('CUSTOMER MESSAGE', `<div style="padding:18px;background:#f4f4ed;border-left:3px solid #ad987f;font:14px/1.8 Arial,sans-serif;color:#435448;word-break:break-word;">${multiline(message)}</div>`)}
+${section('ACTION', (emailLink ? action(emailLink, 'Reply to Customer', true) : '') + (phoneLink ? action(phoneLink, 'Call Customer') : ''))}
+</table></td></tr></table></body></html>`;
+  const text = ['DCOR HOME', design ? 'NEW DESIGN ENQUIRY' : 'NEW WEBSITE ENQUIRY', '', 'CUSTOMER DETAILS', rowsText(customer), ...(design ? ['', 'SELECTED DESIGN', rowsText(design.rows), disclaimer] : fabric.length ? ['', 'SELECTED FABRIC', rowsText(fabric), disclaimer] : []), '', 'PROJECT DETAILS', rowsText(project), '', 'CUSTOMER MESSAGE', message, '', 'ACTION', ...(emailLink ? ['Reply to Customer: ' + emailLink] : []), ...(phoneLink ? ['Call Customer: ' + phoneLink] : [])].join('\n');
+  return { subject, html, text };
 }
