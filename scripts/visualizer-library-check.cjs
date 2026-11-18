@@ -8,7 +8,7 @@ require.extensions['.ts'] = (module, file) => module._compile(ts.transpileModule
 }).outputText, file);
 const {libraryRecords} = require('../lib/manual-visualizer/library.ts');
 const {scenes, materials} = require('../lib/manual-visualizer/manifest.ts');
-const {resolveLayer, validateDesign, defaultDesign, designSummary} = require('../lib/manual-visualizer/model.ts');
+const {resolveLayer, validateDesign, defaultDesign, designSummary, materialShades, matchingMaterialShade} = require('../lib/manual-visualizer/model.ts');
 const {composeDesign} = require('../lib/manual-visualizer/renderer.ts');
 const library = require('../lib/manual-visualizer/library-assets.json');
 const {configurationReducer}=require('../lib/manual-visualizer/configuration.ts');
@@ -22,15 +22,26 @@ const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file))
     assert.equal(fabric.source, 'demo');
     assert.equal(fabric.sku, undefined);
     assert.equal(fabric.colors.length, 10);
+    const material = materials.find(entry => entry.fabricId === fabric.id);
+    const options = materialShades(material, fabric);
     for (const variant of fabric.colors) {
       assert.equal(variant.available, null);
       const resolved = resolveLayer({enabled:true, materialId:fabric.id, fabricId:fabric.id, variantId:variant.id}, []);
       assert.equal(resolved.commercial, false);
       assert.equal(resolved.variant.textureImage, variant.textureImage);
+      assert.equal(matchingMaterialShade(options, variant.id, variant.name)?.textureImage, variant.textureImage);
+      assert.equal(matchingMaterialShade(options, 'legacy-id', variant.name.toUpperCase())?.textureImage, variant.textureImage);
       assert.ok(fs.existsSync(path.join(root, 'public', variant.textureImage)));
       shades++;
     }
   }
+  const fabric = libraryRecords[0], material = materials.find(entry => entry.fabricId === fabric.id);
+  const [unavailable, inactive, missingTexture] = fabric.colors;
+  const restricted = materialShades(material, {...fabric, colors: [
+    {...unavailable, available: false}, {...inactive, active: false}, {...missingTexture, textureImage: undefined},
+  ]});
+  assert.deepEqual(restricted.map(variant => variant.id), [unavailable.id]);
+  assert.equal(matchingMaterialShade(restricted, unavailable.id, unavailable.name), undefined);
   assert.deepEqual(validateDesign(defaultDesign, []), defaultDesign);
   assert.throws(() => validateDesign({...defaultDesign,main:defaultDesign.sheer}, []), /does not match/);
   assert.throws(() => resolveLayer({...defaultDesign.main,variantId:'missing'}, []), /shade/);

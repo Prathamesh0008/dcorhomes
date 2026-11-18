@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useRef } from 'react';
 
-export function useSelectionRail(selection:string){
+export function useSelectionRail(selection:string,enabled=true){
  const ref=useRef<HTMLDivElement>(null);
  useEffect(()=>{
-  const rail=ref.current;if(!rail)return;
+  const rail=ref.current;if(!enabled||!rail)return;
   const reveal=()=>{
    const button=rail.querySelector<HTMLElement>('[aria-pressed="true"]');
    if(!button||!rail.clientWidth)return;
@@ -13,6 +13,6 @@ export function useSelectionRail(selection:string){
   };
   reveal();const observer=new ResizeObserver(reveal);observer.observe(rail);
   return()=>observer.disconnect();
- },[selection]);
+ },[selection,enabled]);
  return ref;
 }

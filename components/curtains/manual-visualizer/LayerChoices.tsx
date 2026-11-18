@@ -3,24 +3,29 @@ import { useState } from 'react';
 import { Check, ArrowRight } from 'lucide-react';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { demoColors, materials, type Material } from '@/lib/manual-visualizer/manifest';
-import { availableMaterial, resolveLayer, type LayerSelection } from '@/lib/manual-visualizer/model';
+import { availableMaterial, matchingMaterialShade, materialShades, resolveLayer, type LayerSelection } from '@/lib/manual-visualizer/model';
 import { visualizerFabric } from '@/lib/manual-visualizer/library';
 import StudioImage from './StudioImage';
 import { useSelectionRail } from './useSelectionRail';
 
 export default function LayerChoices({layer,value,records,onChange,onNext}:{layer:'main'|'sheer';value:LayerSelection;records:FabricRecord[];onChange:(value:LayerSelection)=>void;onNext?:()=>void}){
  const [allColors,setAllColors]=useState(false);
- const rail=useSelectionRail(value.materialId);
+ const rail=useSelectionRail(value.materialId,value.enabled);
  let current:ReturnType<typeof resolveLayer>|undefined;try{current=resolveLayer(value,records);}catch{}
- const choices=materials.filter(material=>material.layer===layer&&availableMaterial(material,records)&&(material.library||material.id===value.materialId));
- const variants=current?.fabric.colors.filter(variant=>variant.active!==false&&variant.hexPreview)||[];
+ const choices=materials.filter(material=>material.layer===layer&&availableMaterial(material,records)&&(material.library||material.id===value.materialId)).map(material=>{
+  const fabric=visualizerFabric(material.fabricId,records)!;
+  const shades=materialShades(material,fabric);
+  const shade=matchingMaterialShade(shades,current?.variant?.id,current?.shadeName);
+  return {material,fabric,shades,shade,thumbnail:shade?.textureImage||shade?.swatchImage||shade?.digitalSwatchImage||material.thumbnail||material.texture};
+ });
+ const variants=current?materialShades(current.material,current.fabric):[];
  const previewMode=Boolean(value.previewColorId);
- const colors:{id:string;name:string;hex:string;image?:string;disabled?:boolean}[]=previewMode?demoColors:variants.map(variant=>({id:variant.id,name:variant.name,hex:variant.hexPreview!,image:variant.swatchImage||variant.digitalSwatchImage,disabled:variant.available===false}));
+ const colors:{id:string;name:string;hex?:string;image?:string;disabled?:boolean}[]=previewMode?demoColors:variants.map(variant=>({id:variant.id,name:variant.name,hex:variant.hexPreview,image:variant.swatchImage||variant.digitalSwatchImage||variant.textureImage,disabled:variant.available===false}));
  const selectedColor=previewMode?value.previewColorId:value.variantId;
  const visible=allColors?colors:[...colors.slice(0,6),...colors.slice(6).filter(color=>color.id===selectedColor)];
- function choose(material:Material){
-  const fabric=visualizerFabric(material.fabricId,records)!;
-  const variant=fabric.colors.find(variant=>variant.id===value.variantId&&variant.available!==false)||fabric.colors.find(variant=>variant.id===(layer==='sheer'?'soft-ivory':'ivory')&&variant.available!==false)||fabric.colors.find(variant=>variant.available!==false)!;
+ function choose({material,fabric,shades,shade}:typeof choices[number]){
+  const variant=shade||matchingMaterialShade(shades,layer==='sheer'?'soft-ivory':'ivory')||shades.find(variant=>variant.available!==false);
+  if(!variant)return;
   onChange({enabled:true,materialId:material.id,fabricId:fabric.id,...(material.colorMode==='tint'&&value.previewColorId?{previewColorId:value.previewColorId}:{variantId:variant.id})});
  }
  return <div>
@@ -31,10 +36,10 @@ export default function LayerChoices({layer,value,records,onChange,onNext}:{laye
   {value.enabled&&<>
    <p className="mb-2 text-[11px] uppercase tracking-[1.5px] text-muted">Fabric <span className="ml-1 normal-case tracking-normal text-ink">/ {current?.fabric.name}</span></p>
    <div ref={rail} role="group" aria-label={layer+' fabric varieties'} className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-3 [scrollbar-width:thin]">
-    {choices.map(material=><button type="button" key={material.id} data-material-id={material.id} aria-label={material.name} aria-pressed={value.materialId===material.id} onClick={()=>choose(material)} className="group w-[100px] shrink-0 snap-start border-0 bg-transparent p-0 text-left">
-     <span className="relative block overflow-hidden rounded-[4px] border-2 border-solid border-transparent group-aria-pressed:border-ink"><StudioImage src={material.thumbnail} alt={material.name+' texture'} className="aspect-[1.35] w-full object-cover"/>{value.materialId===material.id&&<Check size={14} className="absolute bottom-1 right-1 rounded-full bg-paper p-0.5"/>}</span>
+    {choices.map(choice=>{const {material,thumbnail}=choice;return <button type="button" key={material.id} data-material-id={material.id} aria-label={material.name} aria-pressed={value.materialId===material.id} onClick={()=>choose(choice)} className="group w-[100px] shrink-0 snap-start border-0 bg-transparent p-0 text-left">
+     <span className="relative block overflow-hidden rounded-[4px] border-2 border-solid border-transparent group-aria-pressed:border-ink"><StudioImage key={thumbnail} src={thumbnail} alt={material.name+' texture'} className="aspect-[1.35] w-full object-cover"/>{value.materialId===material.id&&<Check size={14} className="absolute bottom-1 right-1 rounded-full bg-paper p-0.5"/>}</span>
      <span className="mt-2 block min-h-8 text-[11px] leading-[1.4] group-aria-pressed:font-semibold">{material.name}</span>
-    </button>)}
+    </button>;})}
    </div>
    {current&&<fieldset className="m-0 mt-4 min-w-0 border-0 p-0"><legend className="text-[11px] uppercase tracking-[1.5px] text-muted">Colour <span className="ml-1 normal-case tracking-normal text-ink">/ {current.shadeName}</span></legend>
     {!current.material.library&&current.material.colorMode==='tint'&&<div role="group" aria-label={layer+' shade source'} className="my-2 flex gap-4 text-[11px]"><button type="button" onClick={()=>onChange({...value,variantId:undefined,previewColorId:'preview-ivory'})} className="min-h-11 border-0 bg-transparent p-0 underline">Illustrative palette</button><button type="button" onClick={()=>onChange({...value,previewColorId:undefined,variantId:variants.find(variant=>variant.available!==false)?.id})} className="min-h-11 border-0 bg-transparent p-0 underline">{current.fabric.source==='supplier'?'Catalogue shades':'Reference shades'}</button></div>}

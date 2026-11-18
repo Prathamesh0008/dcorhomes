@@ -1,4 +1,4 @@
-import type { FabricRecord } from '@/lib/curtains/catalogue';
+import type { FabricRecord, FabricVariant } from '@/lib/curtains/catalogue';
 import type { ManualConfig } from '@/lib/curtains/manual-config';
 import { assetVersion, rendererVersion, demoColors, materials, scenes, type Material } from './manifest';
 import { visualizerFabric } from './library';
@@ -6,7 +6,15 @@ import type { LayerSelection, VisualizerConfiguration } from './types';
 export type { LayerSelection } from './types';
 export type VisualizerDesign = VisualizerConfiguration;
 export const defaultDesign:VisualizerDesign={version:1,assetVersion,rendererVersion,sceneId:'garden-living',main:{enabled:true,materialId:'library-main-pure-linen',fabricId:'library-main-pure-linen',variantId:'olive-green'},sheer:{enabled:true,materialId:'library-sheer-plain-voile',fabricId:'library-sheer-plain-voile',variantId:'soft-ivory'}};
-export function availableMaterial(material:Material,records:FabricRecord[]){const f=visualizerFabric(material.fabricId,records);return material.status==='sample'&&Boolean(material.texture)&&Boolean(f&&f.source===material.catalogueSource&&f.active!==false&&(material.colorMode!=='tint'||!f.pattern||['plain','solid'].includes(f.pattern.toLowerCase()))&&f.colors.some(v=>v.active!==false&&v.available!==false));}
+export function materialShades(material:Material,fabric:FabricRecord){
+ return fabric.colors.filter(variant=>variant.active!==false&&(material.colorMode==='tint'?/^#[0-9a-f]{6}$/i.test(variant.hexPreview||''):Boolean(variant.textureImage)));
+}
+export function matchingMaterialShade(variants:FabricVariant[],id?:string,name?:string){
+ const available=variants.filter(variant=>variant.available!==false);
+ const normalize=(value:string)=>value.trim().toLowerCase().replace(/[\s-]+/g,'-');
+ return available.find(variant=>variant.id===id)||(name?available.find(variant=>normalize(variant.name)===normalize(name)):undefined);
+}
+export function availableMaterial(material:Material,records:FabricRecord[]){const f=visualizerFabric(material.fabricId,records);return material.status==='sample'&&Boolean(material.texture)&&Boolean(f&&f.source===material.catalogueSource&&f.active!==false&&(material.colorMode!=='tint'||!f.pattern||['plain','solid'].includes(f.pattern.toLowerCase()))&&materialShades(material,f).some(v=>v.available!==false));}
 export function resolveLayer(layer:LayerSelection,records:FabricRecord[]){
  const material=materials.find(m=>m.id===layer.materialId),fabric=visualizerFabric(layer.fabricId,records);
  if(!material||!fabric||fabric.active===false||material.fabricId!==fabric.id||!availableMaterial(material,records))throw Error('This material needs compatible preview assets.');
