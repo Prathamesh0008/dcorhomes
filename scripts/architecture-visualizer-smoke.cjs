@@ -2,7 +2,9 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{spawn}=require('node:child_process');
 const output=path.resolve('.test-data/architecture-visualizer');fs.mkdirSync(output,{recursive:true});
 const profile=fs.mkdtempSync(path.join(output,'profile-')),port=23000+Math.floor(Math.random()*7000);
-const chrome=spawn('C:/Program Files/Google/Chrome/Application/chrome.exe',['--headless=new','--no-sandbox','--disable-gpu','--disable-extensions','--disable-background-networking','--no-first-run','--remote-debugging-port='+port,'--user-data-dir='+profile,'about:blank'],{windowsHide:true,stdio:'ignore'});
+const browserPath=[process.env.DCORHOME_TEST_BROWSER,'C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Microsoft/Edge/Application/msedge.exe'].find(file=>file&&fs.existsSync(file));
+assert.ok(browserPath,'Install Chrome or Edge, or set DCORHOME_TEST_BROWSER.');
+const chrome=spawn(browserPath,['--headless=new','--no-sandbox','--disable-gpu','--disable-extensions','--disable-background-networking','--no-first-run','--remote-debugging-port='+port,'--user-data-dir='+profile,'about:blank'],{windowsHide:true,stdio:'ignore'});
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));let ws,sequence=0,stage='browser initialization';const pending=new Map(),requests=[],errors=[];
 const deadline=setTimeout(()=>{console.error('FAIL: visualizer smoke deadline');chrome.kill();process.exit(1);},180000);
 function call(method,params={}){return new Promise((resolve,reject)=>{const id=++sequence;const timer=setTimeout(()=>{pending.delete(id);reject(Error('Browser command timeout: '+method));},20000);pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject});ws.send(JSON.stringify({id,method,params}));});}

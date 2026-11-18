@@ -20,7 +20,7 @@ const { hiddenPassword } = require('./member-prompt.cjs');
     break;
   }
   await provisionMember(null, { userId, fullName, email, role: 'admin' }, password);
-  console.log('Administrator created. Sign in at /login using the chosen User ID and password.');
+  console.log('Administrator created. Sign in at /admin/login using the chosen User ID and password.');
   await (await mongoClient()).close();
 })().then(() => process.exit(0)).catch(error => {
   // Never print MongoDB driver errors, connection URIs or credentials.

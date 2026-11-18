@@ -17,13 +17,14 @@ const heading = (title: string) => `<h2 style="margin:0 0 14px;font:600 11px/1.5
 const section = (title: string, content: string) => `<tr><td class="padding" style="padding:0 36px 28px;">${heading(title)}${content}</td></tr>`;
 const rowsText = (rows: Row[]) => rows.map(row => row.label + ': ' + row.value).join('\n');
 
-export function buildEnquiryEmail(_id: string, enquiry: EnquiryEmailData): { subject: string; html: string; text: string } {
+export function buildEnquiryEmail(reference: string, enquiry: EnquiryEmailData): { subject: string; html: string; text: string } {
   const design = enquiry.designDetails;
   const type = design ? 'Curtain Design Enquiry' : enquiry.enquiryType || 'General Enquiry';
   const subject = `New ${type} | ${enquiry.name.replace(/[\r\n\u0000-\u001f\u007f]/g, ' ')} | Dcorhome`;
   const customer: Row[] = [{ label: 'Name', value: enquiry.name }, { label: 'Phone', value: enquiry.phone || 'Not provided' }, { label: 'Email', value: enquiry.email || 'Not provided' }];
   const project: Row[] = [];
   const add = (label: string, value: string) => { if (value) project.push({ label, value }); };
+  add('Enquiry reference', reference);
   add('Enquiry type', design ? 'Design Enquiry' : type);
   if (!design && !enquiry.selectedFabric) { add('Room', enquiry.room); add('Fabric / interest', enquiry.interest); add('Color', enquiry.color); }
   add('Request', enquiry.requestPurpose === 'swatch' ? 'Fabric swatch' : enquiry.requestPurpose === 'quote' ? 'Quotation' : '');
@@ -57,4 +58,37 @@ ${section('ACTION', (emailLink ? action(emailLink, 'Reply to Customer', true) : 
 </table></td></tr></table></body></html>`;
   const text = ['DCOR HOME', design ? 'NEW DESIGN ENQUIRY' : 'NEW WEBSITE ENQUIRY', '', 'CUSTOMER DETAILS', rowsText(customer), ...(design ? ['', 'SELECTED DESIGN', rowsText(design.rows), disclaimer] : fabric.length ? ['', 'SELECTED FABRIC', rowsText(fabric), disclaimer] : []), '', 'PROJECT DETAILS', rowsText(project), '', 'CUSTOMER MESSAGE', message, '', 'ACTION', ...(emailLink ? ['Reply to Customer: ' + emailLink] : []), ...(phoneLink ? ['Call Customer: ' + phoneLink] : [])].join('\n');
   return { subject, html, text };
+}
+
+export const acceptanceEmailSubject = 'Your Enquiry Has Been Accepted | DCOR HOME';
+
+export function buildAcceptanceEmail(reference: string, enquiry: EnquiryEmailData) {
+  const design = (label: string) => enquiry.designDetails?.rows.find(row => row.label === label)?.value;
+  const fabric = enquiry.selectedFabric?.name;
+  const rows: Row[] = [
+    { label: 'Enquiry reference', value: reference },
+    { label: 'Enquiry type', value: enquiry.enquiryType || 'General Enquiry' },
+    { label: 'Room', value: design('Room') || enquiry.room || 'Not specified' },
+    { label: 'Fabric preference', value: (typeof fabric === 'string' && fabric) || enquiry.interest || 'Not specified' },
+  ];
+  const selection = ['Main Curtain', 'Sheer Curtain'].flatMap(label => {
+    const name = design(label);
+    const shade = design(`${label} Color`);
+    return name && name !== 'None' ? [name + (shade ? ` (${shade})` : '')] : [];
+  });
+  if (selection.length) rows.push({ label: 'Selected curtain design', value: selection.join(' / ') });
+  rows.push({ label: 'Status', value: 'Accepted' });
+  const greeting = `Dear ${enquiry.name},`;
+  const introduction = ['Thank you for choosing DCOR HOME.', 'We are pleased to inform you that our team has reviewed and accepted your curtain enquiry.'];
+  const next = 'Our team will be in touch to discuss your requirements and assist you with the next steps.';
+  const contact = 'For further assistance, please contact';
+  const support = 'sales@dcorhome.com';
+  const paragraph = (value: string) => `<p style="margin:0 0 14px;">${escapeHtml(value)}</p>`;
+  const text = [greeting, '', ...introduction, '', 'Enquiry Details', rowsText(rows), '', next, `${contact} ${support}.`, '', 'Warm regards,', 'Team DCOR HOME'].join('\n');
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${acceptanceEmailSubject}</title></head>
+<body style="margin:0;background:#f3f2eb;color:#26392e;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fffdf9;border:1px solid #e1e3d9;">
+<tr><td style="padding:24px;border-bottom:1px solid #e1e3d9;font:600 22px Arial,sans-serif;"><img src="${escapeHtml(`${siteUrl}/branding/green.png`)}" alt="" width="36" height="36" style="vertical-align:middle;margin-right:12px;"/>DCOR HOME</td></tr>
+<tr><td style="padding:24px;font:15px/1.65 Arial,sans-serif;">${paragraph(greeting)}${introduction.map(paragraph).join('')}<h2 style="margin:22px 0 0;font:600 16px Arial,sans-serif;">Enquiry Details</h2>${rowsHtml(rows)}<div style="margin-top:24px;">${paragraph(next)}<p>${contact} <a style="color:#26392e;" href="mailto:${support}">${support}</a>.</p><p style="margin:0;">Warm regards,<br/>Team DCOR HOME</p></div></td></tr>
+</table></td></tr></table></body></html>`;
+  return { subject: acceptanceEmailSubject, html, text };
 }

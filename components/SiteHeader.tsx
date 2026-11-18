@@ -6,18 +6,18 @@ import { Brand } from "@/components/navigation/Brand";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import StudioLink from "@/components/navigation/StudioLink";
-import AccountNavigation from "@/components/account/AccountNavigation";
+import AccountNavigation from '@/components/account/AccountNavigation';
 export { Brand } from "@/components/navigation/Brand";
 export default function SiteHeader() {
-  const [identity, setIdentity] = useState<{ signedIn: boolean; isAdmin: boolean; resolved: boolean }>({ signedIn: false, isAdmin: false, resolved: false });
-  const { signedIn, isAdmin, resolved } = identity;
   const pathname = usePathname();
+  const [administrator, setAdministrator] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
+    setAdministrator(false);
     fetch('/api/auth/get-session', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal })
-      .then(async response => { if (!response.ok) throw Error('Session unavailable'); return response.json(); })
-      .then(result => { if (!controller.signal.aborted) setIdentity({ signedIn: Boolean(result?.user), isAdmin: result?.user?.role === 'admin' && !result.user.mustChangePassword, resolved: true }); })
-      .catch(() => { if (!controller.signal.aborted) setIdentity({ signedIn: false, isAdmin: false, resolved: false }); });
+      .then(async response => response.ok ? response.json() : null)
+      .then(result => { if (!controller.signal.aborted) setAdministrator(result?.user?.role === 'admin'); })
+      .catch(() => { if (!controller.signal.aborted) setAdministrator(false); });
     return () => controller.abort();
   }, [pathname]);
   const [open, setOpen] = useState(false), [scrolled, setScrolled] = useState(false);
@@ -36,9 +36,9 @@ export default function SiteHeader() {
     <div className="mx-auto flex h-[80px] max-w-[1840px] flex-nowrap items-center gap-5 px-[18px] sm:h-[84px] sm:px-7 lg:gap-4 xl:gap-6 xl:px-10 min-[1600px]:px-14">
       <div className="shrink-0"><Brand/></div>
       <DesktopNavigation/>
-      <div className="ml-auto hidden shrink-0 items-center gap-5 lg:flex xl:gap-6"><AccountNavigation signedIn={signedIn} isAdmin={isAdmin} resolved={resolved}/><span aria-hidden="true" className="h-5 w-px bg-[#d6ccba]"/><StudioLink/></div>
-      <div className="ml-auto flex items-center gap-5 lg:hidden"><StudioLink tabletOnly/><button ref={toggle} type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? "mobile-menu" : undefined} onClick={() => setOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center bg-transparent text-ink"><Menu size={25} strokeWidth={1.25}/></button></div>
+      <div className="ml-auto hidden shrink-0 items-center gap-5 lg:flex xl:gap-6"><AccountNavigation administrator={administrator}/><StudioLink/></div>
+      <div className="ml-auto flex items-center gap-3 sm:gap-5 lg:hidden"><AccountNavigation administrator={administrator} className="hidden sm:inline-flex"/><StudioLink tabletOnly/><button ref={toggle} type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? "mobile-menu" : undefined} onClick={() => setOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center bg-transparent text-ink"><Menu size={25} strokeWidth={1.25}/></button></div>
     </div>
-    <MobileNavigation resolved={resolved} open={open} signedIn={signedIn} isAdmin={isAdmin} onClose={close}/>
+    <MobileNavigation open={open} administrator={administrator} onClose={close}/>
   </header>;
 }

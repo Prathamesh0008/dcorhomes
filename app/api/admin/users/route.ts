@@ -5,7 +5,7 @@ import { failure, privateHeaders } from '@/lib/server/security';
 export const runtime = 'nodejs';
 export async function GET() {
   try { await requireMemberAdmin(); await memberIndexes();
-    const users = await (await mongoDatabase()).collection('users').find({}, { projection: { name: 1, userId: 1, email: 1, role: 1, status: 1, mustChangePassword: 1, createdAt: 1, lastLoginAt: 1, createdBy: 1 } }).sort({ createdAt: -1 }).limit(500).toArray();
+    const users = await (await mongoDatabase()).collection('users').find({ role: 'admin' }, { projection: { name: 1, userId: 1, email: 1, role: 1, status: 1, mustChangePassword: 1, createdAt: 1, lastLoginAt: 1, createdBy: 1 } }).sort({ createdAt: -1 }).limit(500).toArray();
     return NextResponse.json({ users: users.map(publicMember) }, { headers: privateHeaders });
   } catch (error) { return failure(error); }
 }

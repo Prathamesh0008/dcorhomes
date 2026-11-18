@@ -4,10 +4,12 @@ export class DatabaseConfigurationError extends Error {
   constructor(readonly category: DatabaseFailure) { super('Database configuration is unavailable.'); }
 }
 export function databaseFailure(error: unknown): DatabaseFailure {
-  const e = error as { category?: DatabaseFailure; code?: number; name?: string; cause?: unknown } | undefined;
+  const e = error as { category?: DatabaseFailure; code?: number; name?: string; codeName?: string; message?: string; cause?: unknown } | undefined;
   if (e?.category) return e.category;
   if (e?.name === 'MongoParseError' || e?.name === 'MongoInvalidArgumentError') return 'invalid_configuration';
   if (e?.code === 18) return 'authentication';
+  // Atlas uses the generic 8000 code for this server error, so also match its authentication prefix.
+  if (e?.name === 'MongoServerError' && e.code === 8000 && e.codeName === 'AtlasError' && /^bad auth\s*:/i.test(e.message ?? '')) return 'authentication';
   if (e?.code === 13) return 'permission';
   // Prefer an explicit nested TLS code over the driver's server-selection wrapper.
   // A message merely mentioning TLS is not enough (e.g. a pre-handshake TCP reset).

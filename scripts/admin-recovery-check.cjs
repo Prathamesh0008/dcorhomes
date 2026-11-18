@@ -38,12 +38,12 @@ let repl, client, server;
     const response = await api('/api/auth/sign-in/username', 'POST', { username: 'recovery-admin', password: newPassword }); assert.equal(response.status, 200);
     const cookie = response.headers.getSetCookie().map(c => c.split(';')[0]).join('; ');
     for (let i = 0; i < 2; i++) {
-      for (const route of ['/account', '/admin/users']) assert.equal((await api(route, 'GET', undefined, cookie)).status, 200);
+      for (const route of ['/admin', '/admin/users']) assert.equal((await api(route, 'GET', undefined, cookie)).status, 200);
       assert.equal((await (await api('/api/auth/get-session', 'GET', undefined, cookie)).json()).user.role, 'admin');
     }
     assert.equal((await api('/api/auth/sign-out', 'POST', {}, cookie)).status, 200);
     assert.equal(await (await api('/api/auth/get-session', 'GET', undefined, cookie)).json(), null);
-    for (const route of ['/account', '/admin/users']) assert.equal((await api(route, 'GET', undefined, cookie)).headers.get('location'), '/login');
+    for (const route of ['/admin', '/admin/users']) assert.equal((await api(route, 'GET', undefined, cookie)).headers.get('location'), '/admin/login');
     for (const route of ['/api/auth/sign-up/email', '/api/auth/request-password-reset']) assert.equal((await api(route, 'POST', {})).status, 403);
     console.log('PASS: production HTTP login, /account and /admin/users, repeated session reads, logout, protected redirects and blocked signup/reset endpoints.');
   }

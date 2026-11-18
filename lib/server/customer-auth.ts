@@ -4,22 +4,18 @@ import { mongodbAdapter } from '@better-auth/mongo-adapter';
 import { username } from 'better-auth/plugins';
 import { APIError } from 'better-auth/api';
 import { ObjectId } from 'mongodb';
-import { mongoConfigured, mongoDatabase } from './mongodb';
+import { mongoDatabase } from './mongodb';
+import { authConfigurationIssues } from './auth-configuration';
 import { activeSession, normalizeUserId, validUserId } from './member-policy';
 import { AsyncLocalStorage } from 'node:async_hooks';
 const credentialAttempt = new AsyncLocalStorage<{ id: string; version: number } | null>();
 export async function runMemberLogin<T>(userId: string, action: () => Promise<T>) {
-  const user = await (await mongoDatabase()).collection('users').findOne({ normalizedUserId: normalizeUserId(userId) });
+  const user = await (await mongoDatabase()).collection('users').findOne({ normalizedUserId: normalizeUserId(userId), role: 'admin', status: 'active' });
   return credentialAttempt.run(user ? { id: String(user._id), version: user.sessionVersion } : null, action);
 }
 
 export function customerAuthReady() {
-  try {
-    const origin = new URL(process.env.SITE_URL || '');
-    const local = ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname);
-    if (origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash || (origin.protocol !== 'https:' && !(origin.protocol === 'http:' && local && (process.env.NODE_ENV !== 'production' || process.env.ALLOW_LOCAL_HTTP === 'true')))) return false;
-  } catch { return false; }
-  return Boolean(mongoConfigured() && process.env.BETTER_AUTH_SECRET && process.env.BETTER_AUTH_SECRET.length >= 32 && process.env.SITE_URL);
+  return authConfigurationIssues().length === 0;
 }
 let instance: ReturnType<typeof createCustomerAuth> | undefined;
 export async function customerAuth() {
@@ -56,7 +52,7 @@ async function createCustomerAuth() {
       before: async session => {
         const attempt = credentialAttempt.getStore();
         if (!attempt || attempt.id !== session.userId) throw new APIError('UNAUTHORIZED', { message: 'Unable to sign in.' });
-        const user = await db.collection('users').findOne({ _id: new ObjectId(session.userId), status: 'active', sessionVersion: attempt.version });
+        const user = await db.collection('users').findOne({ _id: new ObjectId(session.userId), role: 'admin', status: 'active', sessionVersion: attempt.version });
         if (!user) throw new APIError('UNAUTHORIZED', { message: 'Unable to sign in. Check your User ID and password.' });
         return { data: { ...session, sessionVersion: attempt.version } };
       },
@@ -73,7 +69,7 @@ export async function validatedCustomerSession(requestHeaders: Headers, allowPas
   const result = await (await customerAuth()).api.getSession({ headers: requestHeaders });
   if (!result || !ObjectId.isValid(result.user.id)) return null;
   const current = await (await mongoDatabase()).collection('users').findOne({ _id: new ObjectId(result.user.id) });
-  if (!activeSession(current, result.session.sessionVersion)) return null;
+  if (!activeSession(current, result.session.sessionVersion) || current!.role !== 'admin') return null;
   if (current!.mustChangePassword && !allowPasswordChange) return null;
   return { ...result, user: { ...result.user, name: String(current!.name),
     userId: String(current!.userId), email: String(current!.email || ''),

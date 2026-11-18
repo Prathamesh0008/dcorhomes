@@ -3,6 +3,7 @@ import { useShowroomWhatsApp, useFabricRecords } from "@/components/curtains/Fab
 import { useSearchParams } from 'next/navigation';
 import { designEnquiryDetails, recoverEnquiryDesign } from '@/lib/manual-visualizer/enquiry';
 import type { VisualizerDesign } from '@/lib/manual-visualizer/model';
+import { enquiryAttempt, enquiryReceipt, type EnquiryAttempt } from '@/lib/enquiry-submission';
 import { whatsappHref } from "@/lib/curtains/enquiry";
 import OfficeDetails from "@/components/editorial/OfficeDetails";
 import { business } from "@/lib/business";
@@ -34,7 +35,7 @@ function ContactContent() {
         color: "",
     });
     const [extra, setExtra] = useState({ city: '', method: 'Email', measurements: '', website: '', consent: false });
-    const submitLock = useRef(false), submissionId = useRef('');
+    const submitLock = useRef(false), submission = useRef<EnquiryAttempt | null>(null);
     useEffect(() => {
         const q = new URLSearchParams(query); let recovered: VisualizerDesign | null = null, warning = '';
         try { recovered = recoverEnquiryDesign(q, records); } catch { warning = 'Your selected design could not be recovered. Reopen it in Design Studio in this browser, or send a general enquiry below.'; }
@@ -43,7 +44,7 @@ function ContactContent() {
         const details = recovered ? designEnquiryDetails(recovered, records) : null;
         setForm(f => ({ ...f, message: '', enquiryType: recovered ? 'Design Enquiry' : q.has('measurements') ? 'Measurement Assistance' : q.has('interest') && !warning ? 'Curtain Fabric Enquiry' : 'General Enquiry', interest: recovered || warning ? '' : products.find(p => p.id === q.get('interest'))?.name || q.get('interest')?.slice(0, 100) || '', room: details?.rows[0].value || q.get('room')?.slice(0, 60) || 'Living room' }));
         setExtra(e => ({ ...e, measurements: q.get('measurements')?.slice(0, 1500) || '' }));
-        submissionId.current = '';
+        submission.current = null;
     }, [query, records]);
     const [busy, setBusy] = useState(false), [status, setStatus] = useState<"idle" | "success" | "error">("idle"), [message, setMessage] = useState("");
     const summary = `Dcorhome consultation request\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone || "Not given"}\n${selectedDesign ? selectedDesign.rows.map(row => row.label + ': ' + row.value).join('\n') + '\n' + selectedDesign.disclaimer : 'Room: ' + form.room + '\nInterest: ' + form.interest}\nNotes: ${form.message || "None"}\nCity: ${extra.city}\nContact method: ${extra.method}\nMeasurements: ${extra.measurements}`;
@@ -53,23 +54,22 @@ function ContactContent() {
         if (submitLock.current)
             return;
         submitLock.current = true;
-        submissionId.current ||= crypto.randomUUID();
         setBusy(true);
         setStatus("idle");
         try {
+            submission.current = enquiryAttempt(submission.current, { ...form, ...extra, ...(design ? { visualizer: design } : {}) });
             const response = await fetch("/api/enquiries", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId.current },
-                body: JSON.stringify({ ...form, ...extra, ...(design ? { visualizer: design } : {}) }),
+                headers: { "Content-Type": "application/json", "Idempotency-Key": submission.current.id },
+                body: submission.current.body,
             });
-            const json: { error?: string; accepted?: boolean; notified?: boolean } = await response.json().catch(() => ({}));
+            const json: { error?: string; accepted?: boolean; stored?: boolean; reference?: string; notified?: boolean } = await response.json().catch(() => ({}));
             if (!response.ok)
                 throw new Error(json.error || "Could not submit your request.");
-            if (!json.accepted)
-                throw new Error("Email delivery was not accepted. Please contact sales@dcorhome.com.");
-            submissionId.current = "";
+            const receipt = enquiryReceipt(json);
+            submission.current = null;
             setStatus("success");
-            setMessage("Our email provider accepted your enquiry for delivery. Inbox delivery is not guaranteed. Please keep a copy of your design.");
+            setMessage(receipt);
             setForm({
                 name: "",
                 email: "",
@@ -171,6 +171,7 @@ function ContactContent() {
             Leave a few details and we&apos;ll take it from there.
           </p>
           {whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="mb-6 inline-flex min-h-12 items-center gap-3 border-b border-solid border-ink text-[15px]"><MessageCircle size={18}/> Enquire on WhatsApp</a>}<form onSubmit={submit}>
+            <fieldset disabled={busy} className="m-0 min-w-0 border-0 p-0">
             {designWarning && <p role="status" className="mb-6 border-l-2 border-[#a28d75] bg-[#fffaf0] p-4 text-sm leading-6 text-ink">{designWarning}</p>}
             {selectedDesign && <section aria-label="Your Selected Design" className="mb-6 rounded-lg border border-[#d8dcd3] bg-[#fffcf7] p-5"><p className="text-[10px] uppercase tracking-[2px] text-muted">From Design Studio</p><h3 className="mb-4 mt-2 text-xl font-medium text-ink">Your Selected Design</h3><dl className="space-y-3">{selectedDesign.rows.map(row => <div key={row.label} className="grid gap-1 text-sm sm:grid-cols-[1fr_1.3fr] sm:gap-4"><dt className="text-muted">{row.label}</dt><dd className="m-0 break-words text-ink">{row.value}</dd></div>)}</dl><p className="mb-0 mt-4 border-t border-[#e1e3d9] pt-3 text-xs leading-5 text-muted">{selectedDesign.disclaimer}</p></section>}
             <label className="mb-6 block text-[14px] text-ink">Enquiry type *<select required value={form.enquiryType} onChange={e => setForm({...form, enquiryType:e.target.value})} className="mt-2 min-h-12 w-full border border-solid border-[#d8dcd3] bg-paper px-3 text-base">{[...(design ? ['Design Enquiry'] : []), ...business.enquiryTypes].map(type => <option key={type}>{type}</option>)}</select></label>
@@ -228,6 +229,7 @@ function ContactContent() {
                 .then(() => setMessage("Details copied. Your enquiry has not been sent; keep a copy for later."))} className="bg-none bg-transparent text-[#3c5943] underline flex items-center text-[14px] mt-[15px] p-0 gap-[9px] border-0">
                 <Copy size={15}/> Copy my enquiry instead
               </button>)}
+            </fieldset>
           </form>
         </div>
       </Container>

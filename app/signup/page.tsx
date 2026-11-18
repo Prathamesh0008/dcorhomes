@@ -1,2 +1,3 @@
 import { redirect } from 'next/navigation';
-export default function Signup() { redirect('/login'); }
+export const metadata = { robots: { index: false, follow: false } };
+export default function Page() { redirect('/admin/login'); }

@@ -17,7 +17,8 @@
     "check:fabric-images": "node scripts/fabric-image-check.cjs",
     "auth:migrate": "node scripts/auth-migrate.cjs",
     "auth:bootstrap": "node scripts/bootstrap-admin.cjs",
-    "auth:check": "node scripts/architecture-runtime-check.cjs",
+    "auth:check": "node scripts/admin-only-auth-check.cjs",
+    "auth:config": "node scripts/admin-config-check.cjs",
     "check:mongodb": "node scripts/architecture-runtime-check.cjs",
     "db:ping": "node scripts/mongodb-ping.cjs",
     "db:migrate:sqlite": "node scripts/migrate-sqlite-to-mongodb.cjs",
@@ -27,6 +28,8 @@
     "content:verify-export": "node scripts/verify-content-export.cjs",
     "check:visualizer": "node scripts/visualizer-library-check.cjs",
     "check:enquiries": "node scripts/enquiry-and-storage-check.cjs",
+    "test:enquiries": "node scripts/enquiry-management-check.cjs",
+    "email:config": "node scripts/enquiry-config-check.cjs",
     "check:build-boundaries": "node scripts/build-boundary-check.cjs",
     "check": "npm run check:content && node scripts/preservation-workflow-check.cjs && npm run check:visualizer && npm run check:enquiries",
     "content:identity": "node scripts/content-source-identity.cjs"

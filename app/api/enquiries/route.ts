@@ -1,98 +1,17 @@
-import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { business } from "@/lib/business";
 import { fabricRecords } from "@/lib/server/fabric-records";
 import { fabricEnquiry } from "@/lib/curtains/enquiry";
 import { siteUrl } from "@/lib/seo";
-import { buildEnquiryEmail } from "@/lib/server/enquiry-email-template";
 import { failure, HttpError, jsonInput, privateHeaders } from "@/lib/server/http";
 import { throttlePublic } from '@/lib/server/public-rate-limit';
 import { validateDesign, type VisualizerDesign } from '@/lib/manual-visualizer/model';
-import { designEnquiryDetails, type DesignEnquiryDetails } from '@/lib/manual-visualizer/enquiry';
+import { designEnquiryDetails } from '@/lib/manual-visualizer/enquiry';
+import { enquiryRequestKey, storeEnquiry, notifyEnquiry } from '@/lib/server/enquiry-store';
+import type { EnquiryData } from '@/lib/enquiries';
+import { logDatabaseFailure } from '@/lib/server/database-diagnostics';
 export const runtime = "nodejs";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-type NotificationStatus = "not-configured" | "sent" | "failed";
-type Enquiry = {
-    designDetails: DesignEnquiryDetails | undefined;
-    selectedFabric: Record<string, unknown> | undefined;
-    requestPurpose: string;
-    name: string;
-    email: string;
-    enquiryType: string;
-    color: string;
-    phone: string;
-    city: string;
-    room: string;
-    interest: string;
-    message: string;
-    measurements: string;
-    method: string;
-    designId: string;
-    status: "new";
-    notification: NotificationStatus;
-    consentAt: string;
-};
-/**
- * Sends the admin notification through Resend's REST API.
- * A "sent" status means Resend accepted the email; inbox delivery is not guaranteed.
- */
-function envValue(value: string | undefined): string {
-    // Zero-width marks sometimes appear when an address is copied from formatted text.
-    return (value ?? "").replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim();
-}
-async function sendEnquiryNotification(id: string, enquiry: Enquiry): Promise<NotificationStatus> {
-    const apiKey = envValue(process.env.RESEND_API_KEY);
-    const fromEmail = envValue(process.env.RESEND_FROM_EMAIL ||
-        process.env.ENQUIRY_FROM_EMAIL ||
-        process.env.EMAIL_FROM);
-    const toEmail = 'sales@dcorhome.com';
-    if (!apiKey || !fromEmail || !toEmail) {
-        console.error("Resend notification not configured: missing API key, sender, or recipient.");
-        return "not-configured";
-    }
-    // Accept either an address or the optional "Name <email@domain>" sender format.
-    const senderAddress = fromEmail.match(/<([^<>]+)>$/)?.[1] ?? fromEmail;
-    if (!EMAIL_PATTERN.test(senderAddress) || !EMAIL_PATTERN.test(toEmail)) {
-        console.error("Resend notification not configured: invalid sender or recipient email.");
-        return "not-configured";
-    }
-    try {
-        // Branded HTML message plus an accessible plain-text fallback.
-        const { html, text, subject } = buildEnquiryEmail(id, enquiry);
-        const response = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-                "Idempotency-Key": `dcorhome-enquiry-${id}`,
-            },
-            body: JSON.stringify({
-                from: fromEmail.includes("<") ? fromEmail : `Dcorhome <${fromEmail}>`,
-                to: [toEmail],
-                ...(enquiry.email ? { reply_to: enquiry.email } : {}),
-                subject,
-                html,
-                text,
-            }),
-            signal: AbortSignal.timeout(15000),
-        });
-        if (!response.ok) {
-            // Log only the status and provider's error code, never credentials or enquiry details.
-            console.error(JSON.stringify({event:'enquiry_email_failure',status:response.status}));
-            return "failed";
-        }
-        const result: unknown = await response.json().catch(() => null);
-        if (!result || typeof result !== "object" || !("id" in result) || typeof result.id !== "string") {
-            console.error("Resend did not confirm an email ID.");
-            return "failed";
-        }
-        return "sent";
-    }
-    catch {
-        console.error("Resend enquiry notification could not be submitted.");
-        return "failed";
-    }
-}
 export async function POST(request: NextRequest) {
     try {
         const input = await jsonInput(request, 12000);
@@ -125,8 +44,7 @@ export async function POST(request: NextRequest) {
             try { designSelection = validateDesign(typeof input.visualizer==='string'?JSON.parse(input.visualizer):input.visualizer,records); }
             catch { throw new HttpError(400,'The design configuration could not be verified. Reopen your design and try again.'); }
         }
-        const requestId = request.headers.get('idempotency-key');
-        const id = requestId && /^[a-f0-9-]{36}$/i.test(requestId) ? requestId : randomUUID();
+        const requestKey = enquiryRequestKey(request.headers.get('idempotency-key'));
         const fabricId = text("catalogueFabricId", 60);
         const variantId = text("variantId", 100);
         const quantity = text("quantityMetres", 30);
@@ -160,7 +78,7 @@ export async function POST(request: NextRequest) {
                 summary: fabricEnquiry(fabric, variant, productUrl),
             };
         }
-        const enquiry: Enquiry = {
+        const enquiry: EnquiryData = {
             designDetails: designSelection ? designEnquiryDetails(designSelection, records) : undefined,
             selectedFabric,
             requestPurpose,
@@ -176,17 +94,25 @@ export async function POST(request: NextRequest) {
             measurements: text("measurements", 1500),
             method: text("method", 60),
             designId,
-            status: "new",
-            notification: "not-configured",
+            visualizer: designSelection || null,
             consentAt: new Date().toISOString(),
         };
         if (!request.headers.get('content-type')?.startsWith('application/json')) throw new HttpError(415,'Use a JSON enquiry request.');
         await throttlePublic(request, 'enquiry', 5);
-        enquiry.notification = await sendEnquiryNotification(id, enquiry);
-        if(enquiry.notification !== 'sent') throw new HttpError(503, 'Email delivery was not accepted. Keep a copy of your details and email sales@dcorhome.com directly.');
-        return NextResponse.json({ok:true,id,accepted:true,notified:true,stored:false}, {headers:privateHeaders});
+        const saved = await storeEnquiry(requestKey, enquiry);
+        let record = saved.record;
+        if (!saved.duplicate) {
+            try { record = await notifyEnquiry(record.id); }
+            catch (error) { logDatabaseFailure('enquiry_notification', error); }
+        }
+        const notified = record.notification.state === 'accepted';
+        return NextResponse.json({ ok: true, id: record.id, reference: record.reference, accepted: true, stored: true,
+            notified, emailStatus: record.notification.deliveryStatus || record.notification.state, duplicate: saved.duplicate },
+            { status: saved.duplicate ? 200 : 201, headers: privateHeaders });
     }
     catch (error) {
-        return failure(error);
+        if (error instanceof HttpError) return failure(error);
+        logDatabaseFailure('enquiry_storage', error);
+        return failure(new HttpError(503, 'Your enquiry could not be saved. Your details remain in the form. Please try again or contact sales@dcorhome.com.'));
     }
 }

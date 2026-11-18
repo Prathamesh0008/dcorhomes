@@ -67,8 +67,8 @@ function memberInput(input: Record<string, unknown>) {
   if (!validUserId(userId)) throw new HttpError(400, 'User ID must be 3–30 letters, numbers, dots, underscores or hyphens, starting with a letter or number.');
   if (name.length < 2 || name.length > 100) throw new HttpError(400, 'Enter a full name between 2 and 100 characters.');
   if (!email || (email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith('@members.invalid'))) throw new HttpError(400, 'Enter a valid email address.');
-  if (input.role !== undefined && input.role !== 'user' && input.role !== 'admin') throw new HttpError(400, 'Invalid role.');
-  return { userId, name, email, role: input.role === 'admin' ? 'admin' : 'user' };
+  if (input.role !== undefined && input.role !== 'admin') throw new HttpError(400, 'Only administrator accounts can be created.');
+  return { userId, name, email, role: 'admin' };
 }
 export async function provisionMember(actor: Actor | null, input: Record<string, unknown>, bootstrapPassword?: string) {
   const data = memberInput(input), password = bootstrapPassword ?? generatePassword(data);
@@ -93,7 +93,7 @@ export async function provisionMember(actor: Actor | null, input: Record<string,
 export async function manageMember(actor: Actor, id: string, action: unknown, newPassword?: unknown) {
   if (!ObjectId.isValid(id)) throw new HttpError(404, 'User not found.');
   if (!['disable', 'enable', 'reset-password', 'revoke-sessions'].includes(String(action))) throw new HttpError(400, 'Invalid administrative action.');
-  if (action === 'reset-password' && new ObjectId(id).toHexString() === actor.id) throw new HttpError(409, 'To change your own password, use Change Password in My Account.');
+  if (action === 'reset-password' && new ObjectId(id).toHexString() === actor.id) throw new HttpError(409, 'To change your own password, use Change Password in Administration.');
   const db = await mongoDatabase(), userId = new ObjectId(id);
   const target = action === 'reset-password' ? await db.collection('users').findOne({ _id: userId }, { projection: { userId: 1, name: 1, email: 1 } }) : null;
   if (action === 'reset-password' && !target) throw new HttpError(404, 'User not found.');
@@ -102,7 +102,7 @@ export async function manageMember(actor: Actor, id: string, action: unknown, ne
   const password = typeof temporaryPassword === 'string' ? await hashPassword(temporaryPassword) : undefined;
   await administrative(actor, async session => {
     const user = await db.collection('users').findOne({ _id: userId }, { session });
-    if (!user) throw new HttpError(404, 'User not found.');
+    if (!user || user.role !== 'admin') throw new HttpError(404, 'Administrator not found.');
     if (password) { const problem = passwordProblem(temporaryPassword, passwordContext(user)); if (problem) throw new HttpError(400, problem); }
     if (action === 'disable' && user.role === 'admin' && user.status === 'active' && await db.collection('users').countDocuments({ role: 'admin', status: 'active' }, { session }) <= 1) throw new HttpError(409, 'The final active administrator cannot be disabled.');
     if (password) {
@@ -142,7 +142,7 @@ export async function changeMemberPassword(actor: Actor, currentPassword: unknow
   }); } finally { await session.endSession(); }
 }
 async function replaceMemberPassword(db: Awaited<ReturnType<typeof mongoDatabase>>, session: ClientSession, userId: ObjectId, account: Document, password: string, version: number, localRecovery = false) {
-    const result = await db.collection('users').updateOne({ _id: userId, status: 'active', sessionVersion: version }, { $set: { mustChangePassword: false, updatedAt: new Date() }, $inc: { sessionVersion: 1 } }, { session });
+    const result = await db.collection('users').updateOne({ _id: userId, role: 'admin', status: 'active', sessionVersion: version }, { $set: { mustChangePassword: false, updatedAt: new Date() }, $inc: { sessionVersion: 1 } }, { session });
     if (!result.matchedCount) throw new HttpError(401, 'Session changed. Please sign in again.');
     const changed = await db.collection('accounts').updateOne({ _id: account._id, password: account.password }, { $set: { password, updatedAt: new Date() } }, { session });
     if (!changed.matchedCount) throw new HttpError(409, 'Password changed. Please sign in again.');

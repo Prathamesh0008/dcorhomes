@@ -5,7 +5,7 @@ const {MongoMemoryReplSet}=require('mongodb-memory-server');
 process.env.MONGOMS_DOWNLOAD_DIR=path.resolve('.test-data/mongodb-binaries');
 const base='http://localhost:3351';let server,repl,client,logs='',stage='offline public routes';
 const shared={...process.env,SITE_URL:base,SESSION_SECRET:crypto.randomBytes(32).toString('hex'),BETTER_AUTH_SECRET:crypto.randomBytes(32).toString('hex'),MONGODB_DB:'dcorhome_architecture_check',VERCEL:'1',ALLOW_LOCAL_HTTP:'true',TRUST_PROXY:'false',DCORHOME_AI_ENABLED:'false',OPENAI_API_KEY:'',RESEND_API_KEY:'',RESEND_FROM_EMAIL:'',ENQUIRY_FROM_EMAIL:'',EMAIL_FROM:'',DCORHOME_DATA_DIR:path.resolve('.test-data/must-not-create-architecture')};
-const api=(route,method='GET',body,cookie)=>fetch(base+route,{method,redirect:'manual',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{cookie}:{}),origin:base},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(25000)});
+const api=(route,method='GET',body,cookie)=>fetch(base+route,{method,redirect:'manual',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{cookie}:{}),origin:base,...(route==='/api/enquiries'?{'idempotency-key':crypto.randomUUID()}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(25000)});
 const cookieOf=response=>response.headers.getSetCookie().map(value=>value.split(';')[0]).join('; ');
 async function stop(){if(server&&server.exitCode===null){const done=new Promise(resolve=>server.once('exit',resolve));server.kill('SIGINT');await done;}server=undefined;}
 async function start(env){logs='';server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3351'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});server.stdout.on('data',bytes=>{logs+=bytes.toString();});server.stderr.on('data',bytes=>{logs+=bytes.toString();});for(let i=0;i<120;i++){if(server.exitCode!==null)throw Error('Server exited: '+logs.replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g,'[redacted]').slice(-1800));if(logs.includes('Ready in'))return;await new Promise(resolve=>setTimeout(resolve,250));}throw Error('Server readiness timeout.');}
@@ -18,7 +18,6 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  const fabrics=await api('/api/fabrics');assert.equal(fabrics.status,200);await fabrics.text();
  assert.equal((await api('/api/options')).status,200);
  for(const route of ['/api/manual-designs','/api/designs','/api/fabrics/saved','/api/visualize','/api/visualizer/upload','/api/admin/assets','/api/admin/retention'])assert.equal((await api(route,'POST',{})).status,410);
- const enquiry=await api('/api/enquiries','POST',{name:'Offline architecture fixture',email:'fixture@example.invalid',message:'No email must be sent.',consent:true});assert.equal(enquiry.status,503);assert.ok((await enquiry.json()).error.includes('sales@dcorhome.com'));
  stage='focused offline visualizer';
  const browser=spawn(process.execPath,['scripts/architecture-visualizer-smoke.cjs'],{env:{...process.env,DCORHOME_TEST_BASE_URL:base},windowsHide:true,stdio:['ignore','pipe','pipe']});
  let browserOutput='';browser.stdout.on('data',b=>{browserOutput+=b.toString();});browser.stderr.on('data',b=>{browserOutput+=b.toString();});
@@ -26,7 +25,8 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  if(browserCode!==0){console.error(browserOutput);process.exitCode=1;}else process.stdout.write(browserOutput);
  assert.ok(!logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Public interaction attempted MongoDB.');
  assert.ok(!logs.includes('database_failure'),'Public interaction triggered database diagnostics.');
- console.log('PASS: Public routes, product metadata/sitemap, catalogue APIs and retired cloud endpoints work without any MongoDB connection, including with cookies. Missing email fails truthfully.');
+ console.log('PASS: Public routes, product metadata/sitemap, catalogue APIs and retired cloud endpoints work without any MongoDB connection, including with cookies. Browsing remains independent of the database.');
+ const enquiry=await api('/api/enquiries','POST',{name:'Offline architecture fixture',email:'fixture@example.invalid',message:'No email must be sent.',consent:true});assert.equal(enquiry.status,503);assert.ok((await enquiry.json()).error.includes('sales@dcorhome.com'));
  assert.equal(await (await api('/api/auth/get-session','GET',undefined,'unrelated=1')).json(),null);
  const login=await api('/api/auth/sign-in/username','POST',{username:'offline-admin',password:'not-a-real-password'});assert.equal(login.status,503);
  assert.ok(logs.includes('FORBIDDEN_MONGODB_CONNECT'),'Offline probe must intercept the actual runtime driver.');
@@ -45,22 +45,22 @@ async function start(env){logs='';server=spawn(process.execPath,['node_modules/n
  for(const route of ['/api/auth/sign-up/email','/api/auth/sign-up/username','/api/auth/sign-in/email','/api/auth/request-password-reset','/api/auth/update-user'])assert.equal((await api(route,'POST',{})).status,403);
  const adminState=await (await api('/api/auth/get-session','GET',undefined,adminCookie)).json();assert.equal(adminState.user.role,'admin');assert.equal(adminState.session.token,undefined);
  assert.equal((await api('/admin/users','GET',undefined,adminCookie)).status,200);
- assert.equal((await api('/login')).status,200);
+ assert.equal((await api('/admin/login')).status,200);
  assert.equal((await api('/api/admin/users','POST',{userId:'missing-email',fullName:'Missing email'},adminCookie)).status,400);
  assert.equal((await signIn('unknown-fixture','incorrect')).status,401);
- assert.equal((await api('/account')).headers.get('location'),'/login');
+ assert.equal((await api('/admin')).headers.get('location'),'/admin/login');
  const creation=await api('/api/admin/users','POST',{userId:'fixture-member',fullName:'Isolated architecture member',email:'member@example.invalid'},adminCookie);assert.equal(creation.status,201);const member=await creation.json();
  const {ObjectId}=require('mongodb');const credential=await db.collection('accounts').findOne({userId:new ObjectId(member.id)});assert.notEqual(credential.password,member.temporaryPassword);
  const first=await signIn('FIXTURE-MEMBER',member.temporaryPassword);assert.equal(first.status,200);const firstCookie=cookieOf(first);
- assert.ok((await api('/account','GET',undefined,firstCookie)).headers.get('location').endsWith('/account/change-password'));
+ assert.ok((await api('/admin','GET',undefined,firstCookie)).headers.get('location').endsWith('/admin/change-password'));
  const memberPassword=crypto.randomBytes(24).toString('base64url');assert.equal((await api('/api/account/password','POST',{currentPassword:member.temporaryPassword,newPassword:memberPassword},firstCookie)).status,200);
  assert.equal(await(await api('/api/auth/get-session','GET',undefined,firstCookie)).json(),null);
  const signedIn=await signIn('fixture-member',memberPassword);assert.equal(signedIn.status,200);const memberCookie=cookieOf(signedIn);
- assert.equal((await api('/account','GET',undefined,memberCookie)).status,200);
- assert.equal((await api('/login','GET',undefined,memberCookie)).headers.get('location'),'/account');
- assert.equal((await api('/account','GET',undefined,memberCookie)).status,200);
- assert.equal((await api('/api/admin/users','GET',undefined,memberCookie)).status,403);
- assert.equal((await api('/admin/users','GET',undefined,memberCookie)).status,404);
+ assert.equal((await api('/admin','GET',undefined,memberCookie)).status,200);
+ assert.equal((await api('/admin/login','GET',undefined,memberCookie)).headers.get('location'),'/admin');
+ assert.equal((await api('/admin','GET',undefined,memberCookie)).status,200);
+ assert.equal((await api('/api/admin/users','GET',undefined,memberCookie)).status,200);
+ assert.equal((await api('/admin/users','GET',undefined,memberCookie)).status,200);
  assert.equal((await signIn('fixture-member','incorrect')).status,401);
  assert.equal((await api('/api/admin','PATCH',{kind:'content'},adminCookie)).status,405);
  assert.equal((await api('/api/admin/users/'+member.id,'PATCH',{action:'revoke-sessions'},adminCookie)).status,200);

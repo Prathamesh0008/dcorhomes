@@ -59,12 +59,12 @@ const deadline = setTimeout(() => { console.error('MongoDB diagnostic deadline e
         const session = await api('/api/auth/get-session', 'GET', undefined, cookie);
         assert.equal(session.status, 200);
         const data = await session.json(); assert.equal(data.user.userId, user.userId); assert.equal(data.user.role, 'admin');
-        for (const route of ['/account', '/admin/users']) {
+        for (const route of ['/admin', '/admin/users']) {
           const page = await api(route, 'GET', undefined, cookie);
-          if (user.mustChangePassword) { assert.ok([303, 307, 308].includes(page.status)); assert.equal(new URL(page.headers.get('location'), base).pathname, '/account/change-password'); }
+          if (user.mustChangePassword) { assert.ok([303, 307, 308].includes(page.status)); assert.equal(new URL(page.headers.get('location'), base).pathname, '/admin/change-password'); }
           else assert.equal(page.status, 200, route);
         }
-        if (user.mustChangePassword) assert.equal((await api('/account/change-password', 'GET', undefined, cookie)).status, 200);
+        if (user.mustChangePassword) assert.equal((await api('/admin/change-password', 'GET', undefined, cookie)).status, 200);
         else assert.equal((await api('/api/admin/users', 'GET', undefined, cookie)).status, 200);
       }
     } finally {
@@ -72,8 +72,8 @@ const deadline = setTimeout(() => { console.error('MongoDB diagnostic deadline e
       assert.equal(await (await api('/api/auth/get-session', 'GET', undefined, cookie)).json(), null);
     }
     console.log(user.mustChangePassword
-      ? 'PASS: current password accepted, sessions persist, protected pages require password change, and logout works. Complete /account/change-password before administrator access.'
-      : 'PASS: administrator login, /account, /admin/users, user listing, session persistence across requests, logout and rejection of the logged-out session.');
+      ? 'PASS: current password accepted, sessions persist, protected pages require password change, and logout works. Complete /admin/change-password before administrator access.'
+      : 'PASS: administrator login, /admin, /admin/users, user listing, session persistence across requests, logout and rejection of the logged-out session.');
     return;
   }
   console.log('This resets only this administrator password and revokes its existing sessions.');
@@ -86,7 +86,7 @@ const deadline = setTimeout(() => { console.error('MongoDB diagnostic deadline e
   }
   await require('../lib/server/members.ts').resetLocalAdminPassword(String(user._id), user.sessionVersion, password);
   password = undefined;
-  console.log('Administrator password reset; previous sessions revoked. Sign in at /login.');
+  console.log('Administrator password reset; previous sessions revoked. Sign in at /admin/login.');
 })().catch(error => {
   // Print only our own fixed validation messages, never driver errors or stacks.
   console.error(error?.constructor?.name === 'Error' && /^(Usage:|Expected exactly|Reset refused:|Verification failed:|An interactive|Cancelled\.|The local|Passwords|Administrator changed)/.test(error.message)

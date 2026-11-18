@@ -4,6 +4,7 @@ import { customerAuth, customerAuthReady, runMemberLogin, hasCustomerSessionCook
 import { loginLimit } from '@/lib/server/members';
 import { failure, HttpError, jsonInput, mutation, privateHeaders } from '@/lib/server/security';
 import { normalizeUserId, validUserId } from '@/lib/server/member-policy';
+import { authConfigurationIssues } from '@/lib/server/auth-configuration';
 export const runtime = 'nodejs';
 async function handler(request: NextRequest) {
   const endpoint = request.nextUrl.pathname.slice('/api/auth'.length);
@@ -11,7 +12,10 @@ async function handler(request: NextRequest) {
   if (!['/sign-in/username', '/get-session', '/sign-out'].includes(endpoint)) return NextResponse.json({ message: 'Public registration is unavailable. Contact sales@dcorhome.com for account assistance.' }, { status: 403, headers: privateHeaders });
   try {
     if (endpoint === '/get-session' && request.method === 'GET' && !hasCustomerSessionCookie(request.headers)) return NextResponse.json(null, { headers: privateHeaders });
-    if (!customerAuthReady()) throw new HttpError(503, 'Member accounts are awaiting configuration. Please contact sales@dcorhome.com.');
+    if (!customerAuthReady()) {
+      console.error(JSON.stringify({ event: 'admin_auth_configuration', settings: authConfigurationIssues() }));
+      throw new HttpError(503, 'Administrator authentication is awaiting configuration. Contact the site operator.');
+    }
     if (endpoint === '/get-session') {
       if (request.method !== 'GET') throw new HttpError(405, 'Method not allowed.');
       const result = await validatedCustomerSession(request.headers, true);

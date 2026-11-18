@@ -17,7 +17,7 @@ export default function ChangePassword({ userId, name, email }: { userId: string
       const result = await response.json(); if (!response.ok) throw Error(result.error || 'Unable to change password.');
       // Establish a fresh library session after all previous sessions are revoked.
       const login = await fetch('/api/auth/sign-in/username', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: userId, password: form.get('newPassword') }) });
-      window.location.assign(login.ok ? '/account' : '/login?passwordChanged=1');
+      window.location.assign(login.ok ? '/admin' : '/admin/login?passwordChanged=1');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Please try again.'); }
     finally { setBusy(false); }
   }
