@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import { useFabricRecords } from '../FabricCatalogueProvider';
-import { defaultDesign, resolveLayer } from '@/lib/manual-visualizer/model';
+import { defaultDesign, designPreviewKey, resolveLayer } from '@/lib/manual-visualizer/model';
 import { scenes } from '@/lib/manual-visualizer/manifest';
 import WindowPreview from './WindowPreview';
 import LayerChoices from './LayerChoices';
@@ -29,11 +29,12 @@ export default function ManualCurtainStudio(){
  const records=useFabricRecords(),state=useVisualizerConfiguration(records);
  const {design,initialized,restoreError,originalContact,legacy}=state;
  const [step,setStep]=useState<Step|null>('room'),[renderState,setRenderState]=useState({key:'',ready:false});
- const key=JSON.stringify(design),ready=renderState.key===key&&renderState.ready&&!restoreError;
- const readiness=useCallback((value:boolean)=>setRenderState({key,ready:value}),[key]);
  const room=scenes.find(scene=>scene.id===design.sceneId)!;
+ const key=designPreviewKey(design,Boolean(room.photo)),ready=renderState.key===key&&renderState.ready&&!restoreError;
+ const readiness=useCallback((value:boolean)=>setRenderState({key,ready:value}),[key]);
  const initial=scenes.find(scene=>scene.id===defaultDesign.sceneId)!;
  function selection(layer:'main'|'sheer'){
+  if(room.photo&&layer==='main'&&design.main.enabled&&!design.photoCustomized)return 'Original curtain photograph';
   if(!design[layer].enabled)return layer==='sheer'?'Without sheers':'Without main curtains';
   try{const choice=resolveLayer(design[layer],records);return choice.fabric.name+' / '+choice.shadeName;}catch{return 'Find your fabric';}
  }
@@ -47,14 +48,14 @@ export default function ManualCurtainStudio(){
   <Container className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.86fr)_minmax(330px,1fr)] lg:gap-10">
    <div className="min-w-0 lg:sticky lg:top-[108px]">
     {restoreError?<div className="rounded-[6px] bg-cream p-7"><h2 className="mt-0 font-serif text-[30px] font-normal">Let’s reopen your design.</h2><p role="alert" className="text-[13px] leading-6">{restoreError} Your previous choice has not been previewed.</p><button type="button" onClick={state.startFresh} className="min-h-12 rounded-[3px] border-0 bg-ink px-5 text-[13px] text-paper">Start a new fabric study</button></div>
-     :initialized?<WindowPreview design={design} records={records} onReady={readiness} onSelectSample={()=>state.selectRoom('garden-living')}/>
-     :<div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-cream" role="status" aria-label="Opening the curtain studio"><StudioImage src={initial.base} alt="Garden sample room" priority className="h-full w-full object-contain"/></div>}
+     :initialized?<WindowPreview design={design} records={records} onReady={readiness} onSelectSample={()=>state.selectRoom(defaultDesign.sceneId)}/>
+     :<div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-cream" role="status" aria-label="Opening the curtain studio"><StudioImage src={initial.base} alt={initial.name} priority className="h-full w-full object-contain"/></div>}
     {initialized&&!restoreError&&<div className="mt-4 hidden flex-wrap items-center justify-between gap-3 border-t border-solid border-[#dedfd5] pt-4 lg:flex"><p className="m-0 max-w-md text-[12px] leading-6 text-muted">Prefer to feel the fabric first? Request samples with your enquiry.</p><a href="mailto:sales@dcorhome.com" className="inline-flex min-h-11 items-center gap-2 text-[12px]">Talk to the atelier<ArrowUpRight size={14}/></a></div>}
    </div>
    <aside aria-label="Create your curtain design" className="min-w-0 rounded-[6px] bg-cream px-5 pb-6 pt-1 sm:px-6 lg:px-6 xl:px-7">
     {initialized?<>
      <SelectionArea id="room" number="01" title="Where shall we begin?" selected={room.name} open={step==='room'} onToggle={()=>toggle('room')}><RoomChoices value={design.sceneId} onChange={state.selectRoom} onNext={()=>setStep('sheer')}/></SelectionArea>
-     <SelectionArea id="sheer" number="02" title="Let the light in." selected={selection('sheer')} open={step==='sheer'} onToggle={()=>toggle('sheer')}><LayerChoices layer="sheer" value={design.sheer} records={records} onChange={value=>state.selectLayer('sheer',value)} onNext={()=>setStep('main')}/></SelectionArea>
+     <SelectionArea id="sheer" number="02" title="Let the light in." selected={selection('sheer')} open={step==='sheer'} onToggle={()=>toggle('sheer')}>{room.photo&&<p className="mt-0 text-[11px] leading-6 text-muted">The photograph keeps its original sheer. Your sheer choices are saved for your enquiry.</p>}<LayerChoices layer="sheer" value={design.sheer} records={records} onChange={value=>state.selectLayer('sheer',value)} onNext={()=>setStep('main')}/></SelectionArea>
      <SelectionArea id="main" number="03" title="Add the finishing touch." selected={selection('main')} open={step==='main'} onToggle={()=>toggle('main')}><LayerChoices layer="main" value={design.main} records={records} onChange={value=>state.selectLayer('main',value)}/></SelectionArea>
      <DesignReview design={design} records={records} ready={ready} blocked={Boolean(restoreError)} originalContact={originalContact}/>
     </>:<div className="py-6 text-[13px] text-muted" role="status">Opening your fabric collection...</div>}

@@ -1,4 +1,4 @@
-type ImageEntry={promise:Promise<HTMLImageElement>;bytes:number;image?:HTMLImageElement};
+type ImageEntry={promise:Promise<HTMLImageElement>;bytes:number};
 const cache=new Map<string,ImageEntry>();
 const budget=32*1024*1024;
 function trim(){
@@ -7,12 +7,6 @@ function trim(){
   if(bytes<=budget&&cache.size<=16)break;
   cache.delete(key);bytes-=item.bytes;
  }
-}
-export function cachedImage(src:string){
- const entry=cache.get(src);
- if(!entry?.image)return undefined;
- cache.delete(src);cache.set(src,entry);
- return entry.image;
 }
 export function loadImage(src:string):Promise<HTMLImageElement>{
  if(!src.startsWith('/')||src.startsWith('//'))return Promise.reject(Error('Preview images must be hosted on this site.'));
@@ -23,7 +17,7 @@ export function loadImage(src:string):Promise<HTMLImageElement>{
   const image=new Image();image.decoding='async';
   const fail=()=>{if(cache.get(src)===entry)cache.delete(src);reject(Error('This image is temporarily unavailable. Please try another selection.'));};
   image.onerror=fail;
-  image.onload=()=>image.decode().then(()=>{entry.image=image;entry.bytes=image.naturalWidth*image.naturalHeight*4;trim();resolve(image);}).catch(fail);
+  image.onload=()=>image.decode().then(()=>{entry.bytes=image.naturalWidth*image.naturalHeight*4;trim();resolve(image);}).catch(fail);
   image.src=src;
  });
  cache.set(src,entry);trim();return entry.promise;

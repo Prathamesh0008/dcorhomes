@@ -6,6 +6,7 @@ import { localDesigns } from '@/lib/local-designs';
 import { readManual } from '@/lib/curtains/manual-config';
 import { defaultDesign, fromManual, validateDesign, type VisualizerDesign, type LayerSelection } from '@/lib/manual-visualizer/model';
 import { configurationReducer, type ConfigurationAction } from '@/lib/manual-visualizer/configuration';
+import { studioPhotoScenes } from '@/lib/manual-visualizer/manifest';
 
 const storageKey='dcorhome-visualizer-v1';
 export function useVisualizerConfiguration(records:FabricRecord[]){
@@ -38,7 +39,10 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
    }else{
     // Disabled browser storage must not prevent an otherwise working studio.
     let saved:string|null=null;try{saved=localStorage.getItem(storageKey);}catch{}
-    if(saved)restored=JSON.parse(saved);
+    if(saved){
+     const last=validateDesign(JSON.parse(saved),records);
+     restored=studioPhotoScenes.some(scene=>scene.id===last.sceneId)?last:{...last,sceneId:defaultDesign.sceneId};
+    }
    }
    if(!controller.signal.aborted)dispatch({type:'restore',design:restored?validateDesign(restored,records):structuredClone(defaultDesign)});
   }catch(error){if(!controller.signal.aborted)setRestoreError(error instanceof Error?error.message:'Your previous design could not be opened.');}

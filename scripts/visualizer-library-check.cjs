@@ -7,9 +7,10 @@ require.extensions['.ts'] = (module, file) => module._compile(ts.transpileModule
   compilerOptions: {module: ts.ModuleKind.CommonJS, esModuleInterop: true},
 }).outputText, file);
 const {libraryRecords} = require('../lib/manual-visualizer/library.ts');
-const {scenes, materials} = require('../lib/manual-visualizer/manifest.ts');
+const {scenes, materials, studioPhotoScenes} = require('../lib/manual-visualizer/manifest.ts');
 const {resolveLayer, validateDesign, defaultDesign, designSummary, materialShades, matchingMaterialShade} = require('../lib/manual-visualizer/model.ts');
 const {composeDesign} = require('../lib/manual-visualizer/renderer.ts');
+const {renderCapability} = require('../lib/manual-visualizer/types.ts');
 const library = require('../lib/manual-visualizer/library-assets.json');
 const {configurationReducer}=require('../lib/manual-visualizer/configuration.ts');
 const {mirroredCoordinate,textileLuminance,clothLighting}=require('../lib/manual-visualizer/sampling.ts');
@@ -53,7 +54,38 @@ const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file))
     assert.match(designSummary(design, []), /NOT been rendered/);
     await assert.rejects(composeDesign(design, []), /Room view only|Room inspiration only/);
   }
-  assert.equal(scenes.filter(s => s.previewSupport === 'base-only').length, 10);
+  assert.equal(scenes.filter(s => renderCapability(s).mode === 'room-only').length, 8);
+  assert.equal(scenes.filter(s => renderCapability(s).mode === 'unavailable').length, 9);
+  const live = scenes.filter(s => !s.photo && renderCapability(s).comparison);
+  assert.deepEqual(live.map(scene => scene.id), ['room-01', 'room-09', 'garden-living']);
+  for (const scene of live) {
+    const sharp = require('sharp');
+    const {x, y, width, height} = scene.window;
+    assert.ok(x >= 0 && y >= 0 && width > 0 && height > 0 && x + width <= 1 && y + height <= 1);
+    for (const {fold, mask, foldCrop} of Object.values(scene.construction)) {
+      const image = await sharp(path.join(root, 'public', fold)).metadata();
+      const alpha = await sharp(path.join(root, 'public', mask)).metadata();
+      assert.deepEqual([alpha.width, alpha.height], [image.width, image.height]);
+      assert.ok(foldCrop.x + foldCrop.width <= image.width && foldCrop.y + foldCrop.height <= image.height);
+    }
+    if (scene.id !== 'garden-living') assert.ok(scene.foreground.outline);
+    const image = await sharp(path.join(root, 'public', scene.base)).metadata();
+    assert.deepEqual([image.width, image.height], [scene.width, scene.height]);
+  }
+  const {heroComparisonSlides} = require('../lib/hero-comparisons.ts');
+  assert.deepEqual(studioPhotoScenes.map(s=>s.id),heroComparisonSlides.map(s=>s.id));
+  for (const [i,scene] of studioPhotoScenes.entries()) {
+    const slide=heroComparisonSlides[i],sharp=require('sharp');
+    assert.equal(scene.base,slide.beforeSrc);
+    assert.equal(scene.photo.after,slide.afterSrc);
+    assert.ok(scene.photo.mainMask.panels.length>=2,scene.id+' needs an aligned main-curtain mask');
+    for (const src of [scene.base,scene.photo.after]) {
+      const image=await sharp(path.join(root,'public',src)).metadata();
+      assert.deepEqual([image.width,image.height],[1448,1086]);
+    }
+    const thumbnail=await sharp(path.join(root,'public',scene.thumbnail)).metadata();
+    assert.deepEqual([thumbnail.width,thumbnail.height],[640,480]);
+  }
   for (const file of library.files) {
     const input = path.join(root, 'assets/dcorhome-manual-visualizer', file.path);
     const runtime = path.join(root, 'public/images/manual-visualizer/library-v1', file.path);
@@ -80,5 +112,5 @@ const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file))
   assert.ok(detail.every(value=>Math.abs(value-1)<.00001),'neutral cloth must not invent weave or swatch lighting');
   assert.ok(clothLighting(.2,.18)<clothLighting(.8,.18),'real fold map must control the lighting');
   assert.ok(materials.some(m => m.id === 'linen'));
-  console.log(`PASS: ${shades} optimized shade textures, 10 room-view gates, independent reducer, seamless sampling, neutral cloth lighting, saved-version migration and ${library.files.length} byte-identical source copies.`);
+  console.log(`PASS: ten native homepage pairs and thumbnail derivatives, ${shades} optimized shade textures, legacy room capabilities, independent reducer, seamless sampling, neutral cloth lighting, saved-version migration and ${library.files.length} byte-identical source copies.`);
 })().catch(error => {console.error(error); process.exitCode = 1;});

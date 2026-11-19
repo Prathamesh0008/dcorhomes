@@ -31,8 +31,12 @@ export const libraryMaterials: Material[] = library.fabrics.map(fabric => ({
 
 export const libraryScenes: Scene[] = library.rooms.map(room => ({
   id: room.id, name: room.name, version: 'manual-v1', status: 'sample',
-  base: runtimeImage(room.base), thumbnail: runtimeImage(room.thumbnail), width: room.width, height: room.height,
+  base: room.base, thumbnail: runtimeImage(room.thumbnail), width: room.width, height: room.height,
   provenance: room.provisional ? 'Upscaled concept-sheet crop; inspiration only.' : 'Generated architectural prototype; room view only.',
-  previewSupport: 'base-only', previewNotice: room.notice, provisional: room.provisional,
+  previewSupport: 'base-only',
+  previewNotice: room.provisional
+    ? 'Room inspiration only. This image needs aligned curtain and foreground masks before it can preview your fabrics.'
+    : room.notice,
+  provisional: room.provisional,
   window: {x: room.window[0], y: room.window[1], width: room.window[2] - room.window[0], height: room.window[3] - room.window[1]},
 }));
