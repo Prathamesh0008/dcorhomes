@@ -14,8 +14,8 @@ export default function DesignReview({design,records,ready,blocked,originalConta
   <dl className="m-0 space-y-3 text-[12px] leading-5">
    <div className="flex justify-between gap-6"><dt className="text-muted">Room</dt><dd className="m-0 max-w-[70%] text-right">{scenes.find(scene=>scene.id===design.sceneId)?.name}</dd></div>
    {(['sheer','main'] as const).map(key=>{
-    let text='Choose your fabric',image:string|undefined;
-    try{const layer=resolveLayer(design[key],records);text=design[key].enabled?`${layer.fabric.name} / ${layer.shadeName}`:'Not included';image=design[key].enabled?layer.variant?.swatchImage:undefined;}catch{}
+    let text=design[key].enabled?'Choose your fabric':'Not included',image:string|undefined;
+    if(design[key].enabled)try{const layer=resolveLayer(design[key],records);text=`${layer.fabric.name} / ${layer.shadeName}`;image=layer.variant?.swatchImage;}catch{}
     return <div key={key} className="flex justify-between gap-6"><dt className="shrink-0 text-muted">{key==='sheer'?'Sheer':'Main curtain'}</dt><dd className="m-0 flex min-w-0 items-center justify-end gap-2 text-right">{image&&<span aria-hidden="true" style={{backgroundImage:`url("${image}")`}} className="h-4 w-4 shrink-0 rounded-full border border-solid border-black/10 bg-cover"/>}{text}</dd></div>;
    })}
   </dl>

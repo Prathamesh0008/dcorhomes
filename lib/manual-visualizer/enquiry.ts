@@ -1,5 +1,5 @@
 import type { FabricRecord } from '@/lib/curtains/catalogue';
-import { validateDesign, resolveLayer, type VisualizerDesign } from './model';
+import { hasLayerShade, validateDesign, resolveLayer, resolveLayerMaterial, type VisualizerDesign } from './model';
 import { scenes } from './manifest';
 
 export type DesignEnquiryDetails = { rows: { label: string; value: string }[]; disclaimer: string };
@@ -11,6 +11,11 @@ export function designEnquiryDetails(input: unknown, records: FabricRecord[]): D
   for (const key of ['main', 'sheer'] as const) {
     const label = key === 'main' ? 'Main Curtain' : 'Sheer Curtain';
     if (!design[key].enabled) { rows.push({ label, value: 'None' }); continue; }
+    if (!hasLayerShade(design[key])) {
+      const fabric = design[key].fabricId ? resolveLayerMaterial(design[key], records).fabric.name : 'To be selected';
+      rows.push({ label, value: fabric }, { label: label + ' Color', value: 'To be selected' });
+      continue;
+    }
     const layer = resolveLayer(design[key], records);
     demonstration ||= !layer.commercial;
     rows.push({ label, value: layer.fabric.name }, { label: label + ' Color', value: layer.shadeName });

@@ -6,6 +6,27 @@ for(const sheer of data.fabrics.filter(f=>f.usage.includes('sheer')))for(const c
 for(const panels of ['Single','Pair'])for(const curtainLength of ['Floor length','Sill length','Below sill'])for(const fullness of ['1.5','2','2.5']){const next=data.normalizeManual({...base,panels,curtainLength,fullness});assert.equal(next.panels,panels);assert.equal(data.manualSelection(next).curtainLength,curtainLength);assert.equal(data.manualSelection(next).fullness,fullness);assert.deepEqual(data.readManual(data.manualSelection(next)),next);}
 assert.equal(data.normalizeManual({...base,panels:'invalid',curtainLength:'invalid',fullness:'100'}).fullness,'2');
 const changed=data.normalizeManual({...base,mainFabric:'clay'});assert.equal(changed.sheerFabric,base.sheerFabric);assert.equal(changed.sheerColor,base.sheerColor);assert.equal(changed.mainColor,'Soft Beige');
+const addedShades={main:['Navy Blue','Olive Green','Burgundy'],sheer:['Champagne','Sage Green','Pale Blue']};
+for(const [layer,names] of Object.entries(addedShades)){
+ const other=layer==='main'?'sheer':'main';
+ for(const original of data.fabrics.filter(fabric=>fabric.usage.includes(layer))){
+  const fabric=data.fabricFor(original.id,layer);
+  assert.deepEqual(fabric.colors.slice(0,original.colors.length),original.colors);
+  for(const name of names){
+   const matches=fabric.colors.filter(shade=>shade.name===name);
+   assert.equal(matches.length,1,original.name+' / '+name);
+   const [shade]=matches;
+   assert.notEqual(shade.available,false);
+   assert.ok(fs.existsSync(path.join('public',shade.digitalPreviewImage)));
+   assert.ok(fs.existsSync(path.join('public',shade.digitalSwatchImage)));
+   const config=data.normalizeManual({...base,[layer+'Fabric']:fabric.id,[layer+'Color']:shade.id});
+   assert.equal(config[layer+'Color'],shade.id);
+   assert.equal(config[other+'Fabric'],base[other+'Fabric']);
+   assert.equal(config[other+'Color'],base[other+'Color']);
+   assert.deepEqual(data.readManual(data.manualSelection(config)),config);
+  }
+ }
+}
 assert.equal(data.normalizeManual({...base,mainFabric:'clay',pattern:'Striped'}).pattern,'Solid');
 for(const record of data.fabrics){assert.ok(record.colors.length);for(const image of record.images)assert.ok(fs.existsSync(path.join('public',image)));if(record.source==='demo'){for(const key of ['sku','fabricWidthCm','weightGsm','composition','pricePerMetre','availability'])assert.equal(record[key],undefined);}}
 const synthetic={fabricWidthCm:280,weightGsm:220,composition:'synthetic test record',opacity:'test filtering',pattern:'test pattern'};

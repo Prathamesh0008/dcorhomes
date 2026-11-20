@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { scenes } from '@/lib/manual-visualizer/manifest';
-import { designPreviewKey, type VisualizerDesign } from '@/lib/manual-visualizer/model';
+import { designPreviewKey, mainPreviewSelection, type VisualizerDesign } from '@/lib/manual-visualizer/model';
 import { composeDesign } from '@/lib/manual-visualizer/renderer';
 import { renderCapability } from '@/lib/manual-visualizer/types';
 import StudioImage from './StudioImage';
@@ -16,7 +16,10 @@ type Props = {
  onSelectSample: () => void;
 };
 
-const revealDuration = 1400;
+const revealDuration = 1500;
+const curtainFadeDuration = 600;
+const beforePosition = 0;
+const afterPosition = 100;
 
 function paintFrame(target: HTMLCanvasElement, source: HTMLCanvasElement) {
  if (target.width !== source.width) target.width = source.width;
@@ -32,28 +35,30 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
  const capability = renderCapability(scene);
  const live = capability.comparison;
  const key = designPreviewKey(design, Boolean(scene.photo));
+ const mainSelection = mainPreviewSelection(design.main);
+ const mainKey = JSON.stringify(mainSelection);
  const host = useRef<HTMLDivElement>(null);
  const canvas = useRef<HTMLCanvasElement>(null);
  const backdrop = useRef<HTMLCanvasElement>(null);
  const hasPreviousFrame = useRef(false);
  const handle = useRef<HTMLDivElement>(null);
  const animation = useRef(0);
+ const fade = useRef<Animation | null>(null);
  const pointer = useRef<number | null>(null);
- const reveal = useRef(100);
- const lastCompleted = useRef<{sceneId: string; key: string; width: number; records: FabricRecord[]; retry: number} | null>(null);
- const [endpoint, setEndpoint] = useState<number | null>(100);
+ const reveal = useRef(afterPosition);
+ const lastCompleted = useRef<{sceneId: string; key: string; mainKey: string; width: number; records: FabricRecord[]; retry: number} | null>(null);
+ const [endpoint, setEndpoint] = useState<number | null>(afterPosition);
  const [measuredWidth, setWidth] = useState(0);
  const width = scene.photo ? scene.width : measuredWidth;
  const [retry, setRetry] = useState(0);
  const [imageRetry, setImageRetry] = useState(0);
  const [imageError, setImageError] = useState('');
  const [error, setError] = useState('');
- const [frame, setFrame] = useState({sceneId: '', key: '', width: 0, photo: false});
+ const [frame, setFrame] = useState({sceneId: '', key: '', width: 0});
  const imageFailed = imageError === scene.id;
- // The original homepage pairs share one aspect ratio, so the completed
- // frame can also remain in place while a different homepage room loads.
- const visibleFrame = live && (frame.sceneId === scene.id || Boolean(scene.photo && frame.photo));
+ const visibleFrame = live && frame.sceneId === scene.id;
  const ready = visibleFrame && frame.key === key && frame.width === width && !error && !imageFailed;
+ const sliderReady = ready && capability.mode === 'live-study' && mainSelection !== null;
 
  function show(value: number) {
   const previous = reveal.current;
@@ -66,40 +71,45 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
   }
   const before = previous === 0 || previous === 100 ? previous : null;
   const after = reveal.current === 0 || reveal.current === 100 ? reveal.current : null;
-  if (after === 100 && backdrop.current) backdrop.current.hidden = true;
+  if (after === afterPosition && backdrop.current) backdrop.current.hidden = true;
   if (before !== after) setEndpoint(after);
  }
 
  function stopAnimation() {
   cancelAnimationFrame(animation.current);
   animation.current = 0;
+  if (fade.current) {
+   fade.current.cancel();
+   fade.current = null;
+   if (backdrop.current) backdrop.current.hidden = true;
+  }
  }
 
- function replay() {
-  stopAnimation();
+ function animateReveal(fromPreviousFrame = false) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-   show(100);
+   show(afterPosition);
    return;
   }
-  if (backdrop.current) backdrop.current.hidden = !hasPreviousFrame.current;
-  show(0);
+  if (backdrop.current) backdrop.current.hidden = !fromPreviousFrame || !hasPreviousFrame.current;
+  show(beforePosition);
   const started = performance.now();
   const tick = (now: number) => {
-   const progress = Math.min(1, (now - started) / revealDuration);
+   const progress = Math.max(0, Math.min(1, (now - started) / revealDuration));
    show((1 - Math.cos(Math.PI * progress)) * 50);
    animation.current = progress < 1 ? requestAnimationFrame(tick) : 0;
   };
   animation.current = requestAnimationFrame(tick);
  }
 
- function chooseView(value: number) {
+ function replay() {
   stopAnimation();
-  show(value);
+  animateReveal();
  }
 
- function chooseEndpoint(value: number) {
+ function chooseView(value: number) {
+  stopAnimation();
   if (backdrop.current) backdrop.current.hidden = true;
-  chooseView(value);
+  show(value);
  }
 
  function dragTo(x: number) {
@@ -124,7 +134,7 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
 
  useLayoutEffect(() => {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const finish = () => { if (motion.matches && animation.current) chooseView(100); };
+  const finish = () => { if (motion.matches && (animation.current || fade.current)) chooseView(afterPosition); };
   motion.addEventListener('change', finish);
   return () => motion.removeEventListener('change', finish);
  }, []);
@@ -152,7 +162,7 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
    return;
   }
   // Keep the last complete composition visible while the next one is prepared.
-  if (changed || animation.current) chooseEndpoint(100);
+  if (changed || animation.current) chooseView(afterPosition);
   setError('');
   onReady(false);
   if (!live || !width || imageFailed) {
@@ -171,9 +181,22 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
      if (hasPreviousFrame.current) paintFrame(prior, target);
     }
     paintFrame(target, result);
-    lastCompleted.current = {sceneId: scene.id, key, width, records, retry};
-    setFrame({sceneId: scene.id, key, width, photo: Boolean(scene.photo)});
-    if (changed) replay();
+    lastCompleted.current = {sceneId: scene.id, key, mainKey, width, records, retry};
+    setFrame({sceneId: scene.id, key, width});
+    const mainChanged = previous?.sceneId === scene.id ? previous.mainKey !== mainKey : mainKey !== 'null';
+    const animateMain = capability.mode === 'live-study' && mainKey !== 'null' && previous?.mainKey !== mainKey;
+    if (mainChanged && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+     prior.hidden = animateMain || !hasPreviousFrame.current;
+     const transition = target.animate([{opacity: 0}, {opacity: 1}], {duration: curtainFadeDuration, easing: 'ease-in-out'});
+     fade.current = transition;
+     transition.onfinish = () => {
+      if (fade.current !== transition) return;
+      fade.current = null;
+      prior.hidden = true;
+     };
+    }
+    if (animateMain) animateReveal();
+    else if (changed && !scene.photo && !mainChanged) animateReveal(true);
     onReady(true);
    } finally {
     result.width = 0;
@@ -189,10 +212,10 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
   void composeDesign(design, records, width, controller.signal).then(present).catch(fail);
   return () => {
    controller.abort();
-   cancelAnimationFrame(animation.current);
+   stopAnimation();
    pointer.current = null;
   };
- }, [key, records, width, retry, imageFailed, onReady, live]);
+ }, [key, mainKey, records, width, retry, imageFailed, onReady, live, capability.mode]);
 
  function retryPreview() {
   if (imageFailed) {
@@ -210,7 +233,7 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
    <div className="mb-4 flex min-h-11 flex-wrap items-center justify-between gap-3">
     <figcaption className="text-[13px] font-medium">{scene.name}</figcaption>
     {live && <div role="group" aria-label="Compare your curtains" className="inline-flex rounded-full bg-[#eeeee6] p-1">
-     {[0, 100].map(value => <button type="button" key={value} disabled={!ready} aria-pressed={ready && endpoint === value} onClick={() => chooseEndpoint(value)} className="min-h-9 rounded-full border-0 bg-transparent px-3 text-[11px] transition-colors aria-pressed:bg-paper aria-pressed:shadow-sm disabled:opacity-50">{value ? 'After' : 'Before'}</button>)}
+     {[beforePosition, afterPosition].map(value => <button type="button" key={value} disabled={!ready} aria-pressed={ready && endpoint === value} onClick={() => chooseView(value)} className="min-h-9 rounded-full border-0 bg-transparent px-3 text-[11px] transition-colors aria-pressed:bg-paper aria-pressed:shadow-sm disabled:opacity-50">{value === beforePosition ? 'Before' : 'After'}</button>)}
      <button type="button" disabled={!ready} onClick={replay} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border-0 bg-transparent px-3 text-[11px] disabled:opacity-50"><RotateCcw aria-hidden="true" size={12}/>Replay</button>
     </div>}
    </div>
@@ -224,7 +247,7 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
     <canvas ref={backdrop} data-testid="previous-curtain-composition" aria-hidden="true" hidden className="pointer-events-none absolute inset-0 h-full w-full"/>
     <canvas ref={canvas} data-testid="composed-curtains" aria-hidden={!visibleFrame} aria-label="Curtain composition" role="img" className="pointer-events-none absolute inset-0 h-full w-full [clip-path:inset(0_calc(100%_-_var(--reveal,100%))_0_0)]" style={{visibility: visibleFrame ? 'visible' : 'hidden'}}/>
     {live && <div
-     hidden={!ready}
+     hidden={!sliderReady}
      className="absolute inset-0 touch-pan-y select-none"
      onPointerDown={event => {
       if (!event.isPrimary || event.button !== 0) return;
@@ -237,7 +260,7 @@ export default function WindowPreview({design, records, onReady, onSelectSample}
      onLostPointerCapture={() => { pointer.current = null; }}
     >
      <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-[var(--reveal,100%)] w-px bg-white shadow-sm"/>
-     <div ref={handle} role="slider" tabIndex={0} aria-label="Before and after curtain reveal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={100} aria-valuetext="100% after view" onKeyDown={moveWithKeyboard} className="absolute left-[clamp(22px,var(--reveal,100%),calc(100%_-_22px))] top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-solid border-[#d9d4c7] bg-paper text-ink shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
+     <div ref={handle} role="slider" tabIndex={0} aria-label="Before and after curtain reveal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={afterPosition} aria-valuetext="100% after view" onKeyDown={moveWithKeyboard} className="absolute left-[clamp(22px,var(--reveal,100%),calc(100%_-_22px))] top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-solid border-[#d9d4c7] bg-paper text-ink shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
       <ChevronLeft aria-hidden="true" size={14}/><ChevronRight aria-hidden="true" size={14}/>
      </div>
     </div>}

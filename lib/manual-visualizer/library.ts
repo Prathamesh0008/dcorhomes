@@ -1,4 +1,5 @@
 import type { FabricRecord } from '../curtains/catalogue';
+import { withCustomizerShades } from '../curtains/customizer-shades';
 import type { FabricMaterial as Material, RoomScene as Scene } from './types';
 import library from './library-assets.json';
 
@@ -16,8 +17,9 @@ export const libraryRecords: FabricRecord[] = library.fabrics.map(fabric => ({
     swatchImage: runtimeImage(color.texture), available: null})),
 }));
 
-export function visualizerFabric(id: string | undefined, records: FabricRecord[]) {
-  return records.find(record => record.id === id) || libraryRecords.find(record => record.id === id);
+export function visualizerFabric(id: string | null | undefined, records: FabricRecord[]) {
+  const record = records.find(record => record.id === id);
+  return record ? withCustomizerShades(record) : libraryRecords.find(record => record.id === id);
 }
 
 export const libraryMaterials: Material[] = library.fabrics.map(fabric => ({

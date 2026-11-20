@@ -34,7 +34,7 @@ export default function ManualCurtainStudio(){
  const readiness=useCallback((value:boolean)=>setRenderState({key,ready:value}),[key]);
  const initial=scenes.find(scene=>scene.id===defaultDesign.sceneId)!;
  function selection(layer:'main'|'sheer'){
-  if(room.photo&&layer==='main'&&design.main.enabled&&!design.photoCustomized)return 'Original curtain photograph';
+  if(room.photo&&layer==='main'&&design.main.enabled&&!design.main.materialId)return 'Original curtain photograph';
   if(!design[layer].enabled)return layer==='sheer'?'Without sheers':'Without main curtains';
   try{const choice=resolveLayer(design[layer],records);return choice.fabric.name+' / '+choice.shadeName;}catch{return 'Find your fabric';}
  }

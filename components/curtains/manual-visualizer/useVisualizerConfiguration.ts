@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { localDesigns } from '@/lib/local-designs';
 import { readManual } from '@/lib/curtains/manual-config';
-import { defaultDesign, fromManual, validateDesign, type VisualizerDesign, type LayerSelection } from '@/lib/manual-visualizer/model';
+import { defaultDesign, fromManual, validateDesign, type LayerSelection } from '@/lib/manual-visualizer/model';
 import { configurationReducer, type ConfigurationAction } from '@/lib/manual-visualizer/configuration';
 import { studioPhotoScenes } from '@/lib/manual-visualizer/manifest';
 
@@ -41,7 +41,10 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
     let saved:string|null=null;try{saved=localStorage.getItem(storageKey);}catch{}
     if(saved){
      const last=validateDesign(JSON.parse(saved),records);
-     restored=studioPhotoScenes.some(scene=>scene.id===last.sceneId)?last:{...last,sceneId:defaultDesign.sceneId};
+     const sceneId=studioPhotoScenes.some(scene=>scene.id===last.sceneId)?last.sceneId:defaultDesign.sceneId;
+     // An ordinary visit starts a new main-curtain selection. Explicit
+     // design links above still restore the complete saved configuration.
+     restored={...defaultDesign,sceneId,sheer:last.sheer};
     }
    }
    if(!controller.signal.aborted)dispatch({type:'restore',design:restored?validateDesign(restored,records):structuredClone(defaultDesign)});

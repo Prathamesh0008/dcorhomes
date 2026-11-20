@@ -36,7 +36,7 @@ export type FabricMaterial = {
   colorMode:'tint'|'photographic'|'texture'; status:'sample'|'missing';
   surface?:'woven'|'patterned'|'velvet'|'silk';
 };
-export type LayerSelection = {enabled:boolean;materialId:string;fabricId:string;variantId?:string;previewColorId?:string};
+export type LayerSelection = {enabled:boolean;materialId:string|null;fabricId:string|null;variantId?:string|null;previewColorId?:string};
 export type VisualizerConfiguration = {
   version:1; assetVersion:string; rendererVersion?:string; sceneId:string;
   main:LayerSelection; sheer:LayerSelection;

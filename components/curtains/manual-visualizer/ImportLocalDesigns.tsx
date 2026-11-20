@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { localDesigns, saveLocalDesign } from '@/lib/local-designs';
-import { validateDesign, resolveLayer } from '@/lib/manual-visualizer/model';
+import { hasLayerShade, validateDesign, resolveLayer } from '@/lib/manual-visualizer/model';
 import { defaultSelection } from '@/lib/design-options';
 import { useFabricRecords } from '../FabricCatalogueProvider';
 
@@ -21,7 +21,7 @@ export default function ImportLocalDesigns(){
    if(new Set(designs.map(item=>item.id)).size!==designs.length)throw Error('Duplicate design IDs in import.');
    const existing=await localDesigns();
    for(const item of designs){const prior=existing.find(saved=>saved.id===item.id);if(prior&&JSON.stringify(prior.visualizer)!==JSON.stringify(item.design))throw Error('An existing local design has this ID. Import refused to preserve it.');}
-   for(const item of designs){if(existing.some(saved=>saved.id===item.id))continue;const main=resolveLayer(item.design.main,records);await saveLocalDesign({id:item.id,created:item.created,visualizer:item.design,selection:{...defaultSelection,fabric:main.fabric.id,color:main.hex},status:'manual'});count++;}
+   for(const item of designs){if(existing.some(saved=>saved.id===item.id))continue;const {main}=item.design;const shade=hasLayerShade(main)?resolveLayer(main,records):null;await saveLocalDesign({id:item.id,created:item.created,visualizer:item.design,selection:{...defaultSelection,fabric:main.fabricId??'',color:shade?.hex??''},status:'manual'});count++;}
    setMessage(`${count} designs imported on this browser/device.`);
   }catch(error){setMessage(`${count?count+' designs imported before stopping. ':''}${error instanceof Error?error.message:'Import failed.'}`);}
   finally{setBusy(false);event.target.value='';window.dispatchEvent(new Event('dcorhome-designs-changed'));}

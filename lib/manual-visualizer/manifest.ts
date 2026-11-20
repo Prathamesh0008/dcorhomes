@@ -8,7 +8,7 @@ export const assetVersion='manual-v1';
 const root='/images/manual-visualizer/v1';
 // Crop excess transparent padding from the prepared photographic fold and
 // alpha maps together. The alpha retains the photographed heading and hem.
-const constructions:NonNullable<RoomScene['construction']>={
+export const constructions:NonNullable<RoomScene['construction']>={
  main:{fold:root+'/constructions/main-fold.webp',mask:root+'/constructions/main-mask.png',foldCrop:{x:113,y:4,width:282,height:908}},
  sheer:{fold:root+'/constructions/sheer-fold.webp',mask:root+'/constructions/sheer-mask.png',foldCrop:{x:42,y:4,width:838,height:778}},
 };

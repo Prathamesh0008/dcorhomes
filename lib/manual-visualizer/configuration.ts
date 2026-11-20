@@ -6,6 +6,5 @@ export type ConfigurationAction =
 export function configurationReducer(state:VisualizerConfiguration,action:ConfigurationAction):VisualizerConfiguration{
  if(action.type==='restore')return action.design;
  if(action.type==='scene')return {...state,sceneId:action.id};
- if(action.layer==='main'&&state.main.enabled&&action.value.enabled)return {...state,main:action.value,photoCustomized:true};
  return {...state,[action.layer]:action.value};
 }

@@ -1,11 +1,12 @@
 import type { DesignSelection } from '@/lib/design-options';
 import { catalogueRecords } from '../../data/catalogue';
 import type { FabricRecord } from './catalogue';
+import { withCustomizerShades } from './customizer-shades';
 export const fabrics: FabricRecord[] = catalogueRecords;
 export type ManualConfig = { mainFabric: string; mainColor: string; sheerFabric: string; sheerColor: string; mainEnabled: boolean; sheerEnabled: boolean; heading: string; sheerHeading: string; pattern: string; room: string; panels: 'Single' | 'Pair'; curtainLength: string; fullness: string };
 export const manualDefault: ManualConfig={ mainFabric:'sienna',mainColor:'Warm Ivory',sheerFabric:'solstice',sheerColor:'Soft Ivory',mainEnabled:true,sheerEnabled:true,heading:'Wave Pleat',sheerHeading:'Wave Pleat',pattern:'Solid',room:'Living Room',panels:'Pair',curtainLength:'Floor length',fullness:'2' };
 export const storageKey='dcorhome-manual-v1';
-export function fabricFor(id: string, layer:'main'|'sheer', records: FabricRecord[]=fabrics) {return records.find(f=>f.id===id&&f.usage.includes(layer)&&f.colors.some(c=>c.active!==false&&c.available!==false)&&f.compatibleHeadingStyles.length>0) || records.find(f=>f.usage.includes(layer)&&f.colors.some(c=>c.active!==false&&c.available!==false)&&f.compatibleHeadingStyles.length>0) || fabrics.find(f=>f.usage.includes(layer))!;}
+export function fabricFor(id: string, layer:'main'|'sheer', records: FabricRecord[]=fabrics) {return withCustomizerShades(records.find(f=>f.id===id&&f.usage.includes(layer)&&f.colors.some(c=>c.active!==false&&c.available!==false)&&f.compatibleHeadingStyles.length>0) || records.find(f=>f.usage.includes(layer)&&f.colors.some(c=>c.active!==false&&c.available!==false)&&f.compatibleHeadingStyles.length>0) || fabrics.find(f=>f.usage.includes(layer))!);}
 export function patternsFor(fabric: FabricRecord): string[] { return fabric.pattern ? [fabric.pattern] : ['Solid']; }
 export function normalizeManual(raw: Partial<ManualConfig>, records: FabricRecord[]=fabrics): ManualConfig {
   const value={...manualDefault,...raw},main=fabricFor(value.mainFabric,'main',records),sheer=fabricFor(value.sheerFabric,'sheer',records);

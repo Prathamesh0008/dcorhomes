@@ -4,7 +4,7 @@ import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { saveLocalDesign } from '@/lib/local-designs';
 import { defaultSelection } from '@/lib/design-options';
 import { scenes } from '@/lib/manual-visualizer/manifest';
-import { resolveLayer, validateDesign, type VisualizerDesign } from '@/lib/manual-visualizer/model';
+import { hasLayerShade, resolveLayer, validateDesign, type VisualizerDesign } from '@/lib/manual-visualizer/model';
 import { exportDesign } from '@/lib/manual-visualizer/renderer';
 
 export function useDesignActions(design:VisualizerDesign,records:FabricRecord[]){
@@ -19,8 +19,8 @@ export function useDesignActions(design:VisualizerDesign,records:FabricRecord[])
   finally{if(mounted.current)setBusy(false);}
  }
  async function saveDevice(clean=validateDesign(design,records)){
-  const main=resolveLayer(clean.main,records);
-  await saveLocalDesign({id:crypto.randomUUID(),created:Date.now(),selection:{...defaultSelection,fabric:main.fabric.id,color:main.hex,roomType:scenes.find(scene=>scene.id===clean.sceneId)!.name},status:'manual',visualizer:clean});
+  const main=hasLayerShade(clean.main)?resolveLayer(clean.main,records):null;
+  await saveLocalDesign({id:crypto.randomUUID(),created:Date.now(),selection:{...defaultSelection,fabric:clean.main.fabricId??'',color:main?.hex??'',roomType:scenes.find(scene=>scene.id===clean.sceneId)!.name},status:'manual',visualizer:clean});
   return 'Your design is saved on this device. Find it in Saved designs.';
  }
  return {busy,message,

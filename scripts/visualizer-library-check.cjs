@@ -8,7 +8,7 @@ require.extensions['.ts'] = (module, file) => module._compile(ts.transpileModule
 }).outputText, file);
 const {libraryRecords} = require('../lib/manual-visualizer/library.ts');
 const {scenes, materials, studioPhotoScenes} = require('../lib/manual-visualizer/manifest.ts');
-const {resolveLayer, validateDesign, defaultDesign, designSummary, materialShades, matchingMaterialShade} = require('../lib/manual-visualizer/model.ts');
+const {resolveLayer, validateDesign, defaultDesign, designSummary, designPreviewKey, materialShades, matchingMaterialShade} = require('../lib/manual-visualizer/model.ts');
 const {composeDesign} = require('../lib/manual-visualizer/renderer.ts');
 const {renderCapability} = require('../lib/manual-visualizer/types.ts');
 const library = require('../lib/manual-visualizer/library-assets.json');
@@ -45,7 +45,13 @@ const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file))
   assert.equal(matchingMaterialShade(restricted, unavailable.id, unavailable.name), undefined);
   assert.deepEqual(validateDesign(defaultDesign, []), defaultDesign);
   assert.throws(() => validateDesign({...defaultDesign,main:defaultDesign.sheer}, []), /does not match/);
-  assert.throws(() => resolveLayer({...defaultDesign.main,variantId:'missing'}, []), /shade/);
+  const silk = {enabled:true,materialId:'library-main-silk',fabricId:'library-main-silk',variantId:null};
+  const silkDraft = {...defaultDesign, main:silk};
+  assert.deepEqual(validateDesign(silkDraft, []), silkDraft);
+  assert.equal(designPreviewKey(silkDraft, true), designPreviewKey(defaultDesign, true));
+  const silkPreview = {...silkDraft, main:{...silk,variantId:'burgundy'}};
+  assert.notEqual(designPreviewKey(silkPreview, true), designPreviewKey(silkDraft, true));
+  assert.throws(() => resolveLayer({...silk,variantId:'missing'}, []), /shade/);
   for (const scene of scenes.filter(s => s.previewSupport === 'base-only')) {
     assert.ok(fs.existsSync(path.join(root, 'public', scene.base)));
     assert.ok(fs.existsSync(path.join(root, 'public', scene.thumbnail)));
