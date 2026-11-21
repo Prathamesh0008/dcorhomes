@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
+  <defs>
+    <g id="rosette" fill="#62544d" fill-opacity=".24" stroke="#62544d" stroke-width="1.8">
+      <path d="M0-24C10-29 17-17 13-11C25-14 31-4 24 4C21 8 17 10 12 9C17 18 11 27 3 26C-4 26-9 21-10 14C-17 20-27 15-26 6C-25-1-19-5-13-5C-20-14-12-25-4-22Z"/>
+      <path fill="none" d="M0 0L0-19M0 0L18-3M0 0L7 18M0 0L-17 8M0 0L-13-14"/>
+      <circle r="5" fill-opacity=".85"/>
+    </g>
+  </defs>
+  <path d="M0 64Q30 35 64 64T128 64M64 0Q35 30 64 64T64 128" fill="none" stroke="#62544d" stroke-width="1.8" stroke-dasharray="1 3"/>
+  <use href="#rosette" x="32" y="32"/>
+  <use href="#rosette" x="96" y="96"/>
+</svg>

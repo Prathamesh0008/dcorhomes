@@ -29,7 +29,6 @@ export const heroCurtainMasks: Partial<Record<string, { panels: string[]; cutout
     ],
     cutouts: [
       'M 0 187 L 18 193 L 23 204 L 31 199 L 44 204 L 49 189 L 59 198 L 57 212 L 71 217 L 63 230 L 65 245 L 45 257 L 31 277 L 12 295 L 0 303 Z',
-      'M 280 224 L 294 221 L 305 225 L 322 222 L 335 223 L 341 215 L 350 221 L 357 243 L 348 257 L 337 266 L 329 281 L 331 293 L 326 331 L 302 339 L 302 291 L 310 282 L 302 264 L 287 251 Z',
       'M 477 232 L 499 241 L 520 237 L 521 264 L 507 282 L 510 298 L 505 314 H 480 Z',
     ],
   },

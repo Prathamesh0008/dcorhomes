@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
+  <defs>
+    <g id="vine">
+      <path d="M24 0C24 20 42 29 39 51S16 80 18 102Q17 115 24 128" fill="none" stroke="#5e534b" stroke-width="2.2"/>
+      <path d="M35 33Q15 36 5 19Q27 18 35 33ZM38 49Q40 30 58 27Q55 44 38 49ZM29 72Q10 76 2 61Q22 59 29 72ZM18 98Q20 80 45 77Q42 97 18 98ZM20 114Q5 116 1 104Q15 104 20 114Z" fill="#5e534b" fill-opacity=".60" stroke="#5e534b" stroke-width="1.4"/>
+    </g>
+  </defs>
+  <use href="#vine"/>
+  <use href="#vine" transform="translate(126 128) rotate(180)"/>
+</svg>

@@ -1,6 +1,6 @@
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { scenes, rendererVersion, constructions, type Scene, type ConstructionAssets } from './manifest';
-import { mainPreviewSelection, resolveLayer, validateDesign, type VisualizerDesign } from './model';
+import { mainPreviewSelection, photoSheerSelection, resolveLayer, validateDesign, type VisualizerDesign } from './model';
 import { renderCapability, type Rect } from './types';
 import { drapePanels, resolveFloorLengthDrape } from './floor-length-layouts';
 import { loadImage } from './image-cache';
@@ -46,10 +46,10 @@ function layerRequest(selection:VisualizerDesign['main'],key:'main'|'sheer',reco
  const drape=resolveFloorLengthDrape(scene);
  const regions=drapePanels(drape??{span:window,centerGap:.17},key);
  const cacheKey=JSON.stringify([rendererVersion,scene.id,key,material,hex,texturePath,construction,regions,width,height]);
- return {key,material,hex,texturePath,construction,regions,cacheKey,width,height};
+ return {key,material,hex,texturePath,construction,regions,cacheKey,width,height,backlit:key==='sheer',hasShadeTint:material.colorMode==='tint'||Boolean(variant?.hexPreview)};
 }
 
-type LayerRequest=ReturnType<typeof layerRequest>&{backlit?:true};
+type LayerRequest=ReturnType<typeof layerRequest>;
 function cachedLayer(cacheKey:string){
  const cached=layerCache.get(cacheKey);
  if(cached){layerCache.delete(cacheKey);layerCache.set(cacheKey,cached);}
@@ -65,18 +65,23 @@ function regionPixels(region:Rect,width:number,height:number){
 }
 
 async function renderLayer(request:LayerRequest,signal?:AbortSignal){
- const {key,material,hex,texturePath,construction,regions,cacheKey,width,height,backlit}=request;
+ const {key,material,hex,texturePath,construction,regions,cacheKey,width,height,backlit,hasShadeTint}=request;
  const cached=cachedLayer(cacheKey);
  if(cached)return cached;
- const [foldImage,maskImage,textureImage,opacityImage]=await Promise.all([
+ const [foldImage,maskImage,textureImage,opacityImage,patternImage]=await Promise.all([
   loadImage(construction.fold),loadImage(construction.mask),loadImage(texturePath),
   material.opacityMap?loadImage(material.opacityMap):null,
+  material.patternTexture?loadImage(material.patternTexture):null,
  ]);
  check(signal);
  const result=surface(width,height),tinted=material.colorMode==='tint',rgb=[1,3,5].map(i=>linear(parseInt(hex.slice(i,i+2),16)));
- const texture=pixels(textureImage,256,256),detail=tinted?textileLuminance(texture):null;
+ const texture=pixels(textureImage,256,256),detail=tinted||backlit?textileLuminance(texture):null;
  const opacity=opacityImage?pixels(opacityImage,256,256):null;
- let mean=0;if(tinted&&material.surface==='patterned')for(let i=0;i<texture.length;i+=4)mean+=(.2126*texture[i]+.7152*texture[i+1]+.0722*texture[i+2])/65536;
+ const embroidery=patternImage?pixels(patternImage,256,256):null;
+ const fabricOpacity=backlit?.55+.45*material.opacity:material.opacity;
+ const wovenPattern=backlit&&!embroidery&&material.surface==='patterned';
+ const inspectLuminance=wovenPattern||(!backlit&&tinted&&material.surface==='patterned');
+ let mean=0;if(inspectLuminance)for(let i=0;i<texture.length;i+=4)mean+=(.2126*texture[i]+.7152*texture[i+1]+.0722*texture[i+2])/65536;
  const repeat=Math.max(12,material.repeat*width/1280);
  try{
   for(const [index,region] of regions.entries()){
@@ -88,6 +93,9 @@ async function renderLayer(request:LayerRequest,signal?:AbortSignal){
    // Use the same material texture repeat at every panel width.
    for(let y=0;y<h;y++){
     if((y&31)===0)check(signal);
+    const textureY=y/repeat*256;
+    const v=mirroredCoordinate(textureY);
+    const patternRow=(Math.floor(textureY)&255)*256;
     for(let x=0;x<w;x++){
      const i=(y*w+x)*4,lx=Math.max(0,x-2),rx=Math.min(w-1,x+2);
      const alpha=mask[i]/255;
@@ -95,25 +103,35 @@ async function renderLayer(request:LayerRequest,signal?:AbortSignal){
      const light=fold[i]/255;
      const left=fold[(y*w+lx)*4]/255;
      const right=fold[(y*w+rx)*4]/255;
-     const u=mirroredCoordinate(x/repeat*256+(left-right)*36),v=mirroredCoordinate(y/repeat*256),t=(v*256+u)*4;
-     const weave=detail?material.surface==='patterned'
-      ?clamp(1+((.2126*texture[t]+.7152*texture[t+1]+.0722*texture[t+2])/Math.max(8,mean)-1)*.75,.5,1.5)
+     const textureX=x/repeat*256+(left-right)*36;
+     const u=mirroredCoordinate(textureX),t=(v*256+u)*4;
+     const sample=inspectLuminance ? .2126*texture[t]+.7152*texture[t+1]+.0722*texture[t+2] : 0;
+     // Use broader contrast from the original woven swatch for older patterns
+     // whose motifs would otherwise be removed by local weave normalization.
+     const thread=embroidery?embroidery[(patternRow+(Math.floor(textureX)&255))*4+3]/255
+      :wovenPattern?clamp((mean-sample-2)*.038,0,.72):0;
+     const weave=!backlit&&detail?material.surface==='patterned'
+      ?clamp(1+(sample/Math.max(8,mean)-1)*.75,.5,1.5)
       :1+(detail[v*256+u]-1)*material.textureStrength:1;
      // The photographed fold map has a narrow luminance range in the body
      // of the voile. Expand it for backlighting while keeping the fabric tint.
      const foldContrast=backlit?clamp((light-.75)/.20):0;
-     const lighting=(backlit ? .70+.36*foldContrast : clothLighting(light,material.sheen))*weave;
+     // Let the shade control the colour and the prepared swatch supply weave
+     // detail. Highlights baked into the swatch would wash out close shades.
+     const lighting=backlit
+      ? (.70+.36*foldContrast)*(1+(detail![v*256+u]-1)*.65)*(1-.32*thread)
+      : clothLighting(light,material.sheen)*weave;
      for(let c=0;c<3;c++){
-      const color=tinted?rgb[c]:linearChannel[texture[t+c]];
+      const color=tinted||(backlit&&hasShadeTint)?rgb[c]:linearChannel[texture[t+c]];
       frame.data[i+c]=srgb(clamp(color*lighting));
      }
      const density=opacity?opacity[t]/255:1;
      const diffuseCoverage=density*(2-density);
      // Keep transmission even through the densest folds and retain soft mask edges.
-     const coverage=backlit ? Math.min(.74,diffuseCoverage*(1.06+.43*foldContrast))
+     const coverage=backlit ? Math.min(.74,.32+.61*diffuseCoverage+.15*foldContrast)*(1-thread)+.84*thread
       : key==='sheer' ? diffuseCoverage*(.78+.22*(1-light)) : density;
      const maskStrength=backlit?Math.pow(alpha,.8):alpha;
-     frame.data[i+3]=Math.round(255*clamp(material.opacity*coverage*maskStrength));
+     frame.data[i+3]=Math.round(255*clamp(fabricOpacity*coverage*maskStrength));
     }
    }
    result.context.putImageData(frame,x0,y0);
@@ -164,31 +182,36 @@ async function compose(request:DesignRequest,signal?:AbortSignal){
  check(signal);return paint(request,base,sheerImage,mainImage,shadow,occlusion);
 }
 
-const goldenVoile={
- enabled:true,materialId:'library-sheer-plain-voile',fabricId:'library-sheer-plain-voile',variantId:'champagne',
-};
-
-async function photoWithVoile(scene:Scene,room:HTMLImageElement,width:number,height:number,signal?:AbortSignal){
+async function photoWithVoile(scene:Scene,room:HTMLImageElement,width:number,height:number,selection:VisualizerDesign['sheer'],records:FabricRecord[],signal?:AbortSignal){
  const mask=heroSheerMasks[scene.id];
  if(!mask)return null;
- const cacheKey=JSON.stringify([scene.id,goldenVoile.variantId,'sheer-background',width,height]);
+ const {material,variant,hex}=resolveLayer(selection,records);
+ const texturePath=material.colorMode==='tint'?material.texture:variant?.textureImage;
+ if(!texturePath)throw Error('A preview for this fabric shade is not available yet.');
+ const cacheKey=JSON.stringify([rendererVersion,scene.id,'sheer-background',material,texturePath,hex,width,height]);
  const cached=cachedLayer(cacheKey);
  if(cached)return cached;
 
- const {material,variant,hex}=resolveLayer(goldenVoile,[]);
  const openings=new Path2D();
- const regions=mask.openings.map(points=>{
-  const xs=points.map(([x])=>x),ys=points.map(([,y])=>y),left=Math.min(...xs),top=Math.min(...ys);
-  const [first,...remaining]=points;
-  openings.moveTo(...first);
-  for(const point of remaining)openings.lineTo(...point);
-  openings.closePath();
+ const regions=mask.openings.map(opening=>{
+  let left:number,top:number,right:number,bottom:number;
+  if(Array.isArray(opening)){
+   const xs=opening.map(([x])=>x),ys=opening.map(([,y])=>y);
+   left=Math.min(...xs);top=Math.min(...ys);right=Math.max(...xs);bottom=Math.max(...ys);
+   const [first,...remaining]=opening;
+   openings.moveTo(...first);
+   for(const point of remaining)openings.lineTo(...point);
+   openings.closePath();
+  }else{
+   openings.addPath(new Path2D(opening.path));
+   [left,top,right,bottom]=opening.bounds;
+  }
   return {x:left/heroMaskSize.width,y:top/heroMaskSize.height,
-   width:(Math.max(...xs)-left)/heroMaskSize.width,height:(Math.max(...ys)-top)/heroMaskSize.height};
+   width:(right-left)/heroMaskSize.width,height:(bottom-top)/heroMaskSize.height};
  });
  const voile=await renderLayer({
-  key:'sheer',material,hex,texturePath:variant!.textureImage!,construction:constructions.sheer,
-  regions,cacheKey:cacheKey+'-voile',width,height,backlit:true,
+  key:'sheer',material,hex,texturePath,construction:constructions.sheer,
+  regions,cacheKey:cacheKey+'-voile',width,height,backlit:true,hasShadeTint:material.colorMode==='tint'||Boolean(variant?.hexPreview),
  },signal);
  check(signal);
  const {canvas,context}=surface(width,height);
@@ -212,6 +235,7 @@ async function composePhoto(design:VisualizerDesign,records:FabricRecord[],scene
  const main=mainPreviewSelection(design.main);
  const mask=main?photo.mainMask:undefined;
  const choice=mask&&main?resolveLayer(main,records):null;
+ const sheer=photoSheerSelection(design);
  const texturePath=choice?.material.colorMode==='tint'?choice.material.texture:choice?.variant?.textureImage;
  const w=Math.max(1,Math.min(scene.width,Math.round(width))),h=Math.round(w*scene.height/scene.width);
  const [original,after,texture]=await Promise.all([
@@ -219,7 +243,7 @@ async function composePhoto(design:VisualizerDesign,records:FabricRecord[],scene
    if(room.naturalWidth!==scene.width||room.naturalHeight!==scene.height){
     throw Error('The room photographs no longer match the registered curtain geometry.');
    }
-   return choice ? (await photoWithVoile(scene,room,w,h,signal))??room : room;
+   return sheer ? (await photoWithVoile(scene,room,w,h,sheer,records,signal))??room : room;
   }),
   choice?loadImage(photo.after):null,
   texturePath?loadImage(texturePath):null,

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
+  <defs>
+    <pattern id="net" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M0 0Q16 32 32 0Q48 32 64 0M0 32Q16 64 32 32Q48 64 64 32M0 64Q16 32 32 64Q48 32 64 64M0 32Q16 0 32 32Q48 0 64 32" fill="none" stroke="#61554c" stroke-width="1.6"/>
+      <path d="M16 21L21 32L16 43L11 32ZM48 21L53 32L48 43L43 32Z" fill="#61554c" fill-opacity=".60" stroke="#61554c" stroke-width="1.4"/>
+      <circle cx="16" cy="32" r="2.6" fill="#61554c"/><circle cx="48" cy="32" r="2.6" fill="#61554c"/>
+    </pattern>
+  </defs>
+  <rect width="128" height="128" fill="url(#net)"/>
+</svg>

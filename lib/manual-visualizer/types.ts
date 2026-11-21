@@ -32,6 +32,7 @@ export type RoomScene = {
 export type FabricMaterial = {
   id:string; name:string; layer:'main'|'sheer'; fabricId?:string;
   catalogueSource:'demo'|'supplier'; texture?:string; thumbnail?:string; opacityMap?:string;
+  patternTexture?:string;
   library?:boolean; opacity:number; sheen:number; textureStrength:number; repeat:number;
   colorMode:'tint'|'photographic'|'texture'; status:'sample'|'missing';
   surface?:'woven'|'patterned'|'velvet'|'silk';
@@ -40,6 +41,8 @@ export type LayerSelection = {enabled:boolean;materialId:string|null;fabricId:st
 export type VisualizerConfiguration = {
   version:1; assetVersion:string; rendererVersion?:string; sceneId:string;
   main:LayerSelection; sheer:LayerSelection;
+  sheerColorMode?:'auto'|'manual';
+  sheerOptOut?:true;
   photoCustomized?:true;
   inspiration?:{style:string;pattern:string;room:string};
 };

@@ -36,18 +36,19 @@ const liveLibraryRooms:Partial<Record<string,Partial<RoomScene>>>={
   'M 350 419 L 360 407 L 358 401 L 369 392 L 381 392 L 383 384 L 391 390 L 400 378 L 413 381 L 416 375 L 426 385 L 435 386 L 437 398 L 433 420 L 426 440 H 353 Z '+
   'M 624 431 Q 633 423 635 415 Q 640 382 702 371 Q 739 364 779 370 Q 790 372 789 385 L 786 402 L 794 394 L 804 394 L 813 410 L 825 415 L 828 432 Z'),
 };
+const archedStudioPhotos='/images/manual-visualizer/atelier-v2/rooms/hero-03';
 export const studioPhotoScenes:RoomScene[]=heroComparisonSlides.map(slide=>({
  id:slide.id,
  name:slide.roomName||slide.label||slide.alt,
  version:assetVersion,
  status:'sample',
- base:slide.beforeSrc,
+ base:slide.id==='hero-03'?archedStudioPhotos+'/before.webp':slide.beforeSrc,
  thumbnail:slide.afterSrc.replace(/\.webp$/,'-640.webp'),
  // Verified against both originals in the asset check.
  width:1448,
  height:1086,
  provenance:'Original homepage curtain concept pair',
- photo:{after:slide.afterSrc,mainMask:heroCurtainMasks[slide.id]},
+ photo:{after:slide.id==='hero-03'?archedStudioPhotos+'/after.webp':slide.afterSrc,mainMask:heroCurtainMasks[slide.id]},
 }));
 export const scenes:RoomScene[]=[
  ...studioPhotoScenes,

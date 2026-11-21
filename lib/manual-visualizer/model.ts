@@ -2,19 +2,25 @@ import type { FabricRecord, FabricVariant } from '@/lib/curtains/catalogue';
 import type { ManualConfig } from '@/lib/curtains/manual-config';
 import { assetVersion, rendererVersion, demoColors, materials, scenes, studioPhotoScenes, type Material } from './manifest';
 import { visualizerFabric } from './library';
+import { recommendedSheerColors } from './sheer-shades';
 import type { LayerSelection, VisualizerConfiguration } from './types';
 export type { LayerSelection } from './types';
 export type VisualizerDesign = VisualizerConfiguration;
-export const defaultDesign:VisualizerDesign={version:1,assetVersion,rendererVersion,sceneId:studioPhotoScenes[0].id,main:{enabled:true,materialId:null,fabricId:null,variantId:null},sheer:{enabled:true,materialId:'library-sheer-plain-voile',fabricId:'library-sheer-plain-voile',variantId:'soft-ivory'}};
+export const defaultDesign:VisualizerDesign={version:1,assetVersion,rendererVersion,sceneId:studioPhotoScenes[0].id,main:{enabled:true,materialId:null,fabricId:null,variantId:null},sheer:{enabled:true,materialId:'library-sheer-plain-voile',fabricId:'library-sheer-plain-voile',variantId:'champagne'},sheerColorMode:'auto'};
 export function hasLayerShade(layer:LayerSelection){
  return Boolean(layer.variantId || layer.previewColorId);
 }
 export function mainPreviewSelection(main:LayerSelection){
  return main.enabled && main.materialId && hasLayerShade(main) ? main : null;
 }
+export function photoSheerSelection(design:VisualizerDesign){
+ const customized=hasLayerShade(design.main)||design.photoCustomized||design.sheerColorMode==='manual';
+ return design.sheer.enabled&&customized?design.sheer:null;
+}
 export function designPreviewKey(design:VisualizerDesign,photo:boolean){
  const main=mainPreviewSelection(design.main);
- return JSON.stringify(photo?[design.sceneId,main]:[design.sceneId,main,design.sheer]);
+ const sheer=photo?photoSheerSelection(design):design.sheer;
+ return JSON.stringify([design.sceneId,main,sheer]);
 }
 export function materialShades(material:Material,fabric:FabricRecord){
  return fabric.colors.filter(variant=>variant.active!==false&&(material.colorMode==='tint'?/^#[0-9a-f]{6}$/i.test(variant.hexPreview||''):Boolean(variant.textureImage)));
@@ -40,6 +46,19 @@ export function resolveLayer(layer:LayerSelection,records:FabricRecord[]){
  if(material.colorMode==='tint'&&!/^#[0-9a-f]{6}$/i.test(hex||''))throw Error('This shade requires a prepared photographic texture.');
  return {material,fabric,variant,preview,hex:hex||'#ffffff',shadeName:preview?.name||variant!.name,commercial:Boolean(variant&&fabric.source==='supplier')};
 }
+export function matchSheerToMain(design:VisualizerDesign,records:FabricRecord[]):VisualizerDesign{
+ const main=mainPreviewSelection(design.main);
+ if(!design.sheer.enabled||design.sheerColorMode!=='auto'||!main)return design;
+ const {shadeName}=resolveLayer(main,records);
+ const {material,fabric}=resolveLayerMaterial(design.sheer,records);
+ const sheer=design.sheer;
+ if(sheer.previewColorId){
+  const [shade]=recommendedSheerColors(demoColors,shadeName);
+  return shade?{...design,sheer:{...sheer,previewColorId:shade.id}}:design;
+ }
+ const [shade]=recommendedSheerColors(materialShades(material,fabric),shadeName);
+ return shade?{...design,sheer:{...sheer,variantId:shade.id}}:design;
+}
 export function validateDesign(input:unknown,records:FabricRecord[]):VisualizerDesign{
  if(!input||typeof input!=='object')throw Error('Invalid saved design.');
  const raw=input as VisualizerDesign;
@@ -63,10 +82,13 @@ export function validateDesign(input:unknown,records:FabricRecord[]):VisualizerD
   return selection;
  };
  let inspiration:VisualizerDesign['inspiration'];if(raw.inspiration){const value=raw.inspiration;if(typeof value!=='object'||[value.style,value.pattern,value.room].some(text=>typeof text!=='string'||text.length>100))throw Error('Invalid design inspiration.');inspiration={style:value.style,pattern:value.pattern,room:value.room};}
- return {version:1,assetVersion,rendererVersion,sceneId:raw.sceneId,main:clean('main'),sheer:clean('sheer'),...(raw.photoCustomized===true?{photoCustomized:true}:{}),...(inspiration?{inspiration}:{})};
+ const sheerColorMode=raw.sheerColorMode;
+ const sheer=clean('sheer');
+ return {version:1,assetVersion,rendererVersion,sceneId:raw.sceneId,main:clean('main'),sheer,...(sheerColorMode==='auto'||sheerColorMode==='manual'?{sheerColorMode}:{}),...(!sheer.enabled&&raw.sheerOptOut===true?{sheerOptOut:true}:{}),...(raw.photoCustomized===true?{photoCustomized:true}:{}),...(inspiration?{inspiration}:{})};
 }
 export function fromManual(config:ManualConfig,records:FabricRecord[],inspiration?:VisualizerDesign['inspiration']):VisualizerDesign{
  const design=structuredClone(defaultDesign);
+ delete design.sheerColorMode;
  design.photoCustomized=true;
  for(const key of ['main','sheer'] as const){const id=key==='main'?config.mainFabric:config.sheerFabric,variantId=key==='main'?config.mainColor:config.sheerColor,enabled=key==='main'?config.mainEnabled:config.sheerEnabled,material=materials.find(m=>m.layer===key&&m.fabricId===id&&availableMaterial(m,records));if(!material&&enabled)throw Error('Your selected '+key+' fabric needs compatible room-preview assets. Your original fabric is retained in the enquiry. Choose a supported material to start a new sample study.');if(material)design[key]={enabled,materialId:material.id,fabricId:id,variantId};else design[key].enabled=false;}
  if(inspiration)design.inspiration=inspiration;
@@ -75,7 +97,7 @@ export function fromManual(config:ManualConfig,records:FabricRecord[],inspiratio
 export function designSummary(design:VisualizerDesign,records:FabricRecord[]){
  const scene=scenes.find(s=>s.id===design.sceneId)!;
  const preview=scene.photo
-  ?'Preview: Original room photograph with its original sheer. Main-curtain swatches are illustrative.'
+  ?'Preview: Original room photograph with illustrative main and sheer curtain selections.'
   :scene.previewSupport==='base-only'
    ?'Preview: Room reference only. Selected curtains have NOT been rendered.'
    :'Construction: sample wave drape; colour and fit are approximate.';

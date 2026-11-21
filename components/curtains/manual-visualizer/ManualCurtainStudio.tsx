@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import { useFabricRecords } from '../FabricCatalogueProvider';
-import { defaultDesign, designPreviewKey, resolveLayer } from '@/lib/manual-visualizer/model';
+import { defaultDesign, designPreviewKey, mainPreviewSelection, resolveLayer } from '@/lib/manual-visualizer/model';
 import { scenes } from '@/lib/manual-visualizer/manifest';
 import WindowPreview from './WindowPreview';
 import LayerChoices from './LayerChoices';
@@ -33,6 +33,9 @@ export default function ManualCurtainStudio(){
  const key=designPreviewKey(design,Boolean(room.photo)),ready=renderState.key===key&&renderState.ready&&!restoreError;
  const readiness=useCallback((value:boolean)=>setRenderState({key,ready:value}),[key]);
  const initial=scenes.find(scene=>scene.id===defaultDesign.sceneId)!;
+ const main=mainPreviewSelection(design.main);
+ let mainShade:string|undefined;
+ if(main)try{mainShade=resolveLayer(main,records).shadeName;}catch{}
  function selection(layer:'main'|'sheer'){
   if(room.photo&&layer==='main'&&design.main.enabled&&!design.main.materialId)return 'Original curtain photograph';
   if(!design[layer].enabled)return layer==='sheer'?'Without sheers':'Without main curtains';
@@ -55,7 +58,7 @@ export default function ManualCurtainStudio(){
    <aside aria-label="Create your curtain design" className="min-w-0 rounded-[6px] bg-cream px-5 pb-6 pt-1 sm:px-6 lg:px-6 xl:px-7">
     {initialized?<>
      <SelectionArea id="room" number="01" title="Where shall we begin?" selected={room.name} open={step==='room'} onToggle={()=>toggle('room')}><RoomChoices value={design.sceneId} onChange={state.selectRoom} onNext={()=>setStep('sheer')}/></SelectionArea>
-     <SelectionArea id="sheer" number="02" title="Let the light in." selected={selection('sheer')} open={step==='sheer'} onToggle={()=>toggle('sheer')}>{room.photo&&<p className="mt-0 text-[11px] leading-6 text-muted">The photograph keeps its original sheer. Your sheer choices are saved for your enquiry.</p>}<LayerChoices layer="sheer" value={design.sheer} records={records} onChange={value=>state.selectLayer('sheer',value)} onNext={()=>setStep('main')}/></SelectionArea>
+     <SelectionArea id="sheer" number="02" title="Let the light in." selected={selection('sheer')} open={step==='sheer'} onToggle={()=>toggle('sheer')}><LayerChoices layer="sheer" value={design.sheer} records={records} mainShade={mainShade} sheerColorMode={design.sheerColorMode} onChange={(value,mode)=>state.selectLayer('sheer',value,mode)} onNext={()=>setStep('main')}/></SelectionArea>
      <SelectionArea id="main" number="03" title="Add the finishing touch." selected={selection('main')} open={step==='main'} onToggle={()=>toggle('main')}><LayerChoices layer="main" value={design.main} records={records} onChange={value=>state.selectLayer('main',value)}/></SelectionArea>
      <DesignReview design={design} records={records} ready={ready} blocked={Boolean(restoreError)} originalContact={originalContact}/>
     </>:<div className="py-6 text-[13px] text-muted" role="status">Opening your fabric collection...</div>}

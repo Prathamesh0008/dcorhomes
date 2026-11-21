@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
+  <defs>
+    <pattern id="lace" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M32 5L39 20L56 16L50 32L56 48L39 44L32 59L25 44L8 48L14 32L8 16L25 20Z" fill="#60534f" fill-opacity=".24" stroke="#60534f" stroke-width="2.2"/>
+      <path d="M32 18L44 32L32 46L20 32ZM0 0L16 0M0 0V16M48 64H64V48M48 0H64V16M0 48V64H16" fill="none" stroke="#60534f" stroke-width="2"/>
+      <circle cx="32" cy="32" r="3.3" fill="#60534f"/>
+    </pattern>
+  </defs>
+  <rect width="128" height="128" fill="url(#lace)"/>
+</svg>

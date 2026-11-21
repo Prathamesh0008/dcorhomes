@@ -1,5 +1,8 @@
+import { heroCurtainMasks } from './hero-curtain-masks';
+
 type Point = [x: number, y: number];
-type PhotoSheerMask = { openings: Point[][]; foreground?: string[] };
+type PhotoSheerOpening = Point[] | {path:string; bounds:[left:number,top:number,right:number,bottom:number]};
+type PhotoSheerMask = { openings: PhotoSheerOpening[]; foreground?: string[] };
 
 // Window openings and foreground silhouettes on the original room photos.
 // Coordinates share the existing 600 x 450 hero-mask reference space.
@@ -21,11 +24,12 @@ export const heroSheerMasks: Partial<Record<string, PhotoSheerMask>> = {
  },
  'hero-03': {
   openings: [
-   [[102,0],[166,0],[181,20],[193,47],[196,342],[102,353]],
-   [[369,23],[380,29],[399,49],[414,79],[414,316],[369,322]],
-   [[508,114],[521,139],[528,167],[531,303],[508,309]],
+   {path:'M 45 356 L 54 18 Q 56 5 60 0 H 163 Q 217 30 218 100 L 215 337 Z',bounds:[45,0,218,356]},
+   {path:'M 344 325 L 343 62 Q 345 22 368 21 Q 403 24 418 88 V 318 Z',bounds:[343,21,418,325]},
+   {path:'M 490 311 L 490 126 Q 490 94 499 96 Q 516 103 524 142 L 526 304 Z',bounds:[490,95,526,311]},
   ],
   foreground: [
+   ...(heroCurtainMasks['hero-03']?.cutouts?.slice(0,1) ?? []),
    'M 486 328 L 486 271 L 481 253 L 480 235 L 486 237 L 490 224 L 496 229 L 501 216 L 506 223 L 508 230 L 516 226 L 516 233 L 526 234 L 519 243 L 527 249 L 519 264 L 510 280 L 508 304 L 503 327 Z',
   ],
  },
@@ -80,10 +84,11 @@ export const heroSheerMasks: Partial<Record<string, PhotoSheerMask>> = {
  },
  'hero-09': {
   openings: [
-   [[41,0],[93,0],[110,41],[117,246],[41,252]],
-   [[216,0],[252,5],[274,21],[286,46],[286,225],[216,237]],
+   {path:'M 0 0 H 103 Q 134 13 139 48 L 137 248 L 0 254 Z',bounds:[0,0,139,254]},
+   {path:'M 194 239 L 193 54 Q 195 5 234 3 Q 281 5 295 67 L 296 229 Z',bounds:[193,3,296,239]},
   ],
   foreground: [
+   'M 141 249 L 145 196 Q 128 201 130 182 Q 132 159 145 148 Q 144 128 157 123 Q 173 118 179 141 L 181 153 Q 192 169 186 191 L 179 199 L 185 244 Z',
    'M 199 268 L 204 248 L 213 235 L 213 217 L 220 220 L 225 208 L 240 208 L 243 211 L 251 202 L 255 207 L 267 202 L 275 207 L 288 204 L 295 216 L 294 227 L 314 226 L 319 234 L 306 253 L 283 273 Z',
   ],
  },

@@ -13,7 +13,7 @@ async function until(expression){for(let i=0;i<300;i++){if(await evaluate(expres
 const ready=()=>until(`document.querySelector('[data-testid="manual-window-preview"]')?.dataset.renderState==='ready'`);
 const click=selector=>evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
 const clickText=(panel,text)=>evaluate(`[...document.querySelectorAll('#studio-${panel}-panel button')].find(button=>button.textContent.startsWith(${JSON.stringify(text)})).click()`);
-const pixels=(x,y=.4)=>evaluate(`(()=>{const canvas=document.querySelector('[data-testid="composed-curtains"]');return Array.from(canvas.getContext('2d').getImageData(canvas.width*${x},canvas.height*${y},8,8).data);})()`);
+const pixels=(x,y=.4,width=8,height=width)=>evaluate(`(()=>{const canvas=document.querySelector('[data-testid="composed-curtains"]');return Array.from(canvas.getContext('2d').getImageData(canvas.width*${x},canvas.height*${y},${width},${height}).data);})()`);
 function averageDifference(a,b){
  let sum=0;
  for(let i=0;i<a.length;i+=4)for(let channel=0;channel<3;channel++)sum+=Math.abs(a[i+channel]-b[i+channel]);
@@ -42,6 +42,11 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1050,deviceScaleFactor:1,mobile:false});
  stage='homepage room cards and exact photographs';
  await call('Page.navigate',{url:base+'/studio'});await ready();await finished();
+ stage='legacy Without sheers draft';
+ await evaluate(`(()=>{const key='dcorhome-visualizer-v1';const draft=JSON.parse(localStorage.getItem(key));draft.sheer.enabled=false;draft.sheer.variantId='soft-ivory';delete draft.sheerColorMode;localStorage.setItem(key,JSON.stringify(draft));})()`);
+ const firstVisit=await evaluate('performance.timeOrigin');
+ await call('Page.reload');await until('performance.timeOrigin!=='+firstVisit);await ready();await finished();
+ assert.equal((await savedSelection()).sheer.enabled,true,'Restore the default when an old draft supplied no explicit opt-out');
  const roomIds=Array.from({length:10},(_,i)=>'hero-'+String(i+1).padStart(2,'0'));
  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("[data-scene-id]"), button => button.dataset.sceneId)'),roomIds);
  const fixtures=[
@@ -56,21 +61,37 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
   [[140,90],[302,110],[240,80],[161,138]],
   [[122,110],[354,119],[250,205],[404,150]],
  ];
+ const roomBefore=id=>id==='hero-03'?'/images/manual-visualizer/atelier-v2/rooms/hero-03/before.webp':'/images/hero/'+id+'-before.webp';
  const imageDiff=(id,points)=>evaluate('(async()=>{'+
   'const shown=document.querySelector("[data-testid=composed-curtains]");'+
-  'const ref=new Image();ref.src='+JSON.stringify('/images/hero/'+id+'-before.webp')+';await ref.decode();'+
+  'const ref=new Image();ref.src='+JSON.stringify(roomBefore(id))+';await ref.decode();'+
   'const canvas=document.createElement("canvas");canvas.width=shown.width;canvas.height=shown.height;'+
   'const reference=canvas.getContext("2d",{willReadFrequently:true});reference.drawImage(ref,0,0);'+
   'const output=shown.getContext("2d");'+
   'const read=(ctx,x,y)=>Array.from(ctx.getImageData(x,y,3,3).data);'+
   'const samples='+JSON.stringify(points)+'.map(([x,y])=>{const X=Math.round(x*shown.width/600),Y=Math.round(y*shown.height/450);const a=read(reference,X,Y),b=read(output,X,Y);return a.reduce((sum,v,i)=>sum+Math.abs(v-b[i]),0)/a.length;});'+
   'return {samples,resolution:[shown.width,shown.height],before:document.querySelector("[data-testid=manual-window-preview] img").getAttribute("src")};})()');
+ stage='explicit sheer-only preview';
+ const originalDraft=await savedSelection();
+ const untouchedWindow=await hash();
+ await click('[data-studio-step="sheer"]');
+ await click('[data-material-id="library-sheer-plain-voile"]');await ready();
+ assert.notEqual(await hash(),untouchedWindow,'Selecting the default fabric displays the sheer without a main selection');
+ assert.ok((await imageDiff('hero-01',fixtures[0])).samples[2]>2);
+ await click('[data-layer-toggle="sheer-off"]');await ready();
+ assert.equal(await hash(),untouchedWindow);
+ await click('[data-layer-toggle="sheer-on"]');await ready();
+ assert.notEqual(await hash(),untouchedWindow,'Choosing Yes immediately restores the sheer-only preview');
+ await evaluate(`localStorage.setItem('dcorhome-visualizer-v1',${JSON.stringify(JSON.stringify(originalDraft))})`);
+ const sheerVisit=await evaluate('performance.timeOrigin');
+ await call('Page.reload');await until('performance.timeOrigin!=='+sheerVisit);await ready();
+ stage='homepage room cards and exact photographs';
  for(const [i,id] of roomIds.entries()){
   await click('[data-scene-id="'+id+'"]');await ready();
   assert.equal(await sliderVisible(),false,id+' hides the slider before a customization');
   const info=await imageDiff(id,fixtures[i]);
   assert.deepEqual(info.resolution,[1448,1086]);
-  assert.equal(info.before,'/images/hero/'+id+'-before.webp');
+  assert.equal(info.before,roomBefore(id));
   assert.ok(info.samples.every(n=>n<=1),id+' starts on the original room without curtains');
  }
  await click('[data-scene-id="hero-01"]');await ready();
@@ -107,7 +128,17 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  assert.equal(await sliderVisible(),false,'Fabric selection alone keeps the slider hidden');
  assert.equal((await savedSelection()).main.variantId,null);
  assert.equal(await evaluate('document.querySelectorAll(\'[aria-label^="main colour: "][aria-pressed="true"]\').length'),0);
+ stage='Ivory in Sunlit bedroom';
+ await click('[data-scene-id="hero-02"]');await ready();
+ await click('[aria-label="main colour: Ivory"]');await ready();await finished();
+ assert.equal((await savedSelection()).sheer.variantId,'soft-ivory');
+ assert.ok((await imageDiff('hero-02',fixtures[1])).samples[2]>5,'Ivory main curtains visibly render Soft Ivory over Sunlit bedroom glass');
+ await click('[data-scene-id="hero-01"]');await ready();await finished();
+ const ivorySheer=await pixels(.45,.29);
+ stage='Burgundy with Golden Beige';
  await click('[aria-label="main colour: Burgundy"]');await ready();
+ assert.equal((await savedSelection()).sheer.variantId,'light-beige');
+ assert.ok(averageDifference(await pixels(.45,.29),ivorySheer)>3,'Golden Beige changes the centre glass from Soft Ivory');
  const fadeDuration=()=>evaluate('document.querySelector("[data-testid=composed-curtains]").getAnimations()[0]?.effect.getTiming().duration');
  assert.equal(await fadeDuration(),600);
  await midReveal();await finished();
@@ -116,7 +147,7 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  assert.ok(voile.lift>60,'Golden voile diffuses visible daylight over the tree line: '+voile.lift);
  assert.ok(voile.outdoorContrast>.23&&voile.outdoorContrast<.55,'The outdoor view remains readable through the fabric: '+voile.outdoorContrast);
  assert.ok(voile.foldContrast>12,'Adjacent folds remain distinct across the glass: '+voile.foldContrast);
- assert.ok(voile.warmth>22,'The visible voile has a warm golden-beige tint: '+voile.warmth);
+ assert.ok(voile.warmth>20,'The visible Golden Beige voile has a warm tint: '+voile.warmth);
  const silk=await hash();
  await click('[data-studio-step="room"]');
  for(const [i,id] of roomIds.entries()){
@@ -134,13 +165,38 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  assert.notEqual(velvet,silk,'Switching fabric updates texture with the same colour');
  assert.equal(await sliderVisible(),true,'The slider works after switching fabrics');
  await click('[data-layer-toggle="main-off"]');await ready();
- assert.equal(await hash(),original,'No main curtains removes both layers');
+ const sheerOnly=(await imageDiff('hero-01',fixtures[0])).samples;
+ assert.ok(sheerOnly[0]<=1&&sheerOnly[1]<=1&&sheerOnly[2]>2,'Disabling main curtains leaves the enabled sheer in place');
  assert.equal(await sliderVisible(),false,'Removing main curtains hides the slider');
  assert.equal(await evaluate(`document.querySelectorAll('${comparison} button:not(:disabled)').length`),3);
  await click('[data-layer-toggle="main-on"]');await ready();
  assert.equal(await hash(),velvet,'Yes restores the explicitly selected fabric and colour');
  assert.equal(await sliderVisible(),true,'Re-enabling main curtains restores the slider');
- const initialSheer=await pixels(.45,.29);
+ stage='automatic sheer matching and independent fabric';
+ const burgundySheer=await pixels(.45,.29);
+ await click('[aria-label="main colour: Navy Blue"]');await ready();await finished();
+ assert.equal((await savedSelection()).sheer.variantId,'pure-white');
+ assert.ok(averageDifference(await pixels(.45,.29),burgundySheer)>2,'Automatic matching changes the middle window');
+ await click('[aria-label="main colour: Burgundy"]');await ready();await finished();
+ assert.equal((await savedSelection()).sheer.variantId,'light-beige');
+ await click('[data-studio-step="sheer"]');
+ const recommended=()=>evaluate('Array.from(document.querySelectorAll(\'[aria-label="sheer colours"] button\')).slice(0,3).map(b=>b.title.split(" · ")[0])');
+ assert.deepEqual(await recommended(),['Golden Beige','Champagne Gold','Soft Ivory']);
+ const plainVoile=await pixels(.45,.29);
+ await click('[data-material-id="library-sheer-fine-voile"]');await ready();
+ assert.equal((await savedSelection()).sheer.variantId,'light-beige','A different sheer fabric retains its available shade');
+ assert.deepEqual(await pixels(.18,.15),oldMain);
+ assert.notDeepEqual(await pixels(.45,.29),plainVoile,'A different sheer fabric changes the center texture');
+ await click('[data-layer-toggle="sheer-off"]');await ready();
+ assert.equal((await savedSelection()).sheerOptOut,true,'No sheers records the explicit opt-out');
+ assert.ok((await imageDiff('hero-01',fixtures[0])).samples[2]<=1,'Turning off the sheer restores the original center window');
+ assert.deepEqual(await pixels(.18,.15),oldMain);
+ await click('[data-layer-toggle="sheer-on"]');await ready();
+ assert.equal((await savedSelection()).sheerOptOut,undefined,'Re-enabling sheers clears the opt-out');
+ await click('[aria-label="sheer colour: Soft Ivory"]');await ready();
+ const initialSheer=await pixels(.45,.29),withIvory=await hash();
+ assert.deepEqual((await savedSelection()).main,{enabled:true,materialId:'library-main-velvet',fabricId:'library-main-velvet',variantId:'burgundy'});
+ await click('[data-studio-step="main"]');
  stage='slow texture and rapid selection';
  const scroll=await evaluate('window.scrollY');
  await call('Fetch.enable',{patterns:[{urlPattern:'*/main-curtains/velvet/taupe.webp'}]});
@@ -149,7 +205,7 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  assert.ok(paused.length,'The fixture must delay the requested texture');
  assert.equal((await savedSelection()).main.variantId,'taupe');
  assert.equal(await sliderVisible(),false,'The slider waits for the newly selected shade to render');
- assert.equal(await hash(),velvet,'Keep the original completed frame while loading');
+ assert.equal(await hash(),withIvory,'Keep the original completed frame while loading');
  assert.equal(await evaluate('getComputedStyle(document.querySelector("[data-testid=composed-curtains]")).visibility'),'visible');
  assert.equal(await evaluate('window.scrollY'),scroll);
  await click('[aria-label="main colour: Navy Blue"]');await ready();
@@ -158,19 +214,156 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  assert.ok(mainContrast>10);
  assert.deepEqual(await pixels(.45,.29),initialSheer);
  assert.equal(await fadeDuration(),600);
- assert.equal(await hash('previous-curtain-composition'),velvet);
+ assert.equal(await hash('previous-curtain-composition'),withIvory);
  assert.equal(await evaluate('document.querySelector("[data-testid=previous-curtain-composition]").hidden'),true,'The reveal starts over the original room');
  await midReveal();
  await Promise.all(paused.map(requestId=>call('Fetch.continueRequest',{requestId})));await call('Fetch.disable');
  await finished();
  assert.equal(await reveal(),100,'Changing colour automatically ends at the right edge');
  assert.deepEqual(await pixels(.18,.15),navy,'Late texture must not overwrite the chosen shade');
- const completed=await hash();
+ stage='sheer shade preview and independence';
  await click('[data-studio-step="sheer"]');
- await click('[aria-label="sheer colour: Pale Blue"]');await ready();
- assert.equal(await hash(),completed,'Sheer preferences are saved independently of the original photograph');
+ assert.deepEqual(await recommended(),['Pure White','Soft Ivory','Warm Grey']);
+ assert.equal((await savedSelection()).sheer.variantId,'soft-ivory','New main recommendations retain the chosen sheer');
+ await click('[aria-label="sheer colour: Sky Blue"]');await ready();
+ const blueSheer=await pixels(.45,.29);
+ assert.notDeepEqual(blueSheer,initialSheer,'A chosen sheer shade changes the center window');
+ assert.deepEqual(await pixels(.18,.15),navy,'Selecting a sheer shade preserves the main curtain');
+ assert.equal((await savedSelection()).main.variantId,'navy-blue');
  assert.equal((await savedSelection()).sheer.variantId,'pale-blue');
+ stage='all sheer swatches in all three arched windows';
+ await click('[data-scene-id="hero-03"]');await ready();
+ const planterArea=(await imageDiff('hero-03',[[345,241],[315,310],[500,294]])).samples;
+ assert.ok(planterArea[0]>8,'The main curtain covers the former plant cutout');
+ assert.ok(planterArea[1]<=1&&planterArea[2]<=1,'The retouched wall and remaining planter keep their foreground pixels');
+ const arches=[[145/600,132/450],[392/600,130/450],[512/600,160/450]];
+ const archPixels=()=>Promise.all(arches.map(([x,y])=>pixels(x,y)));
+ const mainPanel=await pixels(209/600,145/450);
+ await click('[data-layer-toggle="sheer-off"]');await ready();
+ const bareArches=await archPixels();
+ await click('[data-layer-toggle="sheer-on"]');await ready();
+ const swatches=['Pure White','Soft Ivory','Champagne Gold','Golden Beige','Blush Pink','Sage Green','Sky Blue','Warm Grey','Cream','Light Sand','Lavender'];
+ const samples=[];
+ for(const shade of swatches){
+  await click('[aria-label="sheer colour: '+shade+'"]');await ready();
+  const sample=await archPixels();
+  assert.deepEqual(await pixels(209/600,145/450),mainPanel,shade+' preserves the main curtain');
+  for(const [index,window] of sample.entries()){
+   assert.ok(averageDifference(window,bareArches[index])>3,shade+' shows in arch '+(index+1));
+   for(const previous of samples){
+    const delta=averageDifference(window,previous.sample[index]);
+    assert.ok(delta>1.5,shade+' differs from '+previous.shade+' in arch '+(index+1)+': '+delta);
+   }
+  }
+  samples.push({shade,sample});
+ }
+ stage='all seven patterned sheers';
+ const patternPixels=()=>pixels(110/600,78/450,105,345);
+ const plainLavender=await patternPixels();
+ const patternSamples=[];
+ const patterns=['Floral Lace','Embroidered Flowers','Leaf Pattern','Diamond Net','Geometric Lace','Vertical Stripes','Decorative Net'];
+ for(const name of patterns){
+  await click('[aria-label="'+name+'"]');await ready();
+  const sample=await patternPixels();
+  assert.equal((await savedSelection()).sheer.variantId,'lavender',name+' retains the manual shade');
+  assert.deepEqual(await pixels(209/600,145/450),mainPanel,name+' leaves the main curtain intact');
+  const patternDifference=averageDifference(sample,plainLavender);
+  assert.ok(patternDifference>2,name+' changes the actual middle window pixels: '+patternDifference);
+  for(const previous of patternSamples){
+   const difference=averageDifference(sample,previous.sample);
+   assert.ok(difference>2,name+' differs from '+previous.name+' in the actual room: '+difference);
+  }
+  patternSamples.push({name,sample});
+ }
+ await click('[aria-label="sheer colour: Blush Pink"]');await ready();
+ assert.ok(averageDifference(await patternPixels(),patternSamples.at(-1).sample)>3,'The same pattern visibly changes colour');
+ assert.equal((await savedSelection()).sheer.materialId,'library-sheer-decorative-net');
+ await click('[aria-label="sheer colour: Lavender"]');await ready();
  await click('[data-studio-step="main"]');
+ await click('[aria-label="main colour: Burgundy"]');await ready();await finished();
+ assert.equal((await savedSelection()).sheer.variantId,'lavender');
+ assert.equal((await savedSelection()).sheer.materialId,'library-sheer-decorative-net');
+ assert.deepEqual(await patternPixels(),patternSamples.at(-1).sample,'A different main curtain shade preserves the chosen pattern and shade');
+ await click('[aria-label="main colour: Navy Blue"]');await ready();await finished();
+ await click('[data-studio-step="sheer"]');
+ const screenshotSamples=async(file)=>{
+  const clip=await evaluate(`(()=>{const {x,y,width,height}=document.querySelector('[data-testid=composed-curtains]').getBoundingClientRect();return {x:x+scrollX,y:y+scrollY,width,height,scale:1};})()`);
+  const shot=await call('Page.captureScreenshot',{format:'png',clip,captureBeyondViewport:true});
+  const image=Buffer.from(shot.data,'base64');
+  if(file)fs.writeFileSync(path.join(profile,file),image);
+  const {info,data}=await require('sharp')(image).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  return [arches[0],arches[1],[209/600,145/450]].map(([x,y])=>{
+   const i=(Math.round(y*info.height)*info.width+Math.round(x*info.width))*4;
+   return data.subarray(i,i+4);
+  });
+ };
+ await compare('Before');
+ const beforeReveal=await screenshotSamples();
+ await compare('After');
+ const afterReveal=await screenshotSamples('arched-decorative-net.png');
+ for(let i=0;i<afterReveal.length;i++)assert.ok(averageDifference(afterReveal[i],beforeReveal[i])>3,'The coloured curtains appear only on the After side');
+ await evaluate(`(()=>{const handle=document.querySelector('${slider}');for(let i=0;i<5;i++)handle.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',shiftKey:true,bubbles:true,cancelable:true}));})()`);
+ assert.equal(await reveal(),50);
+ const halfReveal=await screenshotSamples();
+ assert.deepEqual(halfReveal,[afterReveal[0],beforeReveal[1],afterReveal[2]],'The same reveal edge clips the main curtains and sheers');
+ stage='patterned sheer in all ten photo rooms';
+ for(const [i,id] of roomIds.entries()){
+  await click('[data-scene-id="'+id+'"]');await ready();
+  const {samples}=await imageDiff(id,fixtures[i]);
+  assert.ok(samples[2]>2&&samples[3]<=1,id+' renders the patterned sheer and preserves the foreground');
+  assert.equal((await savedSelection()).sheer.materialId,'library-sheer-decorative-net');
+ }
+ stage='fabric and colour changes across three rooms';
+ for(const i of [0,1,2]){
+  const id=roomIds[i];
+  await click('[data-scene-id="'+id+'"]');await ready();
+  const [mainPoint,,glass]=fixtures[i];
+  const mainPixels=()=>pixels(mainPoint[0]/600,mainPoint[1]/450);
+  const clothPixels=()=>pixels((glass[0]-18)/600,(glass[1]-20)/450,88,100);
+  const mainBefore=await mainPixels();
+  await click('[aria-label="Floral Lace"]');await ready();
+  await click('[aria-label="sheer colour: Lavender"]');await ready();
+  const lavender=await clothPixels();
+  await click('[aria-label="sheer colour: Sky Blue"]');await ready();
+  const sky=await clothPixels();
+  assert.ok(averageDifference(lavender,sky)>2,id+' changes the rendered fabric colour');
+  await click('[aria-label="Diamond Net"]');await ready();
+  assert.equal((await savedSelection()).sheer.variantId,'pale-blue');
+  assert.ok(averageDifference(sky,await clothPixels())>2,id+' changes the rendered pattern while retaining Sky Blue');
+  assert.deepEqual(await mainPixels(),mainBefore,id+' retains the rendered main curtain');
+ }
+
+ stage='available fabrics and legacy shade assets';
+ await click('[data-scene-id="hero-01"]');await ready();
+ const fabricIds=await evaluate(`Array.from(document.querySelectorAll('[aria-label="sheer fabric varieties"] [data-material-id]'),button=>button.dataset.materialId)`);
+ assert.equal(fabricIds.length,19,'Show all 17 library fabrics plus both prepared voile references');
+ const textures=new Set();
+ for(const fabricId of fabricIds){
+  await click('[data-material-id="'+fabricId+'"]');await ready();
+  await click('[aria-label="sheer colour: Soft Ivory"]');await ready();
+  const frame=await hash();
+  assert.ok(!textures.has(frame),fabricId+' renders a distinct texture at the same shade');
+  textures.add(frame);
+  if(fabricId==='plain-voile'||fabricId==='fine-voile'){
+   const shades=await evaluate(`Array.from(document.querySelectorAll('[aria-label="sheer colours"] button'),button=>button.getAttribute('aria-label'))`);
+   for(const shade of shades){await click('[aria-label="'+shade+'"]');await ready();}
+  }
+ }
+ stage='automatic matching mode';
+ await click('[data-material-id="library-sheer-fine-voile"]');await ready();
+ await clickText('sheer','Match main curtain');await ready();
+ assert.equal((await savedSelection()).sheer.variantId,'pure-white');
+ await clickText('sheer','Match main curtain');await ready();
+ assert.equal((await savedSelection()).sheerColorMode,'manual');
+ await click('[data-studio-step="main"]');
+ await click('[aria-label="main colour: Burgundy"]');await ready();await finished();
+ assert.equal((await savedSelection()).sheer.variantId,'pure-white','Turning matching off preserves the rendered shade');
+ await click('[data-studio-step="sheer"]');
+ assert.match(await evaluate('document.querySelector(\'[aria-label="sheer colour: Golden Beige"]\').title'),/Suggested for Burgundy/);
+ await click('[aria-label="sheer colour: Sky Blue"]');await ready();
+ assert.deepEqual(await pixels(.45,.29),blueSheer);
+ await click('[data-studio-step="main"]');
+ await click('[aria-label="main colour: Navy Blue"]');await ready();await finished();
  stage='comparison controls';
  const clip=`getComputedStyle(document.querySelector('[data-testid="composed-curtains"]')).clipPath`;
  await compare('Before');
@@ -226,7 +419,7 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  await until(`document.querySelector('[data-testid=composed-curtains]').width>=800`);await ready();
  await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
  await compare('Before');await compare('Replay');assert.equal(await reveal(),100);
- assert.deepEqual(await pixels(.18,.15),mobileMain);assert.deepEqual(await pixels(.45,.29),initialSheer);
+ assert.deepEqual(await pixels(.18,.15),mobileMain);assert.deepEqual(await pixels(.45,.29),blueSheer);
  await click('[aria-label="main colour: Burgundy"]');await ready();
  assert.equal(await reveal(),100);
  stage='download';const downloadPath=path.join(profile,'downloads');fs.mkdirSync(downloadPath);
@@ -250,9 +443,39 @@ const base=process.env.DCORHOME_TEST_BASE_URL||'http://localhost:3351';
  await call('Page.navigate',{url:base+'/studio'});await ready();
  assert.equal((await savedSelection()).main.materialId,null,'A new Studio visit clears the previous main selection');
  assert.equal((await savedSelection()).sheer.variantId,'pale-blue','A new Studio visit retains the existing sheer preference');
- assert.equal(await hash(),original);
+ assert.deepEqual(await pixels(.45,.29),blueSheer,'A manual shade previews without main curtains');
+ assert.equal(await sliderVisible(),false);
+ assert.ok((await imageDiff('hero-01',fixtures[0])).samples[0]<=1,'A sheer-only preview preserves the original main panel area');
+ stage='explicit No sheers across visits';
+ await click('[data-studio-step="sheer"]');
+ await click('[data-layer-toggle="sheer-off"]');await ready();
+ const previousVisit=await evaluate('performance.timeOrigin');
+ await call('Page.reload');await until('performance.timeOrigin!=='+previousVisit);await ready();
+ await click('[data-studio-step="main"]');
+ await click('[data-material-id="library-main-silk"]');
+ await click('[aria-label="main colour: Ivory"]');await ready();
+ assert.equal((await savedSelection()).sheer.enabled,false);
+ assert.equal((await savedSelection()).sheerOptOut,true);
+ assert.ok((await imageDiff('hero-01',fixtures[0])).samples[2]<=1,'Selecting a new main colour leaves the opted-out middle window clear');
+ await click('[data-studio-step="sheer"]');
+ await click('[data-layer-toggle="sheer-on"]');await ready();
+ assert.equal((await savedSelection()).sheer.variantId,'pale-blue','Opting back in restores the manual shade');
+ stage='legacy fitted room previews';
+ const fittedDesign=await savedSelection();
+ for(const sceneId of ['room-01','room-09','garden-living']){
+  const visit=await evaluate('performance.timeOrigin');
+  await call('Page.navigate',{url:base+'/studio?visualizer='+encodeURIComponent(JSON.stringify({...fittedDesign,sceneId}))});
+  await until('performance.timeOrigin!=='+visit);await ready();await finished();
+  await click('[data-studio-step="sheer"]');
+  const before=await hash();
+  await click('[aria-label="Floral Lace"]');await ready();await finished();
+  assert.notEqual(await hash(),before,sceneId+' renders the selected sheer texture');
+  const floral=await hash();
+  await click('[aria-label="sheer colour: Lavender"]');await ready();await finished();
+  assert.notEqual(await hash(),floral,sceneId+' renders the selected sheer colour');
+ }
  stage='delete';await call('Page.navigate',{url:base+'/designs'});await until(`document.querySelector('section[aria-label="Saved manual curtain designs"] button')!==null`);await evaluate(`[...document.querySelectorAll('section[aria-label="Saved manual curtain designs"] button')].find(b=>b.textContent==='Delete').click()`);await until(`JSON.parse(localStorage.getItem('dcorhome-saved-manual-designs-v1')).length===0`);
  assert.deepEqual(requests.filter(url=>/\/api\/(?:auth\/(?!get-session(?:\?|$))|manual-designs|designs|session|visualiz|fabrics\/saved)/.test(url)||/api\.openai\.com/.test(url)),[],'Manual journey must not call auth/cloud storage/AI');
  assert.deepEqual(errors,[]);
- console.log('PASS: original and layered previews across ten rooms, conditional golden voile, stable sheer and foreground pixels, native-resolution download, slider and Replay, and local save/restore/enquiry.');
+ console.log('PASS: eleven rendered sheer shades, seven rendered patterns, patterned sheers across all ten rooms, outdoor contrast and foreground pixels, native-resolution download, slider and Replay, and local selections.');
 })().catch(error=>{console.error('FAIL: visualizer '+stage+': '+error.message);process.exitCode=1;}).finally(async()=>{clearTimeout(deadline);if(ws)ws.close();chrome.kill();});

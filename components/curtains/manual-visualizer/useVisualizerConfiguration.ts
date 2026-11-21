@@ -4,14 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import type { FabricRecord } from '@/lib/curtains/catalogue';
 import { localDesigns } from '@/lib/local-designs';
 import { readManual } from '@/lib/curtains/manual-config';
-import { defaultDesign, fromManual, validateDesign, type LayerSelection } from '@/lib/manual-visualizer/model';
-import { configurationReducer, type ConfigurationAction } from '@/lib/manual-visualizer/configuration';
-import { studioPhotoScenes } from '@/lib/manual-visualizer/manifest';
+import { defaultDesign, fromManual, validateDesign, type LayerSelection, type VisualizerDesign } from '@/lib/manual-visualizer/model';
+import { configurationReducer, restoreStudioVisit, type ConfigurationAction } from '@/lib/manual-visualizer/configuration';
 
 const storageKey='dcorhome-visualizer-v1';
 export function useVisualizerConfiguration(records:FabricRecord[]){
  const params=useSearchParams(),query=params.toString();
- const [design,dispatch]=useReducer(configurationReducer,defaultDesign,design=>structuredClone(design));
+ const [design,dispatch]=useReducer((design:VisualizerDesign,action:ConfigurationAction)=>configurationReducer(design,action,records),defaultDesign,design=>structuredClone(design));
  const [initialized,setInitialized]=useState(false),[restoreError,setRestoreError]=useState(''),[originalContact,setOriginalContact]=useState('');
  const [legacy,setLegacy]=useState<{original:string;result?:string;name:string}|null>(null);
  useEffect(()=>{
@@ -39,15 +38,13 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
    }else{
     // Disabled browser storage must not prevent an otherwise working studio.
     let saved:string|null=null;try{saved=localStorage.getItem(storageKey);}catch{}
-    if(saved){
-     const last=validateDesign(JSON.parse(saved),records);
-     const sceneId=studioPhotoScenes.some(scene=>scene.id===last.sceneId)?last.sceneId:defaultDesign.sceneId;
-     // An ordinary visit starts a new main-curtain selection. Explicit
-     // design links above still restore the complete saved configuration.
-     restored={...defaultDesign,sceneId,sheer:last.sheer};
-    }
+    if(saved)restored=restoreStudioVisit(validateDesign(JSON.parse(saved),records));
    }
-   if(!controller.signal.aborted)dispatch({type:'restore',design:restored?validateDesign(restored,records):structuredClone(defaultDesign)});
+   if(!controller.signal.aborted){
+    const design=restored?validateDesign(restored,records):structuredClone(defaultDesign);
+    if(!design.sheer.enabled)design.sheerOptOut=true;
+    dispatch({type:'restore',design});
+   }
   }catch(error){if(!controller.signal.aborted)setRestoreError(error instanceof Error?error.message:'Your previous design could not be opened.');}
   finally{if(!controller.signal.aborted)setInitialized(true);}})();
   return()=>{controller.abort();urls.forEach(url=>URL.revokeObjectURL(url));};
@@ -56,7 +53,7 @@ export function useVisualizerConfiguration(records:FabricRecord[]){
  function change(action:ConfigurationAction){setRestoreError('');setOriginalContact('');dispatch(action);}
  return {design,initialized,restoreError,originalContact,legacy,
   selectRoom:(id:string)=>change({type:'scene',id}),
-  selectLayer:(layer:'main'|'sheer',value:LayerSelection)=>change({type:'layer',layer,value}),
+  selectLayer:(layer:'main'|'sheer',value:LayerSelection,sheerColorMode?:VisualizerDesign['sheerColorMode'])=>change({type:'layer',layer,value,sheerColorMode}),
   startFresh:()=>change({type:'restore',design:structuredClone(defaultDesign)}),
  };
 }
