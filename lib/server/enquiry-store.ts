@@ -107,7 +107,19 @@ export async function listEnquiries(params: URLSearchParams) {
   const page = Number(params.get('page') || 1);
   if (!Number.isInteger(page) || page < 1 || page > 10000) throw new HttpError(400, 'Invalid page.');
   const collection = await enquiriesCollection();
-  const [records, total] = await Promise.all([collection.find(query).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * 25).limit(25).toArray(), collection.countDocuments(query)]);
+  const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const recordsQuery = search
+    ? collection.aggregate<EnquiryRecord>([
+        { $match: query },
+        { $addFields: { _nameMatchRank: { $switch: { branches: [
+          { case: { $regexMatch: { input: { $ifNull: ['$data.name', ''] }, regex: { $literal: `^${escapedSearch}$` }, options: 'i' } }, then: 0 },
+          { case: { $regexMatch: { input: { $ifNull: ['$data.name', ''] }, regex: { $literal: escapedSearch }, options: 'i' } }, then: 1 },
+        ], default: 2 } } } },
+        { $sort: { _nameMatchRank: 1, createdAt: -1, _id: -1 } },
+        { $skip: (page - 1) * 25 }, { $limit: 25 },
+      ]).toArray()
+    : collection.find(query).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * 25).limit(25).toArray();
+  const [records, total] = await Promise.all([recordsQuery, collection.countDocuments(query)]);
   return { enquiries: records.map(enquirySummary), total, page, pages: Math.max(1, Math.ceil(total / 25)) };
 }
 export async function updateEnquiry(id: unknown, status: unknown, note: unknown, revision: unknown, actor: string) {

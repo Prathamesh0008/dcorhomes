@@ -1,0 +1,27 @@
+﻿const assert = require('node:assert/strict');
+const path = require('node:path');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+require('./auth-loader.cjs');
+let server, client;
+(async () => {
+  server = await MongoMemoryServer.create({ binary: { version: '7.0.24', downloadDir: path.resolve('.test-data/mongodb-binaries') } });
+  Object.assign(process.env, { MONGODB_URI: server.getUri(), MONGODB_DB: 'enquiry_search_check' });
+  const { mongoDatabase, mongoClient } = require('../lib/server/mongodb.ts');
+  const { listEnquiries } = require('../lib/server/enquiry-store.ts');
+  const { ObjectId } = require('mongodb');
+  client = await mongoClient(); const db = await mongoDatabase(), now = Date.now();
+  const make = (i, name, email, phone, status = 'pending') => ({ _id: new ObjectId(), kind: 'customer-enquiry', id: String(i), reference: `REF-${i}`, requestKey: `key-${i}`, data: { name, email, phone, message: '', interest: '', enquiryType: 'General Enquiry' }, status, createdAt: new Date(now + i * 1000), updatedAt: new Date(now), revision: 1, notification: { state: 'accepted', attempts: 1, updatedAt: new Date(now) } });
+  const entries = [make(1, 'Alice', 'exact@example.invalid', '111'), ...Array.from({ length: 30 }, (_, i) => make(i + 2, `Alice Person ${i}`, `partial${i}@example.invalid`, '222')), make(40, 'Other', 'alice@example.invalid', '555'), make(41, 'Unrelated', 'other@example.invalid', '123456789', 'completed')];
+  await db.collection('enquiries').insertMany(entries);
+  const find = query => listEnquiries(new URLSearchParams(query));
+  let result = await find({ search: 'ALICE' }); assert.equal(result.total, 32); assert.equal(result.pages, 2); assert.equal(result.enquiries[0].name, 'Alice'); assert.ok(result.enquiries.slice(1).every(e => e.name.startsWith('Alice Person')));
+  const second = await find({ search: 'alice', page: '2' }); assert.equal(second.enquiries.at(-1).name, 'Other'); assert.equal(second.total, 32);
+  assert.equal((await find({ search: 'EXACT@example.invalid' })).total, 1);
+  assert.equal((await find({ search: '123456789' })).enquiries[0].name, 'Unrelated');
+  assert.equal((await find({ search: 'ref-41' })).enquiries[0].name, 'Unrelated');
+  assert.equal((await find({ search: 'alice', status: 'completed' })).total, 0);
+  assert.equal((await find({ search: 'alice', emailStatus: 'delivered' })).total, 0);
+  assert.equal((await find({ search: 'alice', from: '2999-01-01' })).total, 0);
+  assert.equal((await find({ search: '.*' })).total, 0);
+  console.log('PASS: case-insensitive exact/partial name ranking across pages, email, phone, reference, status/email/date filters and literal search.');
+})().catch(error => { console.error('FAIL: ' + error.message); process.exitCode = 1; }).finally(async () => { if (client) await client.close(); if (server) await server.stop(); });
