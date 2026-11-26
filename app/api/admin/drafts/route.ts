@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const collection = await draftCollection();
     // Exports must include every draft, even when the editor's recent-record list is capped.
     const query = collection.find({ kind }).sort({ updatedAt: -1 });
-    const drafts = await (request.nextUrl.searchParams.get('export') === '1' ? query : query.limit(100)).toArray();
+    const drafts = await (request.nextUrl.searchParams.get('export') === '1' || (kind === 'fabric' && request.nextUrl.searchParams.get('all') === '1') ? query : query.limit(100)).toArray();
     const published = kind === 'fabric' ? await allFabricRecords() : [];
     if (request.nextUrl.searchParams.get('export') === '1') {
       const merged = new Map<string, unknown>(published.map(record => [record.id, record]));
