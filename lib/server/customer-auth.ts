@@ -5,7 +5,7 @@ import { username } from 'better-auth/plugins';
 import { APIError } from 'better-auth/api';
 import { ObjectId } from 'mongodb';
 import { mongoDatabase } from './mongodb';
-import { authConfigurationIssues } from './auth-configuration';
+import { authConfiguration, authConfigurationIssues } from './auth-configuration';
 import { activeSession, normalizeUserId, validUserId } from './member-policy';
 import { AsyncLocalStorage } from 'node:async_hooks';
 const credentialAttempt = new AsyncLocalStorage<{ id: string; version: number } | null>();
@@ -19,13 +19,14 @@ export function customerAuthReady() {
 }
 let instance: ReturnType<typeof createCustomerAuth> | undefined;
 export async function customerAuth() {
-  if (!customerAuthReady()) throw Error('Member authentication is awaiting configuration.');
-  return instance ||= createCustomerAuth().catch(error => { instance = undefined; throw error; });
+  const { origin, issues } = authConfiguration();
+  if (!origin || issues.length) throw Error('Member authentication is awaiting configuration.');
+  return instance ||= createCustomerAuth(origin).catch(error => { instance = undefined; throw error; });
 }
-async function createCustomerAuth() {
+async function createCustomerAuth(origin: string) {
   const db = await mongoDatabase();
   return betterAuth({
-    appName: 'Dcorhome', baseURL: process.env.SITE_URL, secret: process.env.BETTER_AUTH_SECRET,
+    appName: 'Dcorhome', baseURL: origin, secret: process.env.BETTER_AUTH_SECRET,
     database: mongodbAdapter(db), logger: { disabled: true },
     emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 12, maxPasswordLength: 128, autoSignIn: false },
     plugins: [username({ usernameNormalization: normalizeUserId, usernameValidator: validUserId, immutableUsername: true,

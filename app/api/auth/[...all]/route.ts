@@ -1,10 +1,10 @@
 import { logDatabaseFailure } from '@/lib/server/database-diagnostics';
 import { NextRequest, NextResponse } from 'next/server';
-import { customerAuth, customerAuthReady, runMemberLogin, hasCustomerSessionCookie, validatedCustomerSession } from '@/lib/server/customer-auth';
+import { customerAuth, runMemberLogin, hasCustomerSessionCookie, validatedCustomerSession } from '@/lib/server/customer-auth';
 import { loginLimit } from '@/lib/server/members';
 import { failure, HttpError, jsonInput, mutation, privateHeaders } from '@/lib/server/security';
 import { normalizeUserId, validUserId } from '@/lib/server/member-policy';
-import { authConfigurationIssues } from '@/lib/server/auth-configuration';
+import { authConfiguration } from '@/lib/server/auth-configuration';
 export const runtime = 'nodejs';
 async function handler(request: NextRequest) {
   const endpoint = request.nextUrl.pathname.slice('/api/auth'.length);
@@ -12,8 +12,9 @@ async function handler(request: NextRequest) {
   if (!['/sign-in/username', '/get-session', '/sign-out'].includes(endpoint)) return NextResponse.json({ message: 'Public registration is unavailable. Contact sales@dcorhome.com for account assistance.' }, { status: 403, headers: privateHeaders });
   try {
     if (endpoint === '/get-session' && request.method === 'GET' && !hasCustomerSessionCookie(request.headers)) return NextResponse.json(null, { headers: privateHeaders });
-    if (!customerAuthReady()) {
-      console.error(JSON.stringify({ event: 'admin_auth_configuration', settings: authConfigurationIssues() }));
+    const { origin, issues } = authConfiguration();
+    if (!origin || issues.length) {
+      console.error(JSON.stringify({ event: 'admin_auth_configuration', settings: issues }));
       throw new HttpError(503, 'Administrator authentication is awaiting configuration. Contact the site operator.');
     }
     if (endpoint === '/get-session') {
@@ -23,18 +24,18 @@ async function handler(request: NextRequest) {
       return NextResponse.json(result ? { user: result.user, session: { expiresAt: result.session.expiresAt } } : null, { headers: privateHeaders });
     }
     if (request.method !== 'POST') throw new HttpError(405, 'Method not allowed.');
-    mutation(request);
-    if (request.headers.get('origin') !== new URL(process.env.SITE_URL!).origin) throw new HttpError(403, 'Same-origin request required.');
     let forwarded = request;
     let loginUserId = '';
     if (endpoint === '/sign-in/username') {
-      const input = await jsonInput(request, 2048);
+      const input = await jsonInput(request, 2048, origin);
       const userId = typeof input.username === 'string' ? normalizeUserId(input.username) : '';
       loginUserId = userId;
       if (!validUserId(userId) || typeof input.password !== 'string' || !input.password.length || input.password.length > 128) throw new HttpError(401, 'Unable to sign in. Check your User ID and password.');
       const source = process.env.TRUST_PROXY === 'true' ? (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim() : 'shared';
       await loginLimit(userId, source);
       forwarded = new NextRequest(request.url, { method: 'POST', headers: request.headers, body: JSON.stringify({ username: userId, password: input.password }) });
+    } else {
+      mutation(request, undefined, origin);
     }
     const auth = await customerAuth();
     const result = loginUserId ? await runMemberLogin(loginUserId, () => auth.handler(forwarded)) : await auth.handler(forwarded);

@@ -7,12 +7,16 @@ const { MongoMemoryReplSet } = require('mongodb-memory-server');
 require('./auth-loader.cjs');
 let repl, client, server, stage = 'setup', logs = '';
 const base = 'http://localhost:3361';
+const productionOrigin = 'https://www.dcorhome.com';
+const loginRoute = '/api/auth/sign-in/username';
+const logoutRoute = '/api/auth/sign-out';
 const api = (route, method = 'GET', body, cookie) => fetch(base + route, { method, redirect: 'manual', headers: { origin: base, ...(body ? { 'Content-Type': 'application/json' } : {}), ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(20000) });
 const cookieOf = response => response.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
 const randomPassword = () => crypto.randomBytes(24).toString('base64url');
 (async () => {
   repl = await MongoMemoryReplSet.create({ binary: { version: '7.0.24', downloadDir: path.resolve('.test-data/mongodb-binaries') }, replSet: { count: 1 } });
   Object.assign(process.env, { MONGODB_URI: repl.getUri(), MONGODB_DB: 'admin_only_check', SITE_URL: base, BETTER_AUTH_SECRET: crypto.randomBytes(32).toString('hex'), NODE_ENV: 'test', ALLOW_LOCAL_HTTP: 'true', TRUST_PROXY: 'false', RESEND_API_KEY: '', RESEND_ADMIN_API_KEY: '', RESEND_FROM_EMAIL: '', ENQUIRY_FROM_EMAIL: '', EMAIL_FROM: '' });
+  delete process.env.BETTER_AUTH_URL;
   const { mongoDatabase, mongoClient } = require('../lib/server/mongodb.ts');
   const { provisionMember } = require('../lib/server/members.ts');
   client = await mongoClient(); const db = await mongoDatabase();
@@ -23,11 +27,46 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   await db.collection('users').insertOne(customer);
   await db.collection('accounts').insertOne({ userId: customerId, accountId: String(customerId), providerId: 'credential', password: await require('better-auth/crypto').hashPassword(password), createdAt: now, updatedAt: now });
   await assert.rejects(() => provisionMember(null, { userId: 'another-owner', fullName: 'Another Owner', email: 'another@example.invalid' }, randomPassword()), /already exists/);
-  const issues = require('../lib/server/auth-configuration.ts').authConfigurationIssues;
-  assert.deepEqual(issues(), []);
+  stage = 'origin configuration';
+  const { authConfiguration, authConfigurationIssues: issues } = require('../lib/server/auth-configuration.ts');
+  assert.deepEqual(authConfiguration(), { origin: base, issues: [] });
+  const { NextRequest } = require('next/server');
+  const { POST } = require('../app/api/auth/[...all]/route.ts');
+  const localLogin = new NextRequest(base + loginRoute, { method: 'POST', headers: { origin: base }, body: '{}' });
+  assert.equal((await POST(localLogin)).status, 401); // Reaches credential validation over local HTTP.
+  delete process.env.SITE_URL;
+  assert.deepEqual(authConfiguration(), { origin: null, issues: ['SITE_URL'] });
+  process.env.SITE_URL = base;
+  Object.assign(process.env, { NODE_ENV: 'production', ALLOW_LOCAL_HTTP: 'false' });
+  assert.deepEqual(authConfiguration(), { origin: null, issues: ['SITE_URL'] });
+  for (const invalid of ['', 'dcorhome.com', 'http://www.dcorhome.com', `${productionOrigin}/api/auth`, `${productionOrigin}?x=1`]) {
+    process.env.BETTER_AUTH_URL = invalid;
+    assert.deepEqual(authConfiguration(), { origin: null, issues: ['BETTER_AUTH_URL'] });
+  }
+  process.env.BETTER_AUTH_URL = `${productionOrigin}/`;
+  assert.deepEqual(authConfiguration(), { origin: productionOrigin, issues: [] });
   const secret = process.env.BETTER_AUTH_SECRET; process.env.BETTER_AUTH_SECRET = 'short'; assert.ok(issues().includes('BETTER_AUTH_SECRET')); process.env.BETTER_AUTH_SECRET = secret;
   const uri = process.env.MONGODB_URI; process.env.MONGODB_URI = 'mongodb+srv://owner:YOUR_PASSWORD@fixture.invalid/db'; assert.ok(issues().includes('MONGODB_URI/MONGODB_DB')); process.env.MONGODB_URI = uri;
-  server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3361'], { env: { ...process.env, NODE_ENV: 'production' }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  stage = 'production origin and CSRF boundaries';
+  const authPost = (route, headers, body = {}) => POST(new NextRequest(base + route, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body),
+  }));
+  const sameOrigin = { origin: productionOrigin, 'sec-fetch-site': 'same-origin' };
+  assert.equal((await authPost(loginRoute, sameOrigin)).status, 401);
+  for (const origin of ['https://outside.example', 'https://dcorhome.com', base, 'null', undefined]) {
+    const response = await authPost(loginRoute, { ...(origin === undefined ? {} : { origin }), 'x-forwarded-host': 'www.dcorhome.com', 'x-forwarded-proto': 'https' });
+    assert.equal(response.status, 403, origin);
+    assert.deepEqual(await response.json(), { error: 'Same-origin request required.' });
+  }
+  assert.equal((await authPost(loginRoute, { origin: productionOrigin, 'sec-fetch-site': 'cross-site' })).status, 403);
+  assert.equal((await authPost(logoutRoute, { origin: 'https://outside.example' })).status, 403);
+  const productionLogin = await authPost(loginRoute, sameOrigin, { username: 'fixture-owner', password });
+  assert.equal(productionLogin.status, 200);
+  assert.ok(productionLogin.headers.getSetCookie().some(cookie => /HttpOnly/i.test(cookie) && /Secure/i.test(cookie)));
+  assert.equal(await db.collection('sessions').countDocuments({ userId: new ObjectId(owner.id) }), 1);
+  assert.equal((await authPost(logoutRoute, { ...sameOrigin, cookie: cookieOf(productionLogin) })).status, 200);
+
+  server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3361'], { env: { ...process.env, BETTER_AUTH_URL: base, ALLOW_LOCAL_HTTP: 'true' }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   server.stdout.on('data', data => { logs += data; }); server.stderr.on('data', data => { logs += data; });
   for (let i = 0; i < 120 && !logs.includes('Ready in'); i++) { if (server.exitCode !== null) throw Error('Server exited'); await new Promise(resolve => setTimeout(resolve, 250)); }
   assert.ok(logs.includes('Ready in'));
@@ -39,7 +78,7 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   for (const route of ['/login', '/signup', '/account', '/forgot-password', '/reset-password']) assert.equal((await api(route)).headers.get('location'), '/admin/login');
   for (const route of ['/api/auth/sign-up/email','/api/auth/sign-in/email','/api/auth/request-password-reset','/api/auth/update-user']) assert.equal((await api(route,'POST',{})).status,403);
   const home = await (await api('/')).text(); const header = home.match(/<header[\s\S]*?<\/header>/)?.[0] || ''; assert.ok(header); assert.ok(!/href="\/(?:login|signup|account)"/.test(header)); assert.ok(home.includes('Your room.'));
-  const signIn = (username, password) => api('/api/auth/sign-in/username','POST',{username,password});
+  const signIn = (username, password) => api(loginRoute,'POST',{username,password});
   const rejected = await signIn('legacy-customer', password); assert.equal(rejected.status,401); assert.equal(cookieOf(rejected),'');
   assert.equal((await signIn('fixture-owner','incorrect')).status,401);
   const login = await signIn('fixture-owner',password); assert.equal(login.status,200); const ownerCookie = cookieOf(login); assert.ok(ownerCookie); assert.ok(login.headers.getSetCookie().some(cookie=>/HttpOnly/i.test(cookie)&&/Secure/i.test(cookie))); assert.equal((await login.json()).token,undefined);
@@ -93,10 +132,10 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   const reset=await api('/api/admin/users/'+admin.id,'PATCH',{action:'reset-password'},ownerCookie);assert.equal(reset.status,200);const resetPassword=(await reset.json()).temporaryPassword;
   assert.equal((await signIn('fixture-admin',established)).status,401);
   const last=await signIn('fixture-admin',resetPassword);assert.equal(last.status,200);
-  assert.equal((await api('/api/auth/sign-out','POST',{},cookieOf(last))).status,200);
+  assert.equal((await api(logoutRoute,'POST',{},cookieOf(last))).status,200);
   assert.equal(await(await api('/api/auth/get-session','GET',undefined,cookieOf(last))).json(),null);
   assert.deepEqual(await db.collection('users').findOne({_id:customerId}),customer);
   assert.equal(await db.collection('accounts').countDocuments({userId:customerId}),1);
   assert.equal((await(await api('/api/admin/users','GET',undefined,ownerCookie)).json()).users.some(user=>user.id===String(customerId)),false);
-  console.log('PASS: configuration diagnostics, admin login/redirects, all active admin API guards, blocked customer login and stale roles, forced password change, provisioning, draft validation/conflicts/export/delete, disable/reset/revocation/logout, and preserved legacy customer records.');
+  console.log('PASS: origin configuration, HTTPS and CSRF checks, admin login/redirects and session persistence, all active admin API guards, blocked customer login and stale roles, forced password change, provisioning, draft validation/conflicts/export/delete, disable/reset/revocation/logout, and preserved legacy customer records.');
 })().catch(error=>{console.error('FAIL at '+stage+': '+String(error.message).replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g,'[redacted]'));process.exitCode=1;}).finally(async()=>{if(server&&server.exitCode===null){const done=new Promise(resolve=>server.once('exit',resolve));server.kill('SIGINT');await done;}if(client)await client.close();if(repl)await repl.stop();});
