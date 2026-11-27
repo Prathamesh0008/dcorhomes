@@ -10,6 +10,8 @@ const base = 'http://localhost:3361';
 const productionOrigin = 'https://www.dcorhome.com';
 const loginRoute = '/api/auth/sign-in/username';
 const logoutRoute = '/api/auth/sign-out';
+const protectedPages = ['/admin', '/admin/users', '/admin/fabrics', '/admin/designs', '/admin/enquiries', '/admin/enquiries/history', '/admin/change-password'];
+const protectedReads = ['/api/admin', '/api/admin/users', '/api/admin/drafts?kind=fabric', '/api/admin/fabric-export', '/api/admin/enquiries', '/api/admin/enquiries/history'];
 const api = (route, method = 'GET', body, cookie) => fetch(base + route, { method, redirect: 'manual', headers: { origin: base, ...(body ? { 'Content-Type': 'application/json' } : {}), ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(20000) });
 const cookieOf = response => response.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
 const randomPassword = () => crypto.randomBytes(24).toString('base64url');
@@ -63,8 +65,24 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   const productionLogin = await authPost(loginRoute, sameOrigin, { username: 'fixture-owner', password });
   assert.equal(productionLogin.status, 200);
   assert.ok(productionLogin.headers.getSetCookie().some(cookie => /HttpOnly/i.test(cookie) && /Secure/i.test(cookie)));
-  assert.equal(await db.collection('sessions').countDocuments({ userId: new ObjectId(owner.id) }), 1);
-  assert.equal((await authPost(logoutRoute, { ...sameOrigin, cookie: cookieOf(productionLogin) })).status, 200);
+  const ownerSessions = { userId: new ObjectId(owner.id) };
+  assert.equal(await db.collection('sessions').countDocuments(ownerSessions), 1);
+  const productionCookie = { ...sameOrigin, cookie: cookieOf(productionLogin) };
+  stage = 'sign-out deletion failure';
+  const { customerAuth } = require('../lib/server/customer-auth.ts');
+  const { internalAdapter } = await (await customerAuth()).$context;
+  const deleteSession = internalAdapter.deleteSession;
+  try {
+    internalAdapter.deleteSession = async () => { throw Error('Fixture session deletion failed'); };
+    const failedLogout = await authPost(logoutRoute, productionCookie);
+    assert.equal(failedLogout.status, 503);
+    assert.equal(failedLogout.headers.getSetCookie().length, 0);
+    assert.equal(await db.collection('sessions').countDocuments(ownerSessions), 1);
+  } finally {
+    internalAdapter.deleteSession = deleteSession;
+  }
+  assert.equal((await authPost(logoutRoute, productionCookie)).status, 200);
+  assert.equal(await db.collection('sessions').countDocuments(ownerSessions), 0);
 
   server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3361'], { env: { ...process.env, BETTER_AUTH_URL: base, ALLOW_LOCAL_HTTP: 'true' }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   server.stdout.on('data', data => { logs += data; }); server.stderr.on('data', data => { logs += data; });
@@ -72,17 +90,64 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   assert.ok(logs.includes('Ready in'));
   stage = 'anonymous boundaries';
   assert.equal((await api('/admin/login')).status, 200);
-  for (const route of ['/admin', '/admin/users', '/admin/fabrics', '/admin/designs', '/admin/enquiries', '/admin/change-password']) assert.equal((await api(route)).headers.get('location'), '/admin/login', route);
-  for (const route of ['/api/admin', '/api/admin/users', '/api/admin/drafts?kind=fabric', '/api/admin/enquiries']) assert.equal((await api(route)).status, 401, route);
+  for (const route of protectedPages) assert.equal((await api(route)).headers.get('location'), '/admin/login', route);
+  for (const route of protectedReads) assert.equal((await api(route)).status, 401, route);
   for (const [route, method] of [['/api/admin/users','POST'],['/api/admin/users/'+owner.id,'PATCH'],['/api/admin/drafts','POST'],['/api/admin/drafts','DELETE'],['/api/admin/enquiries','PATCH'],['/api/account/password','POST'],['/api/admin/session','POST']]) assert.equal((await api(route,method,{})).status,401,route);
   for (const route of ['/login', '/signup', '/account', '/forgot-password', '/reset-password']) assert.equal((await api(route)).headers.get('location'), '/admin/login');
   for (const route of ['/api/auth/sign-up/email','/api/auth/sign-in/email','/api/auth/request-password-reset','/api/auth/update-user']) assert.equal((await api(route,'POST',{})).status,403);
   const home = await (await api('/')).text(); const header = home.match(/<header[\s\S]*?<\/header>/)?.[0] || ''; assert.ok(header); assert.ok(!/href="\/(?:login|signup|account)"/.test(header)); assert.ok(home.includes('Your room.'));
   const signIn = (username, password) => api(loginRoute,'POST',{username,password});
   const rejected = await signIn('legacy-customer', password); assert.equal(rejected.status,401); assert.equal(cookieOf(rejected),'');
-  assert.equal((await signIn('fixture-owner','incorrect')).status,401);
-  const login = await signIn('fixture-owner',password); assert.equal(login.status,200); const ownerCookie = cookieOf(login); assert.ok(ownerCookie); assert.ok(login.headers.getSetCookie().some(cookie=>/HttpOnly/i.test(cookie)&&/Secure/i.test(cookie))); assert.equal((await login.json()).token,undefined);
+  const invalidLogin = await signIn('fixture-owner','incorrect'); assert.equal(invalidLogin.status,401); assert.equal(cookieOf(invalidLogin),'');
+  const login = await signIn('fixture-owner',password); assert.equal(login.status,200); let ownerCookie = cookieOf(login); assert.ok(ownerCookie); assert.ok(login.headers.getSetCookie().some(cookie=>/HttpOnly/i.test(cookie)&&/Secure/i.test(cookie))); assert.equal((await login.json()).token,undefined);
   assert.equal((await api('/admin/login','GET',undefined,ownerCookie)).headers.get('location'),'/admin');
+  stage = 'refresh and logout through the client';
+  for (let refresh = 0; refresh < 2; refresh++) {
+    const page = await api('/admin','GET',undefined,ownerCookie);
+    assert.equal(page.status, 200);
+    assert.match(page.headers.get('cache-control') || '', /\bno-store\b/);
+    assert.equal((await (await api('/api/auth/get-session','GET',undefined,ownerCookie)).json()).user.role, 'admin');
+  }
+  const transport = global.fetch;
+  let logoutResponse;
+  global.window = { location: { origin: base }, addEventListener() {}, removeEventListener() {} };
+  global.fetch = async (url, init) => {
+    assert.equal(String(url), base + logoutRoute);
+    assert.equal(init.method, 'POST');
+    assert.equal(init.credentials, 'same-origin');
+    assert.equal(init.mode, 'same-origin');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('content-type'), 'application/json');
+    headers.set('origin', base);
+    headers.set('sec-fetch-site', 'same-origin');
+    headers.set('cookie', ownerCookie);
+    logoutResponse = await transport(url, { ...init, headers });
+    return logoutResponse;
+  };
+  try {
+    const { authClient } = require('../lib/auth-client.ts');
+    const result = await authClient.signOut();
+    assert.equal(result.error, null);
+    assert.equal(result.data.success, true);
+  } finally {
+    global.fetch = transport;
+    delete global.window;
+  }
+  assert.equal(logoutResponse.status, 200);
+  const clearCookie = logoutResponse.headers.getSetCookie().find(value => value.startsWith('__Secure-better-auth.session_token=') && /\bMax-Age=0\b/i.test(value));
+  assert.ok(clearCookie);
+  assert.match(clearCookie, /\bPath=\/;/i);
+  assert.match(clearCookie, /\bSecure\b/i);
+  assert.equal(await db.collection('sessions').countDocuments(ownerSessions), 0);
+  assert.equal(await(await api('/api/auth/get-session','GET',undefined,ownerCookie)).json(), null);
+  assert.equal((await api('/admin/login','GET',undefined,ownerCookie)).status, 200);
+  for (const route of protectedPages) assert.equal((await api(route,'GET',undefined,ownerCookie)).headers.get('location'), '/admin/login', route);
+  for (const route of protectedReads) assert.equal((await api(route,'GET',undefined,ownerCookie)).status, 401, route);
+  assert.equal((await api('/api/admin/session','POST',{},ownerCookie)).status, 401);
+  const relogin = await signIn('fixture-owner',password);
+  assert.equal(relogin.status, 200);
+  assert.notEqual(cookieOf(relogin), ownerCookie);
+  ownerCookie = cookieOf(relogin);
   if(process.argv.includes('--browser')) {
     stage='navigation and enquiry browser';
     const browser=spawn(process.execPath,['scripts/navigation-enquiry-browser-check.cjs'],{env:{...process.env,DCORHOME_TEST_BASE_URL:base,DCORHOME_FIXTURE_USER:'fixture-owner',DCORHOME_FIXTURE_PASSWORD:password},windowsHide:true,stdio:['ignore','pipe','pipe']});
@@ -137,5 +202,5 @@ const randomPassword = () => crypto.randomBytes(24).toString('base64url');
   assert.deepEqual(await db.collection('users').findOne({_id:customerId}),customer);
   assert.equal(await db.collection('accounts').countDocuments({userId:customerId}),1);
   assert.equal((await(await api('/api/admin/users','GET',undefined,ownerCookie)).json()).users.some(user=>user.id===String(customerId)),false);
-  console.log('PASS: origin configuration, HTTPS and CSRF checks, admin login/redirects and session persistence, all active admin API guards, blocked customer login and stale roles, forced password change, provisioning, draft validation/conflicts/export/delete, disable/reset/revocation/logout, and preserved legacy customer records.');
+  console.log('PASS: origin, HTTPS and CSRF checks, admin login/refresh/redirects, client sign-out, cookie clearing, MongoDB revocation and failure handling, stale cookie rejection, re-login, admin API guards, and existing admin lifecycle checks.');
 })().catch(error=>{console.error('FAIL at '+stage+': '+String(error.message).replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g,'[redacted]'));process.exitCode=1;}).finally(async()=>{if(server&&server.exitCode===null){const done=new Promise(resolve=>server.once('exit',resolve));server.kill('SIGINT');await done;}if(client)await client.close();if(repl)await repl.stop();});

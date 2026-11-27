@@ -45,6 +45,14 @@ async function handler(request: NextRequest) {
       const headers = new Headers(result.headers); headers.set('Cache-Control', 'private, no-store');
       return new NextResponse(JSON.stringify({ success: true }), { status: 200, headers });
     }
+    if (result.ok && endpoint === '/sign-out' && hasCustomerSessionCookie(request.headers)) {
+      // Better Auth can clear cookies and return success even when its database deletion fails.
+      const remaining = await auth.api.getSession({ headers: request.headers, query: { disableRefresh: true } });
+      if (remaining) {
+        console.error(JSON.stringify({ event: 'admin_sign_out_session_still_active' }));
+        throw new HttpError(503, 'Unable to end the current session. Please try again.');
+      }
+    }
     result.headers.set('Cache-Control', 'private, no-store'); return result;
   } catch (error) {
     if (error instanceof HttpError) return failure(error);
