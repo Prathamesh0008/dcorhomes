@@ -1,0 +1,34 @@
+.closing {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  color: #23382e;
+  background:
+    radial-gradient(ellipse at 7% 0%, rgb(255 251 240 / 32%), transparent 56%),
+    radial-gradient(ellipse at 92% 100%, rgb(198 150 75 / 10%), transparent 52%),
+    linear-gradient(112deg, #eadcc4, #f2e5d0 52%, #faf3e7);
+}
+
+.closing::before,
+.closing::after {
+  position: absolute;
+  z-index: -1;
+  inset-inline-end: clamp(-270px, -14vw, -110px);
+  inset-block-end: -318px;
+  inline-size: clamp(360px, 63vw, 980px);
+  block-size: 460px;
+  border: 1px solid rgb(152 112 63 / 13%);
+  border-radius: 50%;
+  rotate: -12deg;
+  pointer-events: none;
+  content: '';
+}
+
+.closing::after {
+  translate: -26px -18px;
+  border-color: rgb(152 112 63 / 8%);
+}
+
+.closing a:focus-visible {
+  outline-color: #23382e;
+}

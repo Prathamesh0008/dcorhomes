@@ -9,6 +9,7 @@ import { business } from "@/lib/business";
 import { aboutFabricSelections } from "@/lib/about-content";
 import { fabricRecords, categories } from "@/lib/server/fabric-records";
 import { pageMetadata } from "@/lib/seo";
+import styles from "./AboutClosing.module.css";
 
 const title = "About Dcorhome | 20 Years of Curtain Experience";
 const description = "Discover Dcorhome's 20-year journey in curtains and window dressing. Now explore our curtain fabrics, colors and personalized service online.";
@@ -87,10 +88,26 @@ export default async function About() {
       <div className="border-l border-solid border-[#c9b89f] pl-6 md:pl-10"><OfficeDetails/><a href={`mailto:${business.email}`} className="mt-6 flex min-h-11 break-all items-center text-[20px] font-medium">{business.email}</a><div className="mt-2 flex flex-wrap gap-x-7 gap-y-3"><a href={`mailto:${business.email}`} className={textLink}>Email Us<ArrowUpRight size={16} aria-hidden="true"/></a><Link href="/contact" className={textLink}>Contact Dcorhome<ArrowUpRight size={16} aria-hidden="true"/></Link></div></div>
     </Container>
 
-    <section aria-labelledby="closing-title" className="bg-[#1b3027] text-paper">
-      <Container className="grid gap-10 py-16 md:py-24 lg:grid-cols-[1.2fr_.8fr] lg:items-end lg:gap-24 lg:py-28">
-        <div><p className="mb-7 text-[11px] uppercase tracking-[3px] text-[#c6b69e]">A BEAUTIFUL NEXT CHAPTER</p><h2 id="closing-title" className="mb-0 text-[40px] font-medium leading-[1.08] tracking-[-1px] sm:text-[54px] lg:text-[64px]">Your windows.<br/>Our experience.<br/><em className="font-serif font-normal text-[#d7c5a7]">Something beautiful ahead.</em></h2></div>
-        <div className="max-w-[450px]"><p className="mb-8 text-[16px] leading-8 text-[#c1ccbf]">Explore the possibilities with Dcorhome. Discover fabrics, find your preferred colors, and connect with our team about your curtains.</p><div className="flex flex-wrap gap-x-7 gap-y-4"><Link href="/collections" className="inline-flex min-h-13 items-center gap-5 bg-paper px-6 text-[14px] font-medium text-ink transition-colors hover:bg-[#e5dfd1]">Explore Fabrics<ArrowUpRight size={16} aria-hidden="true"/></Link><Link href="/contact" className="inline-flex min-h-13 items-center gap-4 border-b border-solid border-[#819179] text-[14px]">Contact Us<ArrowUpRight size={16} aria-hidden="true"/></Link></div></div>
+    <section aria-labelledby="closing-title" className={styles.closing}>
+      <Container className="grid gap-10 py-[54px] md:py-[82px] lg:grid-cols-[1.2fr_.8fr] lg:items-end lg:gap-24 lg:py-[95px]">
+        <div>
+          <p className="mb-7 text-[11px] uppercase tracking-[3px] text-[#765635]">A BEAUTIFUL NEXT CHAPTER</p>
+          <h2 id="closing-title" className="mb-0 text-[40px] font-medium leading-[1.08] tracking-[-1px] sm:text-[54px] lg:text-[64px]">
+            Your windows.<br />Our experience.<br />
+            <em className="font-serif font-normal text-[#98703f]">Something beautiful ahead.</em>
+          </h2>
+        </div>
+        <div className="max-w-[450px]">
+          <p className="mb-8 text-[16px] leading-8 text-[#514b40]">Explore the possibilities with Dcorhome. Discover fabrics, find your preferred colors, and connect with our team about your curtains.</p>
+          <div className="flex flex-wrap gap-x-7 gap-y-4">
+            <Link href="/collections" className="inline-flex min-h-13 items-center gap-5 bg-[#23382e] px-6 text-[14px] font-medium text-white transition-colors hover:bg-[#324c3f]">
+              Explore Fabrics<ArrowUpRight size={16} aria-hidden="true" />
+            </Link>
+            <Link href="/contact" className="inline-flex min-h-13 items-center gap-4 border-b border-solid border-[#a98961] text-[14px] text-[#23382e]">
+              Contact Us<ArrowUpRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
       </Container>
     </section>
   </>;
