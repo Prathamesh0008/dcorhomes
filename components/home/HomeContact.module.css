@@ -1,0 +1,10 @@
+.section {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse clamp(24rem, 60vw, 57rem) 17rem at -4% 124%, transparent 98.8%, rgb(255 218 158 / 53%) 99.4%, transparent 100%),
+    radial-gradient(ellipse clamp(25rem, 62vw, 59rem) 18rem at -4% 124%, transparent 99.1%, rgb(255 236 193 / 29%) 99.6%, transparent 100%),
+    radial-gradient(ellipse clamp(21rem, 51vw, 45rem) 14rem at 103% -17%, transparent 99%, rgb(255 248 225 / 55%) 99.5%, transparent 100%),
+    radial-gradient(ellipse at 70% -8%, rgb(255 247 224 / 44%), transparent 61%),
+    radial-gradient(ellipse at 24% 79%, rgb(255 227 193 / 27%), transparent 55%),
+    linear-gradient(90deg, #B66A24, #E6A052 34%, #F4C58C 67%, #FFE3C1);
+}
